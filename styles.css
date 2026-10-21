@@ -1,0 +1,153 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f4f6f8;
+  color: #333;
+  padding: 15px;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  color: #1a73e8;
+  font-size: 1.8rem;
+}
+
+header p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.app-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.section {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.section h3 {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 10px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  color: #555;
+}
+
+input[type="text"], input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.item-input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.item-input-group input[type="text"] {
+  flex: 2;
+}
+
+.item-input-group input[type="number"] {
+  flex: 1;
+}
+
+.btn {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary { background: #1a73e8; color: white; width: 100%; }
+.btn-secondary { background: #34a853; color: white; }
+.btn-whatsapp { background: #25d366; color: white; width: 100%; margin-bottom: 8px; font-size: 1rem; }
+.btn-danger { background: #ea4335; color: white; padding: 4px 8px; font-size: 0.8rem; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.totals-box {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+}
+
+.total-row.highlight {
+  color: #1a73e8;
+  font-size: 1.05rem;
+}
+
+/* Ocultar la sección imprimible en la pantalla principal */
+.printable-area {
+  display: none;
+}
+
+/* Estilos para impresión */
+@media print {
+  body * { visibility: hidden; }
+  .printable-area, .printable-area * { visibility: visible; }
+  .printable-area {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 20px;
+  }
+  .print-header { text-align: center; margin-bottom: 20px; }
+  .print-table { width: 100%; margin: 20px 0; border-collapse: collapse; }
+  .print-table th, .print-table td { border: 1px solid #ddd; padding: 8px; }
+  .print-totals { text-align: right; margin-top: 15px; }
+}
