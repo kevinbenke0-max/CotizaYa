@@ -1,8 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
   let items = [];
+  let history = JSON.parse(localStorage.getItem('quoteHistory')) || [];
 
+  const businessNameInput = document.getElementById('businessName');
+  const paymentDetailsInput = document.getElementById('paymentDetails');
   const clientNameInput = document.getElementById('clientName');
   const workTitleInput = document.getElementById('workTitle');
+  const validityDaysInput = document.getElementById('validityDays');
+  
   const itemDescInput = document.getElementById('itemDesc');
   const itemPriceInput = document.getElementById('itemPrice');
   const depositPercentInput = document.getElementById('depositPercent');
@@ -10,12 +15,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnAddItem = document.getElementById('btnAddItem');
   const btnWhatsApp = document.getElementById('btnWhatsApp');
   const btnPrint = document.getElementById('btnPrint');
+  const btnClearHistory = document.getElementById('btnClearHistory');
 
   const itemsList = document.getElementById('itemsList');
+  const historyList = document.getElementById('historyList');
   const lblTotal = document.getElementById('lblTotal');
   const lblDeposit = document.getElementById('lblDeposit');
   const lblBalance = document.getElementById('lblBalance');
   const depositDetailsContainer = document.getElementById('depositDetailsContainer');
+
+  // 1. Cargar datos persistentes del negocio (Alias, Nombre) al abrir
+  if (localStorage.getItem('bizName')) businessNameInput.value = localStorage.getItem('bizName');
+  if (localStorage.getItem('bizPayment')) paymentDetailsInput.value = localStorage.getItem('bizPayment');
+
+  // Guardar automáticamente apenas el usuario escribe sus datos de pago o negocio
+  businessNameInput.addEventListener('input', () => localStorage.setItem('bizName', businessNameInput.value));
+  paymentDetailsInput.addEventListener('input', () => localStorage.setItem('bizPayment', paymentDetailsInput.value));
+
+  renderHistory();
 
   // Agregar Ítem
   btnAddItem.addEventListener('click', () => {
@@ -33,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderItems();
   });
 
-  // Renderizar tabla y calcular totales
   function renderItems() {
     itemsList.innerHTML = '';
     let total = 0;
@@ -52,10 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const percent = parseFloat(depositPercentInput.value) || 0;
-    
     lblTotal.textContent = `$${total.toLocaleString()}`;
 
-    // Mostrar u ocultar la sección de seña según si el porcentaje es mayor a 0
     if (percent > 0) {
       const deposit = (total * percent) / 100;
       const balance = total - deposit;
@@ -67,7 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Eliminar ítem
   window.removeItem = (index) => {
     items.splice(index, 1);
     renderItems();
@@ -75,51 +88,110 @@ document.addEventListener('DOMContentLoaded', () => {
 
   depositPercentInput.addEventListener('input', renderItems);
 
-  // Enviar mensaje por WhatsApp (Sin saludo repetido)
+  // Enviar presupuesto y GUARDAR en el Registro Histórico
   btnWhatsApp.addEventListener('click', () => {
-    const client = clientNameInput.value.trim();
-    const work = workTitleInput.value.trim();
-
     if (items.length === 0) {
       alert('Agrega al menos un ítem antes de enviar.');
       return;
     }
 
+    const biz = businessNameInput.value.trim();
+    const client = clientNameInput.value.trim() || 'Cliente';
+    const work = workTitleInput.value.trim() || 'Trabajo general';
+    const payment = paymentDetailsInput.value.trim();
+    const days = validityDaysInput.value || '7';
+
     let total = items.reduce((acc, i) => acc + i.price, 0);
     let percent = parseFloat(depositPercentInput.value) || 0;
 
-    let text = `📌 *Cotización${work ? ' para ' + work : ''}*${client ? ' (' + client + ')' : ''}:\n\n`;
-    text += `📋 *Detalle:*\n`;
+    const quoteNum = Math.floor(1000 + Math.random() * 9000);
 
+    let text = `📄 *COTIZACIÓN OFICIAL${biz ? ' - ' + biz.toUpperCase() : ''}*\n`;
+    text += `🧾 *N°:* `#COT-${quoteNum}`\n`;
+    text += `👤 *Cliente:* ${client}\n`;
+    text += `🎯 *Concepto:* ${work}\n`;
+    text += `⏳ *Validez:* ${days} días\n\n`;
+
+    text += `📋 *DESGLOSE DEL PEDIDO:*\n`;
     items.forEach(i => {
       text += `• ${i.desc}: $${i.price.toLocaleString()}\n`;
     });
 
-    text += `\n💵 *Total General:* $${total.toLocaleString()}\n`;
-    
-    // Solo incluye la seña si el porcentaje es mayor a 0
+    text += `\n💳 *RESUMEN FINANCIERO:*\n`;
+    text += `💵 *Total:* $${total.toLocaleString()}\n`;
+
     if (percent > 0) {
       let deposit = (total * percent) / 100;
       let balance = total - deposit;
-      text += `💳 *Seña requerida (${percent}%):* $${deposit.toLocaleString()}\n`;
-      text += `📌 *Saldo restante:* $${balance.toLocaleString()}\n`;
+      text += `📌 *Seña requerida (${percent}%):* $${deposit.toLocaleString()}\n`;
+      text += `🔹 *Saldo a la entrega:* $${balance.toLocaleString()}\n`;
     }
 
-    text += `\n¿Te gustaría confirmarlo o tenés alguna consulta?`;
+    if (payment) {
+      text += `\n🏦 *DATOS DE PAGO / TRANSFERENCIA:*\n${payment}\n`;
+    }
+
+    text += `\n⏱️ *Por favor, enviar comprobante por este medio para confirmar el pedido.*`;
+
+    // Guardar en el historial local
+    saveToHistory({ client, work, total, date: new Date().toLocaleDateString('es-AR') });
 
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   });
 
-  // Preparar e imprimir en PDF
+  // Funciones de Historial Local
+  function saveToHistory(record) {
+    history.unshift(record); // Agregar al principio
+    if (history.length > 10) history.pop(); // Guardar hasta 10 registros
+    localStorage.setItem('quoteHistory', JSON.stringify(history));
+    renderHistory();
+  }
+
+  function renderHistory() {
+    historyList.innerHTML = '';
+    if (history.length === 0) {
+      historyList.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">Sin cotizaciones guardadas</td></tr>';
+      return;
+    }
+
+    history.forEach((rec, idx) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${rec.client}</strong><br><small>${rec.date}</small></td>
+        <td>${rec.work}</td>
+        <td>$${rec.total.toLocaleString()}</td>
+        <td><button class="btn btn-danger-soft" onclick="deleteHistoryItem(${idx})">x</button></td>
+      `;
+      historyList.appendChild(tr);
+    });
+  }
+
+  window.deleteHistoryItem = (idx) => {
+    history.splice(idx, 1);
+    localStorage.setItem('quoteHistory', JSON.stringify(history));
+    renderHistory();
+  };
+
+  btnClearHistory.addEventListener('click', () => {
+    if (confirm('¿Deseas borrar todo el historial?')) {
+      history = [];
+      localStorage.removeItem('quoteHistory');
+      renderHistory();
+    }
+  });
+
+  // Imprimir / PDF
   btnPrint.addEventListener('click', () => {
     if (items.length === 0) {
       alert('Agrega al menos un ítem para imprimir.');
       return;
     }
 
+    document.getElementById('printBusiness').textContent = businessNameInput.value.toUpperCase() || 'PRESUPUESTO / COTIZACIÓN';
     document.getElementById('printClient').textContent = clientNameInput.value || 'N/A';
     document.getElementById('printWork').textContent = workTitleInput.value || 'N/A';
+    document.getElementById('printValidity').textContent = validityDaysInput.value || '7';
     document.getElementById('printDate').textContent = new Date().toLocaleDateString('es-AR');
 
     const printList = document.getElementById('printItemsList');
@@ -147,6 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
       printDepositSection.style.display = 'block';
     } else {
       printDepositSection.style.display = 'none';
+    }
+
+    if (paymentDetailsInput.value.trim()) {
+      document.getElementById('printPayment').textContent = `Datos de Pago: ${paymentDetailsInput.value.trim()}`;
     }
 
     window.print();
