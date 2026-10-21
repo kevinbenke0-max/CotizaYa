@@ -3,34 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CotizaYa - Generador de Presupuestos Express</title>
+  <title>CotizaYa Pro - Generador de Presupuestos</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <div class="container">
     <header>
-      <h1>⚡ CotizaYa</h1>
+      <h1>⚡ CotizaYa Pro</h1>
       <p>Crea y envía presupuestos profesionales en segundos</p>
     </header>
 
     <main class="app-card">
+      <!-- Datos de la Empresa (Se guardan automáticos) -->
+      <section class="section">
+        <h3>1. Mi Negocio (Se guarda en tu teléfono)</h3>
+        <div class="form-group">
+          <label for="businessName">Nombre de tu Marca / Negocio</label>
+          <input type="text" id="businessName" placeholder="Ej: Repostería Dulce Amor">
+        </div>
+        <div class="form-group">
+          <label for="paymentDetails">Datos de Pago (Alias / CVU / Titular)</label>
+          <input type="text" id="paymentDetails" placeholder="Ej: Alias: dulce.amor.mp / Titular: María B.">
+        </div>
+      </section>
+
       <!-- Datos del Cliente y Trabajo -->
       <section class="section">
-        <h3>1. Datos del Cliente</h3>
+        <h3>2. Datos del Cliente</h3>
         <div class="form-group">
-          <label for="clientName">Nombre del Cliente / Negocio</label>
+          <label for="clientName">Nombre del Cliente</label>
           <input type="text" id="clientName" placeholder="Ej: Juan Pérez">
         </div>
         <div class="form-group">
           <label for="workTitle">Concepto / Trabajo</label>
-          <input type="text" id="workTitle" placeholder="Ej: Reparación de aire / Sesión de fotos">
+          <input type="text" id="workTitle" placeholder="Ej: Torta Moca 3kg">
+        </div>
+        <div class="form-group">
+          <label for="validityDays">Validez de la Cotización (Días)</label>
+          <input type="number" id="validityDays" value="7" min="1">
         </div>
       </section>
 
       <!-- Agregar Ítems -->
       <section class="section">
-        <h3>2. Servicios o Productos</h3>
+        <h3>3. Servicios o Productos</h3>
         <div class="item-input-group">
           <input type="text" id="itemDesc" placeholder="Descripción del ítem">
           <input type="number" id="itemPrice" placeholder="Precio ($)" min="0">
@@ -45,17 +62,15 @@
               <th></th>
             </tr>
           </thead>
-          <tbody id="itemsList">
-            <!-- Ítems agregados dinámicamente -->
-          </tbody>
+          <tbody id="itemsList"></tbody>
         </table>
       </section>
 
       <!-- Opciones de Seña y Totales -->
       <section class="section">
-        <h3>3. Condiciones y Pago</h3>
+        <h3>4. Condición de Pago</h3>
         <div class="form-group">
-          <label for="depositPercent">Porcentaje de Seña / Anticipo (%) - <i>Poner 0 si no se requiere seña</i></label>
+          <label for="depositPercent">Porcentaje de Seña (%) - <i>(0 para cobro total)</i></label>
           <input type="number" id="depositPercent" value="0" min="0" max="100">
         </div>
 
@@ -64,7 +79,6 @@
             <span>Total General:</span>
             <strong id="lblTotal">$0</strong>
           </div>
-          <!-- Se muestran solo si hay porcentaje de seña -->
           <div id="depositDetailsContainer" style="display: none;">
             <div class="total-row">
               <span>Seña Requerida:</span>
@@ -80,20 +94,42 @@
 
       <!-- Acciones de Envío -->
       <section class="section actions">
-        <button id="btnWhatsApp" class="btn btn-whatsapp">📱 Enviar por WhatsApp</button>
+        <button id="btnWhatsApp" class="btn btn-whatsapp">📱 Enviar Cotización por WhatsApp</button>
         <button id="btnPrint" class="btn btn-primary">🖨️ Imprimir / Guardar PDF</button>
+      </section>
+
+      <!-- Historial de Presupuestos Guardados -->
+      <section class="section history-section">
+        <div class="history-header">
+          <h3>📋 Registro de Presupuestos Recientes</h3>
+          <button id="btnClearHistory" class="btn btn-danger-soft">Limpiar Historial</button>
+        </div>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Trabajo</th>
+              <th>Total</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="historyList">
+            <!-- Se cargan dinámicamente -->
+          </tbody>
+        </table>
       </section>
     </main>
 
-    <!-- Vista imprimible / Comprobante -->
+    <!-- Vista imprimible -->
     <div id="printableArea" class="printable-area">
       <div class="print-header">
-        <h2>PRESUPUESTO / COTIZACIÓN</h2>
+        <h2 id="printBusiness">PRESUPUESTO / COTIZACIÓN</h2>
         <p id="printDate"></p>
       </div>
       <div class="print-details">
         <p><strong>Cliente:</strong> <span id="printClient"></span></p>
         <p><strong>Trabajo:</strong> <span id="printWork"></span></p>
+        <p><strong>Validez:</strong> <span id="printValidity"></span> días</p>
       </div>
       <table class="print-table">
         <thead>
@@ -107,9 +143,10 @@
       <div class="print-totals">
         <p><strong>Total:</strong> <span id="printTotal"></span></p>
         <div id="printDepositSection" style="display: none;">
-          <p><strong>Seña (Anticipo):</strong> <span id="printDeposit"></span></p>
-          <p><strong>Saldo a Cancelar:</strong> <span id="printBalance"></span></p>
+          <p><strong>Seña:</strong> <span id="printDeposit"></span></p>
+          <p><strong>Saldo Restante:</strong> <span id="printBalance"></span></p>
         </div>
+        <p id="printPayment" style="margin-top: 10px; font-size: 0.9rem;"></p>
       </div>
     </div>
   </div>
