@@ -24,11 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const lblBalance = document.getElementById('lblBalance');
   const depositDetailsContainer = document.getElementById('depositDetailsContainer');
 
-  // 1. Cargar datos persistentes del negocio (Alias, Nombre) al abrir
+  // Cargar datos persistentes del negocio
   if (localStorage.getItem('bizName')) businessNameInput.value = localStorage.getItem('bizName');
   if (localStorage.getItem('bizPayment')) paymentDetailsInput.value = localStorage.getItem('bizPayment');
 
-  // Guardar automáticamente apenas el usuario escribe sus datos de pago o negocio
   businessNameInput.addEventListener('input', () => localStorage.setItem('bizName', businessNameInput.value));
   paymentDetailsInput.addEventListener('input', () => localStorage.setItem('bizPayment', paymentDetailsInput.value));
 
@@ -88,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   depositPercentInput.addEventListener('input', renderItems);
 
-  // Enviar presupuesto y GUARDAR en el Registro Histórico
+  // Enviar presupuesto y GUARDAR
   btnWhatsApp.addEventListener('click', () => {
     if (items.length === 0) {
       alert('Agrega al menos un ítem antes de enviar.');
@@ -105,6 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let percent = parseFloat(depositPercentInput.value) || 0;
 
     const quoteNum = Math.floor(1000 + Math.random() * 9000);
+
+    // 1. Guardar de inmediato en el historial ANTES de abrir WhatsApp
+    saveToHistory({ client, work, total, date: new Date().toLocaleDateString('es-AR') });
 
     let text = `📄 *COTIZACIÓN OFICIAL${biz ? ' - ' + biz.toUpperCase() : ''}*\n`;
     text += `🧾 *N°:* `#COT-${quoteNum}`\n`;
@@ -133,17 +135,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     text += `\n⏱️ *Por favor, enviar comprobante por este medio para confirmar el pedido.*`;
 
-    // Guardar en el historial local
-    saveToHistory({ client, work, total, date: new Date().toLocaleDateString('es-AR') });
-
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
+    
+    // Pequeño retardo para dar tiempo a que el navegador guarde los datos en pantalla
+    setTimeout(() => {
+      window.open(url, '_blank');
+    }, 100);
   });
 
-  // Funciones de Historial Local
+  // Funciones del Historial Local
   function saveToHistory(record) {
-    history.unshift(record); // Agregar al principio
-    if (history.length > 10) history.pop(); // Guardar hasta 10 registros
+    history.unshift(record);
+    if (history.length > 10) history.pop();
     localStorage.setItem('quoteHistory', JSON.stringify(history));
     renderHistory();
   }
