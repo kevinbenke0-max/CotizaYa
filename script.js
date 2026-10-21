@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const lblTotal = document.getElementById('lblTotal');
   const lblDeposit = document.getElementById('lblDeposit');
   const lblBalance = document.getElementById('lblBalance');
+  const depositDetailsContainer = document.getElementById('depositDetailsContainer');
 
   // Agregar Ítem
   btnAddItem.addEventListener('click', () => {
@@ -51,12 +52,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const percent = parseFloat(depositPercentInput.value) || 0;
-    const deposit = (total * percent) / 100;
-    const balance = total - deposit;
-
+    
     lblTotal.textContent = `$${total.toLocaleString()}`;
-    lblDeposit.textContent = `$${deposit.toLocaleString()}`;
-    lblBalance.textContent = `$${balance.toLocaleString()}`;
+
+    // Mostrar u ocultar la sección de seña según si el porcentaje es mayor a 0
+    if (percent > 0) {
+      const deposit = (total * percent) / 100;
+      const balance = total - deposit;
+      lblDeposit.textContent = `$${deposit.toLocaleString()}`;
+      lblBalance.textContent = `$${balance.toLocaleString()}`;
+      depositDetailsContainer.style.display = 'block';
+    } else {
+      depositDetailsContainer.style.display = 'none';
+    }
   }
 
   // Eliminar ítem
@@ -67,10 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   depositPercentInput.addEventListener('input', renderItems);
 
-  // Enviar mensaje por WhatsApp
+  // Enviar mensaje por WhatsApp (Sin saludo repetido)
   btnWhatsApp.addEventListener('click', () => {
-    const client = clientNameInput.value.trim() || 'Cliente';
-    const work = workTitleInput.value.trim() || 'Servicio/Trabajo';
+    const client = clientNameInput.value.trim();
+    const work = workTitleInput.value.trim();
 
     if (items.length === 0) {
       alert('Agrega al menos un ítem antes de enviar.');
@@ -79,25 +87,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let total = items.reduce((acc, i) => acc + i.price, 0);
     let percent = parseFloat(depositPercentInput.value) || 0;
-    let deposit = (total * percent) / 100;
 
-    let text = `Hola *${client}*, ¡esperamos que estés muy bien!\n\n`;
-    text += `Adjunto la cotización para: *${work}*\n\n`;
+    let text = `📌 *Cotización${work ? ' para ' + work : ''}*${client ? ' (' + client + ')' : ''}:\n\n`;
     text += `📋 *Detalle:*\n`;
 
     items.forEach(i => {
       text += `• ${i.desc}: $${i.price.toLocaleString()}\n`;
     });
 
-    text += `\n💵 *Total:* $${total.toLocaleString()}\n`;
+    text += `\n💵 *Total General:* $${total.toLocaleString()}\n`;
     
-    // Solo incluye la seña si es mayor a 0%
+    // Solo incluye la seña si el porcentaje es mayor a 0
     if (percent > 0) {
-      text += `💳 *Seña (${percent}%):* $${deposit.toLocaleString()}\n`;
-      text += `📌 *Saldo restante a la entrega:* $${(total - deposit).toLocaleString()}\n`;
+      let deposit = (total * percent) / 100;
+      let balance = total - deposit;
+      text += `💳 *Seña requerida (${percent}%):* $${deposit.toLocaleString()}\n`;
+      text += `📌 *Saldo restante:* $${balance.toLocaleString()}\n`;
     }
 
-    text += `\n¿Te gustaría confirmarlo o tienes alguna consulta?`;
+    text += `\n¿Te gustaría confirmarlo o tenés alguna consulta?`;
 
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -129,11 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     let percent = parseFloat(depositPercentInput.value) || 0;
-    let deposit = (total * percent) / 100;
-
     document.getElementById('printTotal').textContent = `$${total.toLocaleString()}`;
-    document.getElementById('printDeposit').textContent = `$${deposit.toLocaleString()}`;
-    document.getElementById('printBalance').textContent = `$${(total - deposit).toLocaleString()}`;
+
+    const printDepositSection = document.getElementById('printDepositSection');
+    if (percent > 0) {
+      let deposit = (total * percent) / 100;
+      document.getElementById('printDeposit').textContent = `$${deposit.toLocaleString()}`;
+      document.getElementById('printBalance').textContent = `$${(total - deposit).toLocaleString()}`;
+      printDepositSection.style.display = 'block';
+    } else {
+      printDepositSection.style.display = 'none';
+    }
 
     window.print();
   });
