@@ -90,6 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     text += `\n💵 *Total:* $${total.toLocaleString()}\n`;
+    
+    // Solo incluye la seña si es mayor a 0%
     if (percent > 0) {
       text += `💳 *Seña (${percent}%):* $${deposit.toLocaleString()}\n`;
       text += `📌 *Saldo restante a la entrega:* $${(total - deposit).toLocaleString()}\n`;
