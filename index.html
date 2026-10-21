@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CotizaYa - Generador de Presupuestos Express</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>⚡ CotizaYa</h1>
+      <p>Crea y envía presupuestos profesionales en segundos</p>
+    </header>
+
+    <main class="app-card">
+      <!-- Datos del Cliente y Trabajo -->
+      <section class="section">
+        <h3>1. Datos del Cliente</h3>
+        <div class="form-group">
+          <label for="clientName">Nombre del Cliente / Negocio</label>
+          <input type="text" id="clientName" placeholder="Ej: Juan Pérez">
+        </div>
+        <div class="form-group">
+          <label for="workTitle">Concepto / Trabajo</label>
+          <input type="text" id="workTitle" placeholder="Ej: Reparación de aire / Sesión de fotos">
+        </div>
+      </section>
+
+      <!-- Agregar Ítems -->
+      <section class="section">
+        <h3>2. Servicios o Productos</h3>
+        <div class="item-input-group">
+          <input type="text" id="itemDesc" placeholder="Descripción del ítem">
+          <input type="number" id="itemPrice" placeholder="Precio ($)" min="0">
+          <button id="btnAddItem" class="btn btn-secondary">+ Agregar</button>
+        </div>
+
+        <table id="itemsTable">
+          <thead>
+            <tr>
+              <th>Descripción</th>
+              <th>Precio</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="itemsList">
+            <!-- Ítems agregados dinámicamente -->
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Opciones de Seña y Totales -->
+      <section class="section">
+        <h3>3. Condiciones y Pago</h3>
+        <div class="form-group">
+          <label for="depositPercent">Porcentaje de Seña / Anticipo (%)</label>
+          <input type="number" id="depositPercent" value="50" min="0" max="100">
+        </div>
+
+        <div class="totals-box">
+          <div class="total-row">
+            <span>Total General:</span>
+            <strong id="lblTotal">$0</strong>
+          </div>
+          <div class="total-row highlight">
+            <span>Seña Requerida:</span>
+            <strong id="lblDeposit">$0</strong>
+          </div>
+          <div class="total-row">
+            <span>Saldo Restante:</span>
+            <span id="lblBalance">$0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Acciones de Envío -->
+      <section class="section actions">
+        <button id="btnWhatsApp" class="btn btn-whatsapp">📱 Enviar por WhatsApp</button>
+        <button id="btnPrint" class="btn btn-primary">🖨️ Imprimir / Guardar PDF</button>
+      </section>
+    </main>
+
+    <!-- Vista imprimible / Comprobante -->
+    <div id="printableArea" class="printable-area">
+      <div class="print-header">
+        <h2>PRESUPUESTO / COTIZACIÓN</h2>
+        <p id="printDate"></p>
+      </div>
+      <div class="print-details">
+        <p><strong>Cliente:</strong> <span id="printClient"></span></p>
+        <p><strong>Trabajo:</strong> <span id="printWork"></span></p>
+      </div>
+      <table class="print-table">
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th style="text-align: right;">Monto</th>
+          </tr>
+        </thead>
+        <tbody id="printItemsList"></tbody>
+      </table>
+      <div class="print-totals">
+        <p><strong>Total:</strong> <span id="printTotal"></span></p>
+        <p><strong>Seña (Anticipo):</strong> <span id="printDeposit"></span></p>
+        <p><strong>Saldo a Cancelar:</strong> <span id="printBalance"></span></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
