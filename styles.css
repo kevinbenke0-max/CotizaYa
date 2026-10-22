@@ -131,6 +131,7 @@ input[type="text"], input[type="number"], select {
 .btn-primary { background: #1a73e8; color: white; width: 100%; font-size: 1rem; }
 .btn-danger { background: #ea4335; color: white; padding: 4px 8px; font-size: 0.8rem; }
 .btn-danger-soft { background: #fce8e6; color: #ea4335; font-size: 0.75rem; padding: 4px 8px; }
+.btn-warning-soft { background: #fef7e0; color: #b06000; font-size: 0.75rem; padding: 4px 8px; font-weight: bold; }
 
 .history-header {
   display: flex;
