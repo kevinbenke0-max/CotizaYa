@@ -1,18 +1,22 @@
 document.addEventListener('DOMContentLoaded', () => {
   let movements = JSON.parse(localStorage.getItem('cashMovements')) || [];
+  let closedDays = JSON.parse(localStorage.getItem('closedDaysHistory')) || [];
 
   const movDescInput = document.getElementById('movDesc');
   const movAmountInput = document.getElementById('movAmount');
   const movTypeSelect = document.getElementById('movType');
   const btnAddMov = document.getElementById('btnAddMov');
-  const btnClearDay = document.getElementById('btnClearDay');
+  const btnCloseDay = document.getElementById('btnCloseDay');
+  const btnClearHistory = document.getElementById('btnClearHistory');
 
   const movList = document.getElementById('movList');
+  const closedDaysList = document.getElementById('closedDaysList');
   const lblTotalIncome = document.getElementById('lblTotalIncome');
   const lblTotalExpense = document.getElementById('lblTotalExpense');
   const lblNetBalance = document.getElementById('lblNetBalance');
 
   renderMovements();
+  renderClosedDays();
 
   // Registrar Movimiento
   btnAddMov.addEventListener('click', () => {
@@ -88,11 +92,80 @@ document.addEventListener('DOMContentLoaded', () => {
     saveAndRender();
   };
 
-  btnClearDay.addEventListener('click', () => {
-    if (confirm('¿Deseas vaciar los registros y cerrar la caja de hoy?')) {
+  // Botón para Cerrar el Día y guardarlo en el historial
+  btnCloseDay.addEventListener('click', () => {
+    if (movements.length === 0) {
+      alert('No hay movimientos registrados hoy para cerrar.');
+      return;
+    }
+
+    if (confirm('¿Deseas realizar el cierre de caja de hoy y guardar el resumen en el historial?')) {
+      let totalIncome = 0;
+      let totalExpense = 0;
+
+      movements.forEach(m => {
+        if (m.type === 'income') totalIncome += m.amount;
+        else totalExpense += m.amount;
+      });
+
+      let net = totalIncome - totalExpense;
+      let dateStr = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+      // Guardar en el historial de días cerrados
+      closedDays.unshift({
+        date: dateStr,
+        income: totalIncome,
+        expense: totalExpense,
+        net: net
+      });
+
+      localStorage.setItem('closedDaysHistory', JSON.stringify(closedDays));
+
+      // Vaciar los movimientos del día actual
       movements = [];
       localStorage.removeItem('cashMovements');
+
       renderMovements();
+      renderClosedDays();
+      alert('¡Cierre de caja guardado con éxito en el historial!');
+    }
+  });
+
+  function renderClosedDays() {
+    closedDaysList.innerHTML = '';
+    if (closedDays.length === 0) {
+      closedDaysList.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">Sin cierres anteriores guardados</td></tr>';
+      return;
+    }
+
+    closedDays.forEach((day, idx) => {
+      const tr = document.createElement('tr');
+      const netClass = day.net >= 0 ? 'text-success' : 'text-danger';
+      const sign = day.net >= 0 ? '+' : '';
+
+      tr.innerHTML = `
+        <td><strong>${day.date}</strong></td>
+        <td><small>➕ $${day.income.toLocaleString()}</small><br><small>➖ $${day.expense.toLocaleString()}</small></td>
+        <td style="text-align: right;" class="${netClass}"><strong>${sign}$${day.net.toLocaleString()}</strong></td>
+        <td><button class="btn btn-danger-soft" onclick="deleteClosedDay(${idx})">x</button></td>
+      `;
+      closedDaysList.appendChild(tr);
+    });
+  }
+
+  window.deleteClosedDay = (idx) => {
+    if (confirm('¿Eliminar este cierre del historial?')) {
+      closedDays.splice(idx, 1);
+      localStorage.setItem('closedDaysHistory', JSON.stringify(closedDays));
+      renderClosedDays();
+    }
+  };
+
+  btnClearHistory.addEventListener('click', () => {
+    if (confirm('¿Deseas borrar todo el historial de cierres anteriores?')) {
+      closedDays = [];
+      localStorage.removeItem('closedDaysHistory');
+      renderClosedDays();
     }
   });
 });
