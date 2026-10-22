@@ -3,152 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CotizaYa Pro - Generador de Presupuestos</title>
+  <title>ControlCaja - Cierre Diario de Caja</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <div class="container">
     <header>
-      <h1>⚡ CotizaYa Pro</h1>
-      <p>Crea y envía presupuestos profesionales en segundos</p>
+      <h1>💰 ControlCaja</h1>
+      <p>Gestión rápida de ingresos, gastos y caja diaria</p>
     </header>
 
     <main class="app-card">
-      <!-- Datos de la Empresa (Se guardan automáticos) -->
-      <section class="section">
-        <h3>1. Mi Negocio (Se guarda en tu teléfono)</h3>
-        <div class="form-group">
-          <label for="businessName">Nombre de tu Marca / Negocio</label>
-          <input type="text" id="businessName" placeholder="Ej: Repostería Dulce Amor">
+      <!-- Resumen del Día -->
+      <section class="summary-box">
+        <div class="summary-card">
+          <span>Ingresos (+)</span>
+          <strong id="lblTotalIncome" class="text-success">$0</strong>
         </div>
-        <div class="form-group">
-          <label for="paymentDetails">Datos de Pago (Alias / CVU / Titular)</label>
-          <input type="text" id="paymentDetails" placeholder="Ej: Alias: dulce.amor.mp / Titular: María B.">
+        <div class="summary-card">
+          <span>Gastos (-)</span>
+          <strong id="lblTotalExpense" class="text-danger">$0</strong>
         </div>
-      </section>
-
-      <!-- Datos del Cliente y Trabajo -->
-      <section class="section">
-        <h3>2. Datos del Cliente</h3>
-        <div class="form-group">
-          <label for="clientName">Nombre del Cliente</label>
-          <input type="text" id="clientName" placeholder="Ej: Juan Pérez">
-        </div>
-        <div class="form-group">
-          <label for="workTitle">Concepto / Trabajo</label>
-          <input type="text" id="workTitle" placeholder="Ej: Torta Moca 3kg">
-        </div>
-        <div class="form-group">
-          <label for="validityDays">Validez de la Cotización (Días)</label>
-          <input type="number" id="validityDays" value="7" min="1">
+        <div class="summary-card total-balance">
+          <span>Caja Actual</span>
+          <strong id="lblNetBalance">$0</strong>
         </div>
       </section>
 
-      <!-- Agregar Ítems -->
+      <!-- Formulario de Movimiento -->
       <section class="section">
-        <h3>3. Servicios o Productos</h3>
-        <div class="item-input-group">
-          <input type="text" id="itemDesc" placeholder="Descripción del ítem">
-          <input type="number" id="itemPrice" placeholder="Precio ($)" min="0">
-          <button id="btnAddItem" class="btn btn-secondary">+ Agregar</button>
+        <h3>Registrar Movimiento</h3>
+        <div class="form-group">
+          <label for="movDesc">Descripción / Concepto</label>
+          <input type="text" id="movDesc" placeholder="Ej: Venta de mercadería / Pago proveedor">
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="movAmount">Monto ($)</label>
+            <input type="number" id="movAmount" placeholder="0" min="0">
+          </div>
+          <div class="form-group">
+            <label for="movType">Tipo</label>
+            <select id="movType">
+              <option value="income">➕ Ingreso</option>
+              <option value="expense">➖ Gasto</option>
+            </select>
+          </div>
         </div>
 
-        <table id="itemsTable">
+        <button id="btnAddMov" class="btn btn-primary">+ Registrar Movimiento</button>
+      </section>
+
+      <!-- Historial de Movimientos del Día -->
+      <section class="section">
+        <div class="history-header">
+          <h3>📋 Movimientos de Hoy</h3>
+          <button id="btnClearDay" class="btn btn-danger-soft">Cerrar / Borrar Día</button>
+        </div>
+        <table class="mov-table">
           <thead>
             <tr>
-              <th>Descripción</th>
-              <th>Precio</th>
+              <th>Concepto</th>
+              <th>Tipo</th>
+              <th style="text-align: right;">Monto</th>
               <th></th>
             </tr>
           </thead>
-          <tbody id="itemsList"></tbody>
-        </table>
-      </section>
-
-      <!-- Opciones de Seña y Totales -->
-      <section class="section">
-        <h3>4. Condición de Pago</h3>
-        <div class="form-group">
-          <label for="depositPercent">Porcentaje de Seña (%) - <i>(0 para cobro total)</i></label>
-          <input type="number" id="depositPercent" value="0" min="0" max="100">
-        </div>
-
-        <div class="totals-box">
-          <div class="total-row highlight">
-            <span>Total General:</span>
-            <strong id="lblTotal">$0</strong>
-          </div>
-          <div id="depositDetailsContainer" style="display: none;">
-            <div class="total-row">
-              <span>Seña Requerida:</span>
-              <strong id="lblDeposit">$0</strong>
-            </div>
-            <div class="total-row">
-              <span>Saldo Restante:</span>
-              <span id="lblBalance">$0</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Acciones de Envío -->
-      <section class="section actions">
-        <button id="btnWhatsApp" class="btn btn-whatsapp">📱 Enviar Cotización por WhatsApp</button>
-        <button id="btnPrint" class="btn btn-primary">🖨️ Imprimir / Guardar PDF</button>
-      </section>
-
-      <!-- Historial de Presupuestos Guardados -->
-      <section class="section history-section">
-        <div class="history-header">
-          <h3>📋 Registro de Presupuestos Recientes</h3>
-          <button id="btnClearHistory" class="btn btn-danger-soft">Limpiar Historial</button>
-        </div>
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Trabajo</th>
-              <th>Total</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="historyList">
-            <!-- Se cargan dinámicamente -->
+          <tbody id="movList">
+            <!-- Movimientos dinámicos -->
           </tbody>
         </table>
       </section>
     </main>
-
-    <!-- Vista imprimible -->
-    <div id="printableArea" class="printable-area">
-      <div class="print-header">
-        <h2 id="printBusiness">PRESUPUESTO / COTIZACIÓN</h2>
-        <p id="printDate"></p>
-      </div>
-      <div class="print-details">
-        <p><strong>Cliente:</strong> <span id="printClient"></span></p>
-        <p><strong>Trabajo:</strong> <span id="printWork"></span></p>
-        <p><strong>Validez:</strong> <span id="printValidity"></span> días</p>
-      </div>
-      <table class="print-table">
-        <thead>
-          <tr>
-            <th>Concepto</th>
-            <th style="text-align: right;">Monto</th>
-          </tr>
-        </thead>
-        <tbody id="printItemsList"></tbody>
-      </table>
-      <div class="print-totals">
-        <p><strong>Total:</strong> <span id="printTotal"></span></p>
-        <div id="printDepositSection" style="display: none;">
-          <p><strong>Seña:</strong> <span id="printDeposit"></span></p>
-          <p><strong>Saldo Restante:</strong> <span id="printBalance"></span></p>
-        </div>
-        <p id="printPayment" style="margin-top: 10px; font-size: 0.9rem;"></p>
-      </div>
-    </div>
   </div>
 
   <script src="script.js"></script>
