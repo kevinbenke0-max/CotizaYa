@@ -12,7 +12,7 @@ body {
 }
 
 .container {
-  max-width: 600px;
+  max-width: 550px;
   margin: 0 auto;
 }
 
@@ -38,6 +38,46 @@ header p {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+/* Tarjetas de Resumen */
+.summary-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  border: 1px solid #e9ecef;
+}
+
+.summary-card span {
+  display: block;
+  font-size: 0.75rem;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.summary-card strong {
+  font-size: 0.95rem;
+}
+
+.total-balance {
+  background: #e8f0fe;
+  border-color: #d2e3fc;
+}
+
+.total-balance strong {
+  color: #1a73e8;
+  font-size: 1.1rem;
+}
+
+.text-success { color: #34a853; }
+.text-danger { color: #ea4335; }
+
 .section {
   margin-bottom: 20px;
   border-bottom: 1px solid #eee;
@@ -54,6 +94,15 @@ header p {
   margin-bottom: 12px;
 }
 
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
 .form-group label {
   display: block;
   font-size: 0.85rem;
@@ -61,26 +110,13 @@ header p {
   color: #555;
 }
 
-input[type="text"], input[type="number"] {
+input[type="text"], input[type="number"], select {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 0.95rem;
-}
-
-.item-input-group {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.item-input-group input[type="text"] {
-  flex: 2;
-}
-
-.item-input-group input[type="number"] {
-  flex: 1;
+  background: #fff;
 }
 
 .btn {
@@ -92,44 +128,9 @@ input[type="text"], input[type="number"] {
   transition: background 0.2s;
 }
 
-.btn-primary { background: #1a73e8; color: white; width: 100%; }
-.btn-secondary { background: #34a853; color: white; }
-.btn-whatsapp { background: #25d366; color: white; width: 100%; margin-bottom: 8px; font-size: 1rem; }
+.btn-primary { background: #1a73e8; color: white; width: 100%; font-size: 1rem; }
 .btn-danger { background: #ea4335; color: white; padding: 4px 8px; font-size: 0.8rem; }
 .btn-danger-soft { background: #fce8e6; color: #ea4335; font-size: 0.75rem; padding: 4px 8px; }
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 8px;
-}
-
-th, td {
-  padding: 8px;
-  text-align: left;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 0.85rem;
-}
-
-.totals-box {
-  background: #f8f9fa;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 10px;
-}
-
-.total-row {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  font-size: 0.95rem;
-}
-
-.total-row.highlight {
-  color: #1a73e8;
-  font-size: 1.1rem;
-  font-weight: bold;
-}
 
 .history-header {
   display: flex;
@@ -138,27 +139,14 @@ th, td {
   margin-bottom: 8px;
 }
 
-.history-table td {
-  font-size: 0.8rem;
+.mov-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.printable-area {
-  display: none;
-}
-
-@media print {
-  body * { visibility: hidden; }
-  .printable-area, .printable-area * { visibility: visible; }
-  .printable-area {
-    display: block;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    padding: 20px;
-  }
-  .print-header { text-align: center; margin-bottom: 20px; }
-  .print-table { width: 100%; margin: 20px 0; border-collapse: collapse; }
-  .print-table th, .print-table td { border: 1px solid #ddd; padding: 8px; }
-  .print-totals { text-align: right; margin-top: 15px; }
+.mov-table th, .mov-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.85rem;
 }
