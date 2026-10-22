@@ -25,7 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    movements.unshift({ desc, amount, type, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+    movements.unshift({ 
+      desc, 
+      amount, 
+      type, 
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    });
     
     movDescInput.value = '';
     movAmountInput.value = '';
