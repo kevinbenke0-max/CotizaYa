@@ -255,26 +255,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Descarga directa a PDF
+  // Descarga limpia mediante impresión nativa del celular
   btnPrintPDF.addEventListener('click', () => {
-    const element = document.getElementById('pdfArea');
-    const selectedText = monthSelector.options[monthSelector.selectedIndex]?.text || 'Resumen';
-    
-    const opt = {
-      margin:       10,
-      filename:     `Resumen_Caja_${selectedText.replace(/\s+/g, '_')}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2 },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    html2pdf().set(opt).from(element).save();
+    window.print();
   });
 
   window.deleteClosedDay = (idx) => {
     if (confirm('¿Eliminar este cierre del historial?')) {
       closedDays.splice(idx, 1);
-      localStorage.setItem('closedDaysHistory', JSON.stringify(closedDays));
+      localStorage.removeItem('closedDaysHistory');
       renderClosedDays();
       initMonthSelector();
     }
