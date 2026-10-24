@@ -9,14 +9,14 @@
 <body>
 
   <div class="container">
-    <header>
+    <header class="no-print">
       <h1>💰 ControlCaja Pro</h1>
       <p>Gestión rápida de ingresos, gastos y balances</p>
     </header>
 
     <main class="app-card">
       <!-- Resumen del Día Actual -->
-      <section class="summary-box">
+      <section class="summary-box no-print">
         <div class="summary-card">
           <span>Ingresos Hoy (+)</span>
           <strong id="lblTotalIncome" class="text-success">$0</strong>
@@ -32,7 +32,7 @@
       </section>
 
       <!-- Formulario de Movimiento -->
-      <section class="section">
+      <section class="section no-print">
         <h3>Registrar Movimiento de Hoy</h3>
         <div class="form-group">
           <label for="movDesc">Descripción / Concepto</label>
@@ -57,7 +57,7 @@
       </section>
 
       <!-- Movimientos de Hoy -->
-      <section class="section">
+      <section class="section no-print">
         <div class="history-header">
           <h3>📋 Movimientos de Hoy</h3>
           <button id="btnCloseDay" class="btn btn-warning-soft">🔒 Cerrar Día y Guardar</button>
@@ -76,7 +76,7 @@
       </section>
 
       <!-- Historial de Cierres Anteriores -->
-      <section class="section">
+      <section class="section no-print">
         <div class="history-header">
           <h3>📅 Historial de Cierres Diarios</h3>
           <button id="btnClearHistory" class="btn btn-danger-soft">Borrar Historial</button>
@@ -94,7 +94,7 @@
         </table>
       </section>
 
-      <!-- 📊 BALANCE MENSUAL Y DESCARGA PDF -->
+      <!-- 📊 BALANCE MENSUAL Y EXPORTACIÓN -->
       <section class="section monthly-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
         <div class="monthly-header">
           <h3>📈 Balance Mensual</h3>
@@ -103,7 +103,6 @@
           </select>
         </div>
         
-        <!-- Bloque que se convertirá en PDF -->
         <div id="pdfArea" class="monthly-box" style="background: #ffffff; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef;">
           <h2 style="font-size: 1.1rem; color: #1a73e8; margin-bottom: 10px; text-align: center;">Resumen de Caja - <span id="pdfMonthTitle"></span></h2>
           <div class="monthly-row" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
@@ -120,13 +119,11 @@
           </div>
         </div>
 
-        <button id="btnPrintPDF" class="btn btn-primary" style="margin-top: 15px;">📥 Descargar PDF</button>
+        <button id="btnPrintPDF" class="btn btn-primary no-print" style="margin-top: 15px;">📥 Guardar Resumen en PDF</button>
       </section>
     </main>
   </div>
 
-  <!-- Librería externa html2pdf -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
