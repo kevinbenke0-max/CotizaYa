@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lblMonthNet.className = monthNet >= 0 ? 'text-success' : 'text-danger';
   }
 
-  // Enviar Resumen por WhatsApp (Funciona 100% en todos los celulares)
+  // Enviar Resumen por WhatsApp
   btnWhatsApp.addEventListener('click', () => {
     const monthText = monthSelector.options[monthSelector.selectedIndex]?.text || '';
     const income = lblMonthIncome.textContent;
@@ -259,8 +259,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const mensaje = `📊 *Resumen de Caja - ControlCaja Pro*\n📅 Período: ${monthText}\n\n🟢 Ventas / Ingresos: ${income}\n🔴 Compras / Gastos: ${expense}\n💵 Ganancia Neta: ${net}\n\n_Enviado desde mi app de control diario_`;
 
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
+    const encodedMsg = encodeURIComponent(mensaje);
+    const waAppUrl = `whatsapp://send?text=${encodedMsg}`;
+
+    window.location.href = waAppUrl;
   });
 
   window.deleteClosedDay = (idx) => {
