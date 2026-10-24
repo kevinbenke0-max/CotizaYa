@@ -81,6 +81,7 @@
           <h3>📅 Historial de Cierres Diarios</h3>
           <button id="btnClearHistory" class="btn btn-danger-soft">Borrar Historial</button>
         </div>
+        <p style="font-size: 0.75rem; color: #666; margin-bottom: 8px;">💡 Toca cualquier fecha para ver el detalle de sus movimientos.</p>
         <table class="mov-table">
           <thead>
             <tr>
@@ -94,13 +95,11 @@
         </table>
       </section>
 
-      <!-- 📊 BALANCE MENSUAL CON % DE GANANCIA -->
+      <!-- Balance Mensual -->
       <section class="section monthly-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
         <div class="monthly-header">
           <h3>📈 Balance Mensual</h3>
-          <select id="monthSelector" class="month-select">
-            <!-- Se carga dinámicamente -->
-          </select>
+          <select id="monthSelector" class="month-select"></select>
         </div>
         
         <div class="monthly-box">
@@ -122,10 +121,29 @@
           </div>
         </div>
 
-        <!-- Botón directo para WhatsApp -->
         <button id="btnWhatsApp" class="btn" style="background: #25d366; color: white; width: 100%; margin-top: 15px; font-size: 1rem;">💬 Enviar Resumen por WhatsApp</button>
       </section>
     </main>
+  </div>
+
+  <!-- Modal Detalle del Cierre -->
+  <div id="dayModal" class="modal" style="display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div class="modal-content" style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:450px; max-height:80vh; overflow-y:auto;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <h3 id="modalTitle" style="font-size:1.1rem; color:#1a73e8;">Detalle del Día</h3>
+        <button id="btnCloseModal" class="btn btn-danger" style="padding:2px 8px;">✕</button>
+      </div>
+      <table class="mov-table">
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Tipo</th>
+            <th style="text-align: right;">Monto</th>
+          </tr>
+        </thead>
+        <tbody id="modalMovList"></tbody>
+      </table>
+    </div>
   </div>
 
   <script src="script.js"></script>
