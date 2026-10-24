@@ -116,6 +116,7 @@ input[type="text"], input[type="number"], select {
   border-radius: 6px;
   font-size: 0.95rem;
   background: #fff;
+  color: #333; /* Color de texto bien visible */
 }
 
 .btn {
@@ -140,13 +141,13 @@ input[type="text"], input[type="number"], select {
 }
 
 .month-select {
-  padding: 5px 8px;
+  padding: 8px 12px;
   border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 0.85rem;
+  border: 1px solid #1a73e8;
+  font-size: 0.9rem;
   background: #fff;
   font-weight: bold;
-  color: #1a73e8;
+  color: #1a73e8; /* Texto azul bien legible */
 }
 
 .mov-table {
