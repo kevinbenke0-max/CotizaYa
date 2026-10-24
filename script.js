@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const lblMonthMargin = document.getElementById('lblMonthMargin');
   const lblMonthNet = document.getElementById('lblMonthNet');
 
-  // Elementos del Modal
   const dayModal = document.getElementById('dayModal');
   const modalTitle = document.getElementById('modalTitle');
   const modalMovList = document.getElementById('modalMovList');
@@ -32,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMovements();
   renderClosedDays();
 
-  // Registrar Movimiento
   btnAddMov.addEventListener('click', () => {
     const desc = movDescInput.value.trim();
     const amount = parseFloat(movAmountInput.value);
@@ -107,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
     saveAndRender();
   };
 
-  // Cerrar el Día (Guarda copia de los movimientos)
   btnCloseDay.addEventListener('click', () => {
     if (movements.length === 0) {
       alert('No hay movimientos registrados hoy para cerrar.');
@@ -178,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     modalMovList.innerHTML = '';
 
     if (!day.items || day.items.length === 0) {
-      modalMovList.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No hay movimientos detallados para este día anterior.</td></tr>';
+      modalMovList.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No hay movimientos detallados guardados para este día.</td></tr>';
     } else {
       day.items.forEach(item => {
         const tr = document.createElement('tr');
@@ -291,9 +288,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let monthNet = monthIncome - monthExpense;
     
+    // Rentabilidad sobre el costo (Ganancia Neta / Gastos)
     let profitMargin = 0;
-    if (monthIncome > 0) {
-      profitMargin = (monthNet / monthIncome) * 100;
+    if (monthExpense > 0) {
+      profitMargin = (monthNet / monthExpense) * 100;
     }
 
     lblMonthIncome.textContent = `$${monthIncome.toLocaleString()}`;
@@ -305,7 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
     lblMonthNet.className = monthNet >= 0 ? 'text-success' : 'text-danger';
   }
 
-  // Enviar Resumen por WhatsApp
   btnWhatsApp.addEventListener('click', () => {
     const monthText = monthSelector.options[monthSelector.selectedIndex]?.text || '';
     const income = lblMonthIncome.textContent;
@@ -313,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const margin = lblMonthMargin.textContent;
     const net = lblMonthNet.textContent;
 
-    const mensaje = `📊 *Resumen de Caja - ControlCaja Pro*\n📅 Período: ${monthText}\n\n🟢 Ventas / Ingresos: ${income}\n🔴 Compras / Gastos: ${expense}\n📈 Margen de Ganancia: ${margin}\n💵 Ganancia Neta: ${net}\n\n_Enviado desde mi app de control diario_`;
+    const mensaje = `📊 *Resumen de Caja - ControlCaja Pro*\n📅 Período: ${monthText}\n\n🟢 Ventas / Ingresos: ${income}\n🔴 Compras / Gastos: ${expense}\n📈 Rentabilidad s/ Costo: ${margin}\n💵 Ganancia Neta: ${net}\n\n_Enviado desde mi app de control diario_`;
 
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
