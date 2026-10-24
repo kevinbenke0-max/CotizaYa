@@ -22,6 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const lblMonthMargin = document.getElementById('lblMonthMargin');
   const lblMonthNet = document.getElementById('lblMonthNet');
 
+  // Elementos del Modal
+  const dayModal = document.getElementById('dayModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMovList = document.getElementById('modalMovList');
+  const btnCloseModal = document.getElementById('btnCloseModal');
+
   initMonthSelector();
   renderMovements();
   renderClosedDays();
@@ -101,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saveAndRender();
   };
 
-  // Cerrar el Día
+  // Cerrar el Día (Guarda copia de los movimientos)
   btnCloseDay.addEventListener('click', () => {
     if (movements.length === 0) {
       alert('No hay movimientos registrados hoy para cerrar.');
@@ -124,7 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
         date: dateStr,
         income: totalIncome,
         expense: totalExpense,
-        net: net
+        net: net,
+        items: [...movements]
       });
 
       localStorage.setItem('closedDaysHistory', JSON.stringify(closedDays));
@@ -152,14 +159,52 @@ document.addEventListener('DOMContentLoaded', () => {
       const sign = day.net >= 0 ? '+' : '';
 
       tr.innerHTML = `
-        <td><strong>${day.date}</strong></td>
-        <td><small>➕ $${day.income.toLocaleString()}</small><br><small>➖ $${day.expense.toLocaleString()}</small></td>
-        <td style="text-align: right;" class="${netClass}"><strong>${sign}$${day.net.toLocaleString()}</strong></td>
-        <td><button class="btn btn-danger-soft" onclick="deleteClosedDay(${idx})">x</button></td>
+        <td><strong>📅 ${day.date}</strong> <br><small style="color:#1a73e8;">Ver detalle 🔍</small></td>
+        <td><small>➕ $${(day.income || 0).toLocaleString()}</small><br><small>➖ $${(day.expense || 0).toLocaleString()}</small></td>
+        <td style="text-align: right;" class="${netClass}"><strong>${sign}$${(day.net || 0).toLocaleString()}</strong></td>
+        <td><button class="btn btn-danger-soft" onclick="event.stopPropagation(); deleteClosedDay(${idx})">x</button></td>
       `;
+
+      tr.addEventListener('click', () => {
+        openDayDetail(day);
+      });
+
       closedDaysList.appendChild(tr);
     });
   }
+
+  function openDayDetail(day) {
+    modalTitle.textContent = `Detalle del Cierre - ${day.date}`;
+    modalMovList.innerHTML = '';
+
+    if (!day.items || day.items.length === 0) {
+      modalMovList.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#999;">No hay movimientos detallados para este día anterior.</td></tr>';
+    } else {
+      day.items.forEach(item => {
+        const tr = document.createElement('tr');
+        const amountClass = item.type === 'income' ? 'text-success' : 'text-danger';
+        const sign = item.type === 'income' ? '+' : '-';
+        tr.innerHTML = `
+          <td><strong>${item.desc}</strong><br><small>${item.time || ''}</small></td>
+          <td>${item.type === 'income' ? 'Ingreso' : 'Gasto'}</td>
+          <td style="text-align: right;" class="${amountClass}"><strong>${sign}$${Number(item.amount).toLocaleString()}</strong></td>
+        `;
+        modalMovList.appendChild(tr);
+      });
+    }
+
+    dayModal.style.display = 'flex';
+  }
+
+  btnCloseModal.addEventListener('click', () => {
+    dayModal.style.display = 'none';
+  });
+
+  window.addEventListener('click', (e) => {
+    if (e.target === dayModal) {
+      dayModal.style.display = 'none';
+    }
+  });
 
   function initMonthSelector() {
     let availableMonths = new Set();
@@ -260,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
     lblMonthNet.className = monthNet >= 0 ? 'text-success' : 'text-danger';
   }
 
-  // Enviar Resumen por WhatsApp con el porcentaje incluido
+  // Enviar Resumen por WhatsApp
   btnWhatsApp.addEventListener('click', () => {
     const monthText = monthSelector.options[monthSelector.selectedIndex]?.text || '';
     const income = lblMonthIncome.textContent;
