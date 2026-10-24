@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const lblMonthIncome = document.getElementById('lblMonthIncome');
   const lblMonthExpense = document.getElementById('lblMonthExpense');
+  const lblMonthMargin = document.getElementById('lblMonthMargin');
   const lblMonthNet = document.getElementById('lblMonthNet');
 
   initMonthSelector();
@@ -213,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!selectedMonthYear) {
       lblMonthIncome.textContent = '$0';
       lblMonthExpense.textContent = '$0';
+      lblMonthMargin.textContent = '0%';
       lblMonthNet.textContent = '$0';
       return;
     }
@@ -243,21 +245,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     let monthNet = monthIncome - monthExpense;
+    
+    // Cálculo del porcentaje de ganancia sobre los ingresos (si ingresos > 0)
+    let profitMargin = 0;
+    if (monthIncome > 0) {
+      profitMargin = (monthNet / monthIncome) * 100;
+    }
 
     lblMonthIncome.textContent = `$${monthIncome.toLocaleString()}`;
     lblMonthExpense.textContent = `$${monthExpense.toLocaleString()}`;
+    lblMonthMargin.textContent = `${profitMargin.toFixed(1)}%`;
+    lblMonthMargin.className = profitMargin >= 0 ? 'text-success' : 'text-danger';
+    
     lblMonthNet.textContent = `$${monthNet.toLocaleString()}`;
     lblMonthNet.className = monthNet >= 0 ? 'text-success' : 'text-danger';
   }
 
-  // Enlace Universal Infalible para WhatsApp
+  // Enviar Resumen por WhatsApp con el porcentaje incluido
   btnWhatsApp.addEventListener('click', () => {
     const monthText = monthSelector.options[monthSelector.selectedIndex]?.text || '';
     const income = lblMonthIncome.textContent;
     const expense = lblMonthExpense.textContent;
+    const margin = lblMonthMargin.textContent;
     const net = lblMonthNet.textContent;
 
-    const mensaje = `📊 *Resumen de Caja - ControlCaja Pro*\n📅 Período: ${monthText}\n\n🟢 Ventas / Ingresos: ${income}\n🔴 Compras / Gastos: ${expense}\n💵 Ganancia Neta: ${net}\n\n_Enviado desde mi app de control diario_`;
+    const mensaje = `📊 *Resumen de Caja - ControlCaja Pro*\n📅 Período: ${monthText}\n\n🟢 Ventas / Ingresos: ${income}\n🔴 Compras / Gastos: ${expense}\n📈 Margen de Ganancia: ${margin}\n💵 Ganancia Neta: ${net}\n\n_Enviado desde mi app de control diario_`;
 
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
