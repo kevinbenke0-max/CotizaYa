@@ -238,15 +238,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const parts = day.date.split('/'); 
       if (parts.length === 3) {
         if (parts[1] === selM && parts[2] === selY) {
-          monthIncome += day.income;
-          monthExpense += day.expense;
+          monthIncome += Number(day.income) || 0;
+          monthExpense += Number(day.expense) || 0;
         }
       }
     });
 
     let monthNet = monthIncome - monthExpense;
     
-    // Cálculo del porcentaje de ganancia sobre los ingresos (si ingresos > 0)
     let profitMargin = 0;
     if (monthIncome > 0) {
       profitMargin = (monthNet / monthIncome) * 100;
