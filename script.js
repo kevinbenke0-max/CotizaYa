@@ -20,11 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const lblMonthExpense = document.getElementById('lblMonthExpense');
   const lblMonthNet = document.getElementById('lblMonthNet');
 
+  // Inicializar vistas al cargar
+  initMonthSelector();
   renderMovements();
   renderClosedDays();
-  initMonthSelector();
 
-  // Registrar Movimiento
+  // Registrar Movimiento en tiempo real
   btnAddMov.addEventListener('click', () => {
     const desc = movDescInput.value.trim();
     const amount = parseFloat(movAmountInput.value);
@@ -51,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveAndRender() {
     localStorage.setItem('cashMovements', JSON.stringify(movements));
     renderMovements();
-    initMonthSelector();
+    calculateMonthlySummary();
   }
 
   function renderMovements() {
@@ -159,17 +160,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Inicializar y poblar el Selector de Meses basados en los datos guardados
+  // Poblar el Selector de Meses y seleccionar el actual por defecto
   function initMonthSelector() {
-    // Recopilar todos los meses disponibles (del día actual y de los cierres)
     let availableMonths = new Set();
     
-    // Mes actual
     const now = new Date();
     const currentVal = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
     availableMonths.add(currentVal);
 
-    // Meses de los cierres guardados
     closedDays.forEach(day => {
       const parts = day.date.split('/');
       if (parts.length === 3) {
@@ -177,10 +175,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
-    const currentSelected = monthSelector.value; // Guardar selección si ya había una
+    const currentSelected = monthSelector.value;
     monthSelector.innerHTML = '';
 
-    // Ordenar meses del más nuevo al más antiguo
     const sortedMonths = Array.from(availableMonths).sort((a, b) => {
       let [mA, yA] = a.split('/');
       let [mB, yB] = b.split('/');
@@ -210,24 +207,28 @@ document.addEventListener('DOMContentLoaded', () => {
     calculateMonthlySummary();
   }
 
-  // Cambio de mes en el selector
   monthSelector.addEventListener('change', calculateMonthlySummary);
 
-  // Cálculo del Resumen para el Mes Seleccionado
+  // Cálculo en tiempo real del mes seleccionado
   function calculateMonthlySummary() {
-    const selectedMonthYear = monthSelector.value; // Formato "MM/YYYY"
-    if (!selectedMonthYear) return;
+    const selectedMonthYear = monthSelector.value; 
+    if (!selectedMonthYear) {
+      lblMonthIncome.textContent = '$0';
+      lblMonthExpense.textContent = '$0';
+      lblMonthNet.textContent = '$0';
+      return;
+    }
 
     let monthIncome = 0;
     let monthExpense = 0;
 
     const [selM, selY] = selectedMonthYear.split('/');
 
-    // 1. Si el mes seleccionado es el actual, sumar los movimientos de hoy
     const now = new Date();
     const currentM = String(now.getMonth() + 1).padStart(2, '0');
     const currentY = String(now.getFullYear());
 
+    // 1. Sumar movimientos activos de hoy si estamos viendo el mes actual
     if (selM === currentM && selY === currentY) {
       movements.forEach(m => {
         if (m.type === 'income') monthIncome += m.amount;
@@ -235,9 +236,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // 2. Sumar los días cerrados que coincidan con el mes y año seleccionado
+    // 2. Sumar días cerrados que pertenezcan a ese mes
     closedDays.forEach(day => {
-      const parts = day.date.split('/'); // DD/MM/YYYY
+      const parts = day.date.split('/'); 
       if (parts.length === 3) {
         if (parts[1] === selM && parts[2] === selY) {
           monthIncome += day.income;
