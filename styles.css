@@ -38,7 +38,6 @@ header p {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Tarjetas de Resumen */
 .summary-box {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -133,11 +132,21 @@ input[type="text"], input[type="number"], select {
 .btn-danger-soft { background: #fce8e6; color: #ea4335; font-size: 0.75rem; padding: 4px 8px; }
 .btn-warning-soft { background: #fef7e0; color: #b06000; font-size: 0.75rem; padding: 4px 8px; font-weight: bold; }
 
-.history-header {
+.history-header, .monthly-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+}
+
+.month-select {
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.85rem;
+  background: #fff;
+  font-weight: bold;
+  color: #1a73e8;
 }
 
 .mov-table {
@@ -150,4 +159,28 @@ input[type="text"], input[type="number"], select {
   text-align: left;
   border-bottom: 1px solid #f0f0f0;
   font-size: 0.85rem;
+}
+
+.monthly-box {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.monthly-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.monthly-total {
+  border-top: 1px solid #ddd;
+  padding-top: 6px;
+  margin-top: 6px;
+  font-size: 1.05rem;
+  color: #222;
+  font-weight: bold;
 }
