@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnAddMov = document.getElementById('btnAddMov');
   const btnCloseDay = document.getElementById('btnCloseDay');
   const btnClearHistory = document.getElementById('btnClearHistory');
+  const monthSelector = document.getElementById('monthSelector');
 
   const movList = document.getElementById('movList');
   const closedDaysList = document.getElementById('closedDaysList');
@@ -15,8 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const lblTotalExpense = document.getElementById('lblTotalExpense');
   const lblNetBalance = document.getElementById('lblNetBalance');
 
+  const lblMonthIncome = document.getElementById('lblMonthIncome');
+  const lblMonthExpense = document.getElementById('lblMonthExpense');
+  const lblMonthNet = document.getElementById('lblMonthNet');
+
   renderMovements();
   renderClosedDays();
+  initMonthSelector();
 
   // Registrar Movimiento
   btnAddMov.addEventListener('click', () => {
@@ -45,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveAndRender() {
     localStorage.setItem('cashMovements', JSON.stringify(movements));
     renderMovements();
+    initMonthSelector();
   }
 
   function renderMovements() {
@@ -92,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saveAndRender();
   };
 
-  // Botón para Cerrar el Día y guardarlo en el historial
+  // Cerrar el Día
   btnCloseDay.addEventListener('click', () => {
     if (movements.length === 0) {
       alert('No hay movimientos registrados hoy para cerrar.');
@@ -111,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
       let net = totalIncome - totalExpense;
       let dateStr = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-      // Guardar en el historial de días cerrados
       closedDays.unshift({
         date: dateStr,
         income: totalIncome,
@@ -121,13 +127,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       localStorage.setItem('closedDaysHistory', JSON.stringify(closedDays));
 
-      // Vaciar los movimientos del día actual
       movements = [];
       localStorage.removeItem('cashMovements');
 
       renderMovements();
       renderClosedDays();
-      alert('¡Cierre de caja guardado con éxito en el historial!');
+      initMonthSelector();
+      alert('¡Cierre de caja guardado con éxito!');
     }
   });
 
@@ -153,19 +159,116 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Inicializar y poblar el Selector de Meses basados en los datos guardados
+  function initMonthSelector() {
+    // Recopilar todos los meses disponibles (del día actual y de los cierres)
+    let availableMonths = new Set();
+    
+    // Mes actual
+    const now = new Date();
+    const currentVal = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+    availableMonths.add(currentVal);
+
+    // Meses de los cierres guardados
+    closedDays.forEach(day => {
+      const parts = day.date.split('/');
+      if (parts.length === 3) {
+        availableMonths.add(`${parts[1]}/${parts[2]}`);
+      }
+    });
+
+    const currentSelected = monthSelector.value; // Guardar selección si ya había una
+    monthSelector.innerHTML = '';
+
+    // Ordenar meses del más nuevo al más antiguo
+    const sortedMonths = Array.from(availableMonths).sort((a, b) => {
+      let [mA, yA] = a.split('/');
+      let [mB, yB] = b.split('/');
+      return new Date(yB, mB - 1) - new Date(yA, mA - 1);
+    });
+
+    const monthNames = {
+      "01": "Enero", "02": "Febrero", "03": "Marzo", "04": "Abril",
+      "05": "Mayo", "06": "Junio", "07": "Julio", "08": "Agosto",
+      "09": "Septiembre", "10": "Octubre", "11": "Noviembre", "12": "Diciembre"
+    };
+
+    sortedMonths.forEach(mKey => {
+      let [mNum, yNum] = mKey.split('/');
+      const opt = document.createElement('option');
+      opt.value = mKey;
+      opt.textContent = `${monthNames[mNum] || mNum} ${yNum}`;
+      monthSelector.appendChild(opt);
+    });
+
+    if (currentSelected && availableMonths.has(currentSelected)) {
+      monthSelector.value = currentSelected;
+    } else {
+      monthSelector.value = currentVal;
+    }
+
+    calculateMonthlySummary();
+  }
+
+  // Cambio de mes en el selector
+  monthSelector.addEventListener('change', calculateMonthlySummary);
+
+  // Cálculo del Resumen para el Mes Seleccionado
+  function calculateMonthlySummary() {
+    const selectedMonthYear = monthSelector.value; // Formato "MM/YYYY"
+    if (!selectedMonthYear) return;
+
+    let monthIncome = 0;
+    let monthExpense = 0;
+
+    const [selM, selY] = selectedMonthYear.split('/');
+
+    // 1. Si el mes seleccionado es el actual, sumar los movimientos de hoy
+    const now = new Date();
+    const currentM = String(now.getMonth() + 1).padStart(2, '0');
+    const currentY = String(now.getFullYear());
+
+    if (selM === currentM && selY === currentY) {
+      movements.forEach(m => {
+        if (m.type === 'income') monthIncome += m.amount;
+        else monthExpense += m.amount;
+      });
+    }
+
+    // 2. Sumar los días cerrados que coincidan con el mes y año seleccionado
+    closedDays.forEach(day => {
+      const parts = day.date.split('/'); // DD/MM/YYYY
+      if (parts.length === 3) {
+        if (parts[1] === selM && parts[2] === selY) {
+          monthIncome += day.income;
+          monthExpense += day.expense;
+        }
+      }
+    });
+
+    let monthNet = monthIncome - monthExpense;
+
+    lblMonthIncome.textContent = `$${monthIncome.toLocaleString()}`;
+    lblMonthExpense.textContent = `$${monthExpense.toLocaleString()}`;
+    lblMonthNet.textContent = `$${monthNet.toLocaleString()}`;
+    lblMonthNet.className = monthNet >= 0 ? 'text-success' : 'text-danger';
+  }
+
   window.deleteClosedDay = (idx) => {
     if (confirm('¿Eliminar este cierre del historial?')) {
       closedDays.splice(idx, 1);
       localStorage.setItem('closedDaysHistory', JSON.stringify(closedDays));
       renderClosedDays();
+      initMonthSelector();
     }
   };
 
   btnClearHistory.addEventListener('click', () => {
-    if (confirm('¿Deseas borrar todo el historial de cierres anteriores?')) {
+    if (confirm('¿Deseas borrar todo el historial de cierres?')) {
       closedDays = [];
       localStorage.removeItem('closedDaysHistory');
       renderClosedDays();
+      initMonthSelector();
     }
   });
 });
