@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const lblMonthIncome = document.getElementById('lblMonthIncome');
   const lblMonthExpense = document.getElementById('lblMonthExpense');
   const lblMonthNet = document.getElementById('lblMonthNet');
+  const pdfMonthTitle = document.getElementById('pdfMonthTitle');
 
   initMonthSelector();
   renderMovements();
@@ -248,11 +249,26 @@ document.addEventListener('DOMContentLoaded', () => {
     lblMonthExpense.textContent = `$${monthExpense.toLocaleString()}`;
     lblMonthNet.textContent = `$${monthNet.toLocaleString()}`;
     lblMonthNet.className = monthNet >= 0 ? 'text-success' : 'text-danger';
+
+    if (pdfMonthTitle) {
+      pdfMonthTitle.textContent = monthSelector.options[monthSelector.selectedIndex]?.text || '';
+    }
   }
 
-  // Acción del botón para generar el PDF / Imprimir Resumen
+  // Descarga directa a PDF
   btnPrintPDF.addEventListener('click', () => {
-    window.print();
+    const element = document.getElementById('pdfArea');
+    const selectedText = monthSelector.options[monthSelector.selectedIndex]?.text || 'Resumen';
+    
+    const opt = {
+      margin:       10,
+      filename:     `Resumen_Caja_${selectedText.replace(/\s+/g, '_')}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
   });
 
   window.deleteClosedDay = (idx) => {
