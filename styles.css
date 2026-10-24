@@ -43,6 +43,8 @@ header p {
   grid-template-columns: 1fr 1fr 1fr;
   gap: 10px;
   margin-bottom: 25px;
+  border-bottom: 3px solid #cbd5e1;
+  padding-bottom: 20px;
 }
 
 .summary-card {
@@ -77,10 +79,10 @@ header p {
 .text-success { color: #34a853; }
 .text-danger { color: #ea4335; }
 
-/* Líneas divisorias más gruesas y mejor espaciado */
+/* Líneas divisorias rectas y visibles entre secciones */
 .section {
   margin-bottom: 22px;
-  border-bottom: 3px solid #f1f3f5;
+  border-bottom: 3px solid #cbd5e1;
   padding-bottom: 20px;
 }
 
