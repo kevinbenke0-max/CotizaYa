@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCloseDay = document.getElementById('btnCloseDay');
   const btnClearHistory = document.getElementById('btnClearHistory');
   const monthSelector = document.getElementById('monthSelector');
-  const btnPrintPDF = document.getElementById('btnPrintPDF');
+  const btnWhatsApp = document.getElementById('btnWhatsApp');
 
   const movList = document.getElementById('movList');
   const closedDaysList = document.getElementById('closedDaysList');
@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const lblMonthIncome = document.getElementById('lblMonthIncome');
   const lblMonthExpense = document.getElementById('lblMonthExpense');
   const lblMonthNet = document.getElementById('lblMonthNet');
-  const pdfMonthTitle = document.getElementById('pdfMonthTitle');
 
   initMonthSelector();
   renderMovements();
@@ -249,21 +248,25 @@ document.addEventListener('DOMContentLoaded', () => {
     lblMonthExpense.textContent = `$${monthExpense.toLocaleString()}`;
     lblMonthNet.textContent = `$${monthNet.toLocaleString()}`;
     lblMonthNet.className = monthNet >= 0 ? 'text-success' : 'text-danger';
-
-    if (pdfMonthTitle) {
-      pdfMonthTitle.textContent = monthSelector.options[monthSelector.selectedIndex]?.text || '';
-    }
   }
 
-  // Descarga limpia mediante impresión nativa del celular
-  btnPrintPDF.addEventListener('click', () => {
-    window.print();
+  // Enviar Resumen por WhatsApp (Funciona 100% en todos los celulares)
+  btnWhatsApp.addEventListener('click', () => {
+    const monthText = monthSelector.options[monthSelector.selectedIndex]?.text || '';
+    const income = lblMonthIncome.textContent;
+    const expense = lblMonthExpense.textContent;
+    const net = lblMonthNet.textContent;
+
+    const mensaje = `📊 *Resumen de Caja - ControlCaja Pro*\n📅 Período: ${monthText}\n\n🟢 Ventas / Ingresos: ${income}\n🔴 Compras / Gastos: ${expense}\n💵 Ganancia Neta: ${net}\n\n_Enviado desde mi app de control diario_`;
+
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
   });
 
   window.deleteClosedDay = (idx) => {
     if (confirm('¿Eliminar este cierre del historial?')) {
       closedDays.splice(idx, 1);
-      localStorage.removeItem('closedDaysHistory');
+      localStorage.setItem('closedDaysHistory', JSON.stringify(closedDays));
       renderClosedDays();
       initMonthSelector();
     }
