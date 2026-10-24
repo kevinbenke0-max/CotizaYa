@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ControlCaja - Cierres y Historial Mensual</title>
+  <title>ControlCaja - Cierres y Resumen PDF</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <div class="container">
-    <header>
+    <header class="no-print">
       <h1>💰 ControlCaja Pro</h1>
       <p>Gestión rápida de ingresos, gastos y balances</p>
     </header>
 
     <main class="app-card">
       <!-- Resumen del Día Actual -->
-      <section class="summary-box">
+      <section class="summary-box no-print">
         <div class="summary-card">
           <span>Ingresos Hoy (+)</span>
           <strong id="lblTotalIncome" class="text-success">$0</strong>
@@ -32,7 +32,7 @@
       </section>
 
       <!-- Formulario de Movimiento -->
-      <section class="section">
+      <section class="section no-print">
         <h3>Registrar Movimiento de Hoy</h3>
         <div class="form-group">
           <label for="movDesc">Descripción / Concepto</label>
@@ -57,7 +57,7 @@
       </section>
 
       <!-- Movimientos de Hoy -->
-      <section class="section">
+      <section class="section no-print">
         <div class="history-header">
           <h3>📋 Movimientos de Hoy</h3>
           <button id="btnCloseDay" class="btn btn-warning-soft">🔒 Cerrar Día y Guardar</button>
@@ -76,7 +76,7 @@
       </section>
 
       <!-- Historial de Cierres Anteriores -->
-      <section class="section">
+      <section class="section no-print">
         <div class="history-header">
           <h3>📅 Historial de Cierres Diarios</h3>
           <button id="btnClearHistory" class="btn btn-danger-soft">Borrar Historial</button>
@@ -94,7 +94,7 @@
         </table>
       </section>
 
-      <!-- 📊 BALANCE MENSUAL (AHORA ABAJO DE TODO) -->
+      <!-- 📊 BALANCE MENSUAL CON BOTÓN DE PDF -->
       <section class="section monthly-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
         <div class="monthly-header">
           <h3>📈 Balance Mensual</h3>
@@ -102,6 +102,7 @@
             <!-- Se carga dinámicamente -->
           </select>
         </div>
+        
         <div class="monthly-box">
           <div class="monthly-row">
             <span>Total Ventas / Ingresos:</span>
@@ -116,6 +117,9 @@
             <strong id="lblMonthNet">$0</strong>
           </div>
         </div>
+
+        <!-- Botón para descargar el resumen en PDF -->
+        <button id="btnPrintPDF" class="btn btn-primary" style="margin-top: 15px;">📥 Guardar Resumen en PDF</button>
       </section>
     </main>
   </div>
