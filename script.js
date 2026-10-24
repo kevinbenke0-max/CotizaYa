@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCloseDay = document.getElementById('btnCloseDay');
   const btnClearHistory = document.getElementById('btnClearHistory');
   const monthSelector = document.getElementById('monthSelector');
+  const btnPrintPDF = document.getElementById('btnPrintPDF');
 
   const movList = document.getElementById('movList');
   const closedDaysList = document.getElementById('closedDaysList');
@@ -20,12 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const lblMonthExpense = document.getElementById('lblMonthExpense');
   const lblMonthNet = document.getElementById('lblMonthNet');
 
-  // Inicializar vistas al cargar
   initMonthSelector();
   renderMovements();
   renderClosedDays();
 
-  // Registrar Movimiento en tiempo real
+  // Registrar Movimiento
   btnAddMov.addEventListener('click', () => {
     const desc = movDescInput.value.trim();
     const amount = parseFloat(movAmountInput.value);
@@ -160,7 +160,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Poblar el Selector de Meses y seleccionar el actual por defecto
   function initMonthSelector() {
     let availableMonths = new Set();
     
@@ -209,7 +208,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   monthSelector.addEventListener('change', calculateMonthlySummary);
 
-  // Cálculo en tiempo real del mes seleccionado
   function calculateMonthlySummary() {
     const selectedMonthYear = monthSelector.value; 
     if (!selectedMonthYear) {
@@ -223,12 +221,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let monthExpense = 0;
 
     const [selM, selY] = selectedMonthYear.split('/');
-
     const now = new Date();
     const currentM = String(now.getMonth() + 1).padStart(2, '0');
     const currentY = String(now.getFullYear());
 
-    // 1. Sumar movimientos activos de hoy si estamos viendo el mes actual
     if (selM === currentM && selY === currentY) {
       movements.forEach(m => {
         if (m.type === 'income') monthIncome += m.amount;
@@ -236,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // 2. Sumar días cerrados que pertenezcan a ese mes
     closedDays.forEach(day => {
       const parts = day.date.split('/'); 
       if (parts.length === 3) {
@@ -254,6 +249,11 @@ document.addEventListener('DOMContentLoaded', () => {
     lblMonthNet.textContent = `$${monthNet.toLocaleString()}`;
     lblMonthNet.className = monthNet >= 0 ? 'text-success' : 'text-danger';
   }
+
+  // Acción del botón para generar el PDF / Imprimir Resumen
+  btnPrintPDF.addEventListener('click', () => {
+    window.print();
+  });
 
   window.deleteClosedDay = (idx) => {
     if (confirm('¿Eliminar este cierre del historial?')) {
