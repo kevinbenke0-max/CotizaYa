@@ -22,7 +22,7 @@
           <strong id="lblTotalIncome" class="text-success">$0</strong>
         </div>
         <div class="summary-card">
-          <span>Gastos Hoy (-)</span>
+          <span>Gastos (-)</span>
           <strong id="lblTotalExpense" class="text-danger">$0</strong>
         </div>
         <div class="summary-card total-balance">
@@ -75,8 +75,27 @@
         </table>
       </section>
 
-      <!-- 📊 RESUMEN MENSUAL CON SELECTOR -->
-      <section class="section monthly-section">
+      <!-- Historial de Cierres Anteriores -->
+      <section class="section">
+        <div class="history-header">
+          <h3>📅 Historial de Cierres Diarios</h3>
+          <button id="btnClearHistory" class="btn btn-danger-soft">Borrar Historial</button>
+        </div>
+        <table class="mov-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Ingresos / Gastos</th>
+              <th style="text-align: right;">Neto</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="closedDaysList"></tbody>
+        </table>
+      </section>
+
+      <!-- 📊 BALANCE MENSUAL (AHORA ABAJO DE TODO) -->
+      <section class="section monthly-section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
         <div class="monthly-header">
           <h3>📈 Balance Mensual</h3>
           <select id="monthSelector" class="month-select">
@@ -97,25 +116,6 @@
             <strong id="lblMonthNet">$0</strong>
           </div>
         </div>
-      </section>
-
-      <!-- Historial de Cierres Anteriores -->
-      <section class="section history-section">
-        <div class="history-header">
-          <h3>📅 Historial de Cierres Diarios</h3>
-          <button id="btnClearHistory" class="btn btn-danger-soft">Borrar Historial</button>
-        </div>
-        <table class="mov-table">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Ingresos / Gastos</th>
-              <th style="text-align: right;">Neto</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="closedDaysList"></tbody>
-        </table>
       </section>
     </main>
   </div>
