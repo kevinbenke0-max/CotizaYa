@@ -185,3 +185,13 @@ input[type="text"], input[type="number"], select {
   color: #222;
   font-weight: bold;
 }
+
+/* Interacción con el Historial */
+#closedDaysList tr {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#closedDaysList tr:hover {
+  background-color: #f1f3f4;
+}
