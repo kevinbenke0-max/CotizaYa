@@ -88,7 +88,31 @@
       </div>
     </section>
 
-    <!-- RESUMEN MENSUAL Y DE RENTABILIDAD -->
+    <!-- HISTORIAL DE CIERRES DIARIOS (AHORA DEBAJO DE LOS MOVIMIENTOS) -->
+    <section class="card">
+      <div class="summary-header">
+        <h3>📂 Historial de Cierres Diarios</h3>
+        <button id="btnClearHistory" class="btn btn-danger-soft">Limpiar Historial</button>
+      </div>
+      
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Totales</th>
+              <th style="text-align: right;">Neto</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="closedDaysList">
+            <!-- Se carga dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- RESUMEN MENSUAL Y DE RENTABILIDAD (AHORA BIEN ABAJO) -->
     <section class="card card-summary">
       <div class="summary-header">
         <h3>📊 Rentabilidad y Resumen Mensual</h3>
@@ -121,30 +145,6 @@
       </button>
     </section>
 
-    <!-- HISTORIAL DE CIERRES DIARIOS -->
-    <section class="card">
-      <div class="summary-header">
-        <h3>📂 Historial de Cierres Diarios</h3>
-        <button id="btnClearHistory" class="btn btn-danger-soft">Limpiar Historial</button>
-      </div>
-      
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Totales</th>
-              <th style="text-align: right;">Neto</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody id="closedDaysList">
-            <!-- Se carga dinámicamente -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
   </div>
 
   <!-- MODAL DE DETALLE DE DÍA -->
@@ -167,7 +167,7 @@
     </div>
   </div>
 
-  <!-- SDK DE FIREBASE (Compat para usar en navegador sin compiladores) -->
+  <!-- SDK DE FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   
