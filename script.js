@@ -31,11 +31,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (userDeviceIdLabel) userDeviceIdLabel.textContent = deviceId;
 
-  // Actualizar enlace de WhatsApp dinámicamente según lo que escriba el usuario
+  // Cargar nombre previo guardado en el teléfono si existe
+  const savedName = localStorage.getItem('ultraLockUserName') || '';
+  if (lockUserName && savedName) {
+    lockUserName.value = savedName;
+  }
+
+  // Actualizar enlace de WhatsApp y guardar en memoria local
   function updateWhatsAppLink() {
     if (!btnRenovarWA) return;
-    const userName = lockUserName.value.trim() || "No especificado";
-    const text = `Hola, realicé el pago de mi suscripción de Control De Caja Ultra.\nMi nombre en el comprobante es: *${userName}*\nMi ID es: *${deviceId}*`;
+    const userName = lockUserName.value.trim();
+    
+    // Guardar en la memoria del navegador para que no se borre al recargar
+    if (userName) {
+      localStorage.setItem('ultraLockUserName', userName);
+    }
+
+    const displayName = userName || "No especificado";
+    const text = `Hola, realicé el pago de mi suscripción de Control De Caja Ultra.\nMi nombre en el comprobante es: *${displayName}*\nMi ID es: *${deviceId}*`;
     btnRenovarWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=${encodeURIComponent(text)}`;
   }
 
@@ -43,6 +56,18 @@ document.addEventListener('DOMContentLoaded', () => {
     lockUserName.addEventListener('input', updateWhatsAppLink);
   }
   updateWhatsAppLink();
+
+  // Bloquear el clic en WhatsApp si no puso su nombre todavía
+  if (btnRenovarWA) {
+    btnRenovarWA.addEventListener('click', (e) => {
+      const userName = lockUserName.value.trim();
+      if (!userName) {
+        e.preventDefault();
+        alert('Por favor, ingresa tu Nombre y Apellido (como en el comprobante) antes de enviar el mensaje por WhatsApp.');
+        lockUserName.focus();
+      }
+    });
+  }
 
   // CONSULTAR LICENCIA EN FIREBASE FIRESTORE EN TIEMPO REAL
   const docRef = db.collection("licenses").doc(deviceId);
