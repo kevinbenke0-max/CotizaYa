@@ -303,14 +303,14 @@ document.addEventListener('DOMContentLoaded', () => {
     lblMonthNet.className = monthNet >= 0 ? 'text-success' : 'text-danger';
   }
 
-  btnWhatsApp.addEventListener('click', () => {
+    btnWhatsApp.addEventListener('click', () => {
     const monthText = monthSelector.options[monthSelector.selectedIndex]?.text || '';
     const income = lblMonthIncome.textContent;
     const expense = lblMonthExpense.textContent;
     const margin = lblMonthMargin.textContent;
     const net = lblMonthNet.textContent;
 
-    const mensaje = `📊 *Resumen de Caja - Control De Caja Pro*\n📅 Período: ${monthText}\n\n🟢 Ventas / Ingresos: ${income}\n🔴 Compras / Gastos: ${expense}\n📈 Rentabilidad s/ Costo: ${margin}\n💵 Ganancia Neta: ${net}\n\n_Enviado desde mi app de control diario_`;
+    const mensaje = `📊 *Resumen de Caja - ControlCaja Pro*\n📅 Período: ${monthText}\n\n🟢 Ventas / Ingresos: ${income}\n🔴 Compras / Gastos: ${expense}\n📈 Rentabilidad s/ Costo: ${margin}\n💵 Ganancia Neta: ${net}\n\n_Enviado desde mi app de control diario_`;
 
     const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
     window.open(url, '_blank');
