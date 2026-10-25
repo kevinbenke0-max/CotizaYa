@@ -3,7 +3,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyB4eg-yFaE9FQe9dB3WNeOj9JJwI...",
   authDomain: "control-caja-ultra.firebaseapp.com",
   projectId: "control-caja-ultra",
-  storageBucket: "control-caja-ultra.appspot.com",
+  storageBucket: "control-caja-ultra.firebaseapp.com",
   messagingSenderId: "76362765432",
   appId: "1:76362765432:web:1e44c161254bec0..."
 };
@@ -30,10 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (userDeviceIdLabel) userDeviceIdLabel.textContent = deviceId;
   if (btnRenovarWA) {
-    btnRenovarWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20quiero%20renovar%20mi%20suscripción%20mensual%20de%20Control%20De%20Caja%20Ultra.%20Mi%20ID%20es:%20${deviceId}`;
+    btnRenovarWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20realicé%20el%20pago%20de%20mi%20suscripción%20mensual%20de%20Control%20De%20Caja%20Ultra.%20Mi%20ID%20es:%20${deviceId}`;
   }
 
-  // CONSULTAR LICENCIA EN FIREBASE
+  // CONSULTAR LICENCIA EN FIREBASE FIRESTORE EN TIEMPO REAL
   const docRef = db.collection("licenses").doc(deviceId);
 
   docRef.onSnapshot((doc) => {
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
     if (diffMs <= 0) {
-      // SUSCRIPCIÓN EXPIRADA -> BLOQUEAR
+      // SUSCRIPCIÓN EXPIRADA -> BLOQUEAR ACCESO
       mainApp.style.display = 'none';
       lockScreen.style.display = 'flex';
     } else {
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const sign = day.net >= 0 ? '+' : '';
 
       tr.innerHTML = `
-        <td><strong>📅 ${day.date}</strong> <br><small style="color:#1a73e8;">Ver detalle 🔍</small></td>
+        <td><strong>📅 ${day.date}</strong> <br><small style="color:#0066cc;">Ver detalle 🔍</small></td>
         <td><small>➕ $${(day.income || 0).toLocaleString()}</small><br><small>➖ $${(day.expense || 0).toLocaleString()}</small></td>
         <td style="text-align: right;" class="${netClass}"><strong>${sign}$${(day.net || 0).toLocaleString()}</strong></td>
         <td><button class="btn btn-danger-soft" onclick="event.stopPropagation(); deleteClosedDay(${idx})">x</button></td>
