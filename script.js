@@ -3,7 +3,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyB4eg-yFaE9FQe9dB3WNeOj9JJwI...",
   authDomain: "control-caja-ultra.firebaseapp.com",
   projectId: "control-caja-ultra",
-  storageBucket: "control-caja-ultra.firebaseapp.com",
+  storageBucket: "control-caja-ultra.appspot.com",
   messagingSenderId: "76362765432",
   appId: "1:76362765432:web:1e44c161254bec0..."
 };
