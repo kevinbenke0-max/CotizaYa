@@ -1,4 +1,85 @@
+// --- CONFIGURACIÓN DE FIREBASE ---
+const firebaseConfig = {
+  apiKey: "AIzaSyB4eg-yFaE9FQe9dB3WNeOj9JJwI...",
+  authDomain: "control-caja-ultra.firebaseapp.com",
+  projectId: "control-caja-ultra",
+  storageBucket: "control-caja-ultra.appspot.com",
+  messagingSenderId: "76362765432",
+  appId: "1:76362765432:web:1e44c161254bec0..."
+};
+
+// Inicializar Firebase
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+
 document.addEventListener('DOMContentLoaded', () => {
+  // Generar o recuperar ID único del dispositivo
+  let deviceId = localStorage.getItem('ultraDeviceId');
+  if (!deviceId) {
+    deviceId = 'DEV-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+    localStorage.setItem('ultraDeviceId', deviceId);
+  }
+
+  const mainApp = document.getElementById('mainApp');
+  const lockScreen = document.getElementById('lockScreen');
+  const trialBadge = document.getElementById('trialBadge');
+  const userDeviceIdLabel = document.getElementById('userDeviceId');
+  const btnRenovarWA = document.getElementById('btnRenovarWA');
+
+  if (userDeviceIdLabel) userDeviceIdLabel.textContent = deviceId;
+  if (btnRenovarWA) {
+    btnRenovarWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20quiero%20renovar%20mi%20suscripción%20mensual%20de%20Control%20De%20Caja%20Ultra.%20Mi%20ID%20es:%20${deviceId}`;
+  }
+
+  // CONSULTAR LICENCIA EN FIREBASE
+  const docRef = db.collection("licenses").doc(deviceId);
+
+  docRef.onSnapshot((doc) => {
+    const nowMs = new Date().getTime();
+
+    if (!doc.exists) {
+      // Registrar usuario nuevo con 3 días de prueba gratis
+      const trialMs = 3 * 24 * 60 * 60 * 1000;
+      const expireTime = nowMs + trialMs;
+
+      docRef.set({
+        createdAt: nowMs,
+        expirationDate: expireTime,
+        status: 'trial'
+      });
+      return;
+    }
+
+    const data = doc.data();
+    const expireTime = data.expirationDate;
+    const diffMs = expireTime - nowMs;
+    const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffMs <= 0) {
+      // SUSCRIPCIÓN EXPIRADA -> BLOQUEAR
+      mainApp.style.display = 'none';
+      lockScreen.style.display = 'flex';
+    } else {
+      // SUSCRIPCIÓN O PRUEBA ACTIVA
+      lockScreen.style.display = 'none';
+      mainApp.style.display = 'block';
+
+      if (data.status === 'trial') {
+        trialBadge.textContent = `⏳ Prueba Gratuita: queda${daysLeft === 1 ? '' : 'n'} ${daysLeft} día${daysLeft === 1 ? '' : 's'}`;
+        trialBadge.style.backgroundColor = '#fef7e0';
+        trialBadge.style.color = '#b06000';
+      } else {
+        trialBadge.textContent = `✅ Suscripción Activa: queda${daysLeft === 1 ? '' : 'n'} ${daysLeft} día${daysLeft === 1 ? '' : 's'}`;
+        trialBadge.style.backgroundColor = '#e6f4ea';
+        trialBadge.style.color = '#137333';
+      }
+    }
+  });
+
+
+  // --- LÓGICA DE MOVIMIENTOS Y CAJA ---
   let movements = JSON.parse(localStorage.getItem('cashMovements')) || [];
   let closedDays = JSON.parse(localStorage.getItem('closedDaysHistory')) || [];
 
@@ -31,28 +112,30 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMovements();
   renderClosedDays();
 
-  btnAddMov.addEventListener('click', () => {
-    const desc = movDescInput.value.trim();
-    const amount = parseFloat(movAmountInput.value);
-    const type = movTypeSelect.value;
+  if (btnAddMov) {
+    btnAddMov.addEventListener('click', () => {
+      const desc = movDescInput.value.trim();
+      const amount = parseFloat(movAmountInput.value);
+      const type = movTypeSelect.value;
 
-    if (!desc || isNaN(amount) || amount <= 0) {
-      alert('Por favor, ingresa una descripción y un monto válido.');
-      return;
-    }
+      if (!desc || isNaN(amount) || amount <= 0) {
+        alert('Por favor, ingresa una descripción y un monto válido.');
+        return;
+      }
 
-    movements.unshift({ 
-      desc, 
-      amount, 
-      type, 
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      movements.unshift({ 
+        desc, 
+        amount, 
+        type, 
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      });
+      
+      movDescInput.value = '';
+      movAmountInput.value = '';
+      
+      saveAndRender();
     });
-    
-    movDescInput.value = '';
-    movAmountInput.value = '';
-    
-    saveAndRender();
-  });
+  }
 
   function saveAndRender() {
     localStorage.setItem('cashMovements', JSON.stringify(movements));
@@ -61,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderMovements() {
+    if (!movList) return;
     movList.innerHTML = '';
     let totalIncome = 0;
     let totalExpense = 0;
@@ -105,45 +189,48 @@ document.addEventListener('DOMContentLoaded', () => {
     saveAndRender();
   };
 
-  btnCloseDay.addEventListener('click', () => {
-    if (movements.length === 0) {
-      alert('No hay movimientos registrados hoy para cerrar.');
-      return;
-    }
+  if (btnCloseDay) {
+    btnCloseDay.addEventListener('click', () => {
+      if (movements.length === 0) {
+        alert('No hay movimientos registrados hoy para cerrar.');
+        return;
+      }
 
-    if (confirm('¿Deseas realizar el cierre de caja de hoy y guardar el resumen en el historial?')) {
-      let totalIncome = 0;
-      let totalExpense = 0;
+      if (confirm('¿Deseas realizar el cierre de caja de hoy y guardar el resumen en el historial?')) {
+        let totalIncome = 0;
+        let totalExpense = 0;
 
-      movements.forEach(m => {
-        if (m.type === 'income') totalIncome += m.amount;
-        else totalExpense += m.amount;
-      });
+        movements.forEach(m => {
+          if (m.type === 'income') totalIncome += m.amount;
+          else totalExpense += m.amount;
+        });
 
-      let net = totalIncome - totalExpense;
-      let dateStr = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        let net = totalIncome - totalExpense;
+        let dateStr = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-      closedDays.unshift({
-        date: dateStr,
-        income: totalIncome,
-        expense: totalExpense,
-        net: net,
-        items: [...movements]
-      });
+        closedDays.unshift({
+          date: dateStr,
+          income: totalIncome,
+          expense: totalExpense,
+          net: net,
+          items: [...movements]
+        });
 
-      localStorage.setItem('closedDaysHistory', JSON.stringify(closedDays));
+        localStorage.setItem('closedDaysHistory', JSON.stringify(closedDays));
 
-      movements = [];
-      localStorage.removeItem('cashMovements');
+        movements = [];
+        localStorage.removeItem('cashMovements');
 
-      renderMovements();
-      renderClosedDays();
-      initMonthSelector();
-      alert('¡Cierre de caja guardado con éxito!');
-    }
-  });
+        renderMovements();
+        renderClosedDays();
+        initMonthSelector();
+        alert('¡Cierre de caja guardado con éxito!');
+      }
+    });
+  }
 
   function renderClosedDays() {
+    if (!closedDaysList) return;
     closedDaysList.innerHTML = '';
     if (closedDays.length === 0) {
       closedDaysList.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#999;">Sin cierres anteriores guardados</td></tr>';
@@ -171,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function openDayDetail(day) {
+    if (!modalTitle || !modalMovList || !dayModal) return;
     modalTitle.textContent = `Detalle del Cierre - ${day.date}`;
     modalMovList.innerHTML = '';
 
@@ -193,9 +281,11 @@ document.addEventListener('DOMContentLoaded', () => {
     dayModal.style.display = 'flex';
   }
 
-  btnCloseModal.addEventListener('click', () => {
-    dayModal.style.display = 'none';
-  });
+  if (btnCloseModal) {
+    btnCloseModal.addEventListener('click', () => {
+      dayModal.style.display = 'none';
+    });
+  }
 
   window.addEventListener('click', (e) => {
     if (e.target === dayModal) {
@@ -204,6 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function initMonthSelector() {
+    if (!monthSelector) return;
     let availableMonths = new Set();
     
     const now = new Date();
@@ -249,9 +340,12 @@ document.addEventListener('DOMContentLoaded', () => {
     calculateMonthlySummary();
   }
 
-  monthSelector.addEventListener('change', calculateMonthlySummary);
+  if (monthSelector) {
+    monthSelector.addEventListener('change', calculateMonthlySummary);
+  }
 
   function calculateMonthlySummary() {
+    if (!monthSelector || !lblMonthIncome) return;
     const selectedMonthYear = monthSelector.value; 
     if (!selectedMonthYear) {
       lblMonthIncome.textContent = '$0';
@@ -288,7 +382,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let monthNet = monthIncome - monthExpense;
     
-    // Rentabilidad sobre el costo (Ganancia Neta / Gastos)
     let profitMargin = 0;
     if (monthExpense > 0) {
       profitMargin = (monthNet / monthExpense) * 100;
@@ -303,18 +396,20 @@ document.addEventListener('DOMContentLoaded', () => {
     lblMonthNet.className = monthNet >= 0 ? 'text-success' : 'text-danger';
   }
 
+  if (btnWhatsApp) {
     btnWhatsApp.addEventListener('click', () => {
-    const monthText = monthSelector.options[monthSelector.selectedIndex]?.text || '';
-    const income = lblMonthIncome.textContent;
-    const expense = lblMonthExpense.textContent;
-    const margin = lblMonthMargin.textContent;
-    const net = lblMonthNet.textContent;
+      const monthText = monthSelector.options[monthSelector.selectedIndex]?.text || '';
+      const income = lblMonthIncome.textContent;
+      const expense = lblMonthExpense.textContent;
+      const margin = lblMonthMargin.textContent;
+      const net = lblMonthNet.textContent;
 
-    const mensaje = `📊 *Resumen de Caja - ControlCaja Pro*\n📅 Período: ${monthText}\n\n🟢 Ventas / Ingresos: ${income}\n🔴 Compras / Gastos: ${expense}\n📈 Rentabilidad s/ Costo: ${margin}\n💵 Ganancia Neta: ${net}\n\n_Enviado desde mi app de control diario_`;
+      const mensaje = `📊 *Resumen de Caja - Control De Caja Ultra*\n📅 Período: ${monthText}\n\n🟢 Ventas / Ingresos: ${income}\n🔴 Compras / Gastos: ${expense}\n📈 Rentabilidad s/ Costo: ${margin}\n💵 Ganancia Neta: ${net}\n\n_Enviado desde mi app de control diario_`;
 
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
-    window.open(url, '_blank');
-  });
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+      window.open(url, '_blank');
+    });
+  }
 
   window.deleteClosedDay = (idx) => {
     if (confirm('¿Eliminar este cierre del historial?')) {
@@ -325,12 +420,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  btnClearHistory.addEventListener('click', () => {
-    if (confirm('¿Deseas borrar todo el historial de cierres?')) {
-      closedDays = [];
-      localStorage.removeItem('closedDaysHistory');
-      renderClosedDays();
-      initMonthSelector();
-    }
-  });
+  if (btnClearHistory) {
+    btnClearHistory.addEventListener('click', () => {
+      if (confirm('¿Deseas borrar todo el historial de cierres?')) {
+        closedDays = [];
+        localStorage.removeItem('closedDaysHistory');
+        renderClosedDays();
+        initMonthSelector();
+      }
+    });
+  }
 });
