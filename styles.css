@@ -286,6 +286,24 @@ th {
   margin-bottom: 15px;
 }
 
+.form-group-lock {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.form-group-lock input {
+  width: 100%;
+  padding: 10px;
+  font-size: 0.95rem;
+}
+
+.field-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 4px;
+}
+
 .modal-content {
   max-width: 500px;
   width: 100%;
