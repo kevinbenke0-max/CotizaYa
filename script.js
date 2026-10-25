@@ -27,11 +27,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const trialBadge = document.getElementById('trialBadge');
   const userDeviceIdLabel = document.getElementById('userDeviceId');
   const btnRenovarWA = document.getElementById('btnRenovarWA');
+  const lockUserName = document.getElementById('lockUserName');
 
   if (userDeviceIdLabel) userDeviceIdLabel.textContent = deviceId;
-  if (btnRenovarWA) {
-    btnRenovarWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20realicé%20el%20pago%20de%20mi%20suscripción%20mensual%20de%20Control%20De%20Caja%20Ultra.%20Mi%20ID%20es:%20${deviceId}`;
+
+  // Actualizar enlace de WhatsApp dinámicamente según lo que escriba el usuario
+  function updateWhatsAppLink() {
+    if (!btnRenovarWA) return;
+    const userName = lockUserName.value.trim() || "No especificado";
+    const text = `Hola, realicé el pago de mi suscripción de Control De Caja Ultra.\nMi nombre en el comprobante es: *${userName}*\nMi ID es: *${deviceId}*`;
+    btnRenovarWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=${encodeURIComponent(text)}`;
   }
+
+  if (lockUserName) {
+    lockUserName.addEventListener('input', updateWhatsAppLink);
+  }
+  updateWhatsAppLink();
 
   // CONSULTAR LICENCIA EN FIREBASE FIRESTORE EN TIEMPO REAL
   const docRef = db.collection("licenses").doc(deviceId);
@@ -318,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const monthNames = {
-      "01": "Enero", "02": "Febrero", "03": "Marzo", "04": "Abril",
+      "01": "Enero", "02": "Febrero", "03": "Marzo", "04": "Abryl",
       "05": "Mayo", "06": "Junio", "07": "Julio", "08": "Agosto",
       "09": "Septiembre", "10": "Octubre", "11": "Noviembre", "12": "Diciembre"
     };
