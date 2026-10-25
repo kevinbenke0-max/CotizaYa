@@ -20,7 +20,13 @@
         <strong id="userDeviceId">Cargando...</strong>
       </div>
 
-      <p class="pay-instruction">Abona tu cuota mensual para habilitar el uso inmediato del sistema:</p>
+      <p class="pay-instruction">Para activar tu cuenta al instante, completa tus datos, realiza el pago y envíanos el comprobante:</p>
+
+      <!-- CAMPO OBLIGATORIO DE NOMBRE -->
+      <div class="form-group-lock">
+        <input type="text" id="lockUserName" placeholder="Tu Nombre y Apellido (como en el comprobante)" autocomplete="name">
+        <small class="field-hint">Necesario para cruzar los datos con la transferencia.</small>
+      </div>
 
       <!-- BOTÓN DE MERCADO PAGO -->
       <a href="https://mpago.la/29fxHKM" target="_blank" class="btn btn-mp">
