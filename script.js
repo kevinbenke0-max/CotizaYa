@@ -60,7 +60,7 @@ function switchTab(tab) {
   }
 }
 
-// Cargar productos desde Firebase para el inventario
+// Cargar productos desde Firebase para la tabla de inventario
 function loadProducts() {
   const deviceId = localStorage.getItem('ultraDeviceId');
   if (!deviceId) return;
@@ -114,7 +114,7 @@ function loadProductOptions() {
   });
 }
 
-// Mostrar sugerencias flotantes estilo lista al escribir
+// Mostrar sugerencias flotantes al escribir en la caja
 function filtrarProductosSugeridos(texto) {
   const box = document.getElementById('sugerenciasBox');
   if (!box) return;
@@ -137,7 +137,7 @@ function filtrarProductosSugeridos(texto) {
   box.innerHTML = '';
   matches.forEach(prod => {
     const item = document.createElement('div');
-    item.style.padding = '10px 12px';
+    item.style.padding = '12px 14px';
     item.style.cursor = 'pointer';
     item.style.borderBottom = '1px solid #eee';
     item.style.display = 'flex';
@@ -151,7 +151,7 @@ function filtrarProductosSugeridos(texto) {
         <strong>${prod.name}</strong><br>
         <small style="color: #666;">Stock: ${prod.stock} u.</small>
       </div>
-      <div style="color: #0066cc; font-weight: bold;">
+      <div style="color: #0066cc; font-weight: bold; font-size: 1.05rem;">
         $${Number(prod.price).toLocaleString('es-AR')}
       </div>
     `;
