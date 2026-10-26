@@ -1,101 +1,187 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control De Caja Ultra</title>
-    <!-- Tus estilos CSS actuales -->
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control De Caja Ultra</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <!-- PANTALLA DE BLOQUEO / LICENCIA (Se mantiene igual) -->
-    <div id="lockScreen" class="lock-screen" style="display: none;">
-        <div class="lock-card">
-            <div class="lock-icon">🔒</div>
-            <h2>Acceso Requerido</h2>
-            <p>Tu período de prueba gratuita o suscripción mensual ha vencido.</p>
-            <div class="device-id-box">
-                ID de tu dispositivo: <strong id="lockedDeviceId">...</strong>
-            </div>
-            <p>Para activar tu cuenta al instante, completa tus datos, realiza el pago y envíanos el comprobante:</p>
-            
-            <div class="form-group-lock">
-                <input type="text" id="lockUserName" placeholder="Tu Nombre y Apellido (necesario para cruzar datos)">
-            </div>
+  <!-- PANTALLA DE BLOQUEO POR SUSCRIPCIÓN -->
+  <div id="lockScreen" class="lock-screen" style="display: none;">
+    <div class="lock-card">
+      <div class="lock-icon">🔒</div>
+      <h2>Acceso Requerido</h2>
+      <p>Tu período de prueba gratuita o suscripción mensual ha vencido.</p>
+      
+      <div class="device-info">
+        <small>ID de tu dispositivo:</small>
+        <strong id="userDeviceId">Cargando...</strong>
+      </div>
 
-            <a href="https://mpago.la/29fxHKM" target="_blank" class="btn btn-mp">
-                💳 Pagar Suscripción Mensual ($10.000)
-            </a>
+      <p class="pay-instruction">Para activar tu cuenta al instante, completa tus datos, realiza el pago y envíanos el comprobante:</p>
 
-            <a id="btnRenovarWA" href="#" target="_blank" class="btn btn-wa">
-                💬 Notificar Pago por WhatsApp
-            </a>
-        </div>
+      <!-- CAMPO OBLIGATORIO DE NOMBRE -->
+      <div class="form-group-lock">
+        <input type="text" id="lockUserName" placeholder="Tu Nombre y Apellido (como en el comprobante)" autocomplete="name">
+        <small class="field-hint">Necesario para cruzar los datos con la transferencia.</small>
+      </div>
+
+      <!-- BOTÓN DE MERCADO PAGO -->
+      <a href="https://mpago.la/29fxHKM" target="_blank" class="btn btn-mp">
+        💳 Pagar Suscripción Mensual ($10.000)
+      </a>
+
+      <!-- BOTÓN DE CONTACTO WHATSAPP -->
+      <a id="btnRenovarWA" href="#" target="_blank" class="btn btn-wa">
+        💬 Notificar Pago por WhatsApp
+      </a>
     </div>
+  </div>
 
-    <!-- CONTENIDO PRINCIPAL DE LA APLICACIÓN -->
-    <div id="appContent">
-        <header>
-            <h1>Control De Caja Ultra</h1>
-            <!-- MENÚ DE PESTAÑAS: Agregamos el botón de Catálogo aquí al lado -->
-            <div class="nav-tabs">
-                <button class="nav-tab-btn active" onclick="switchTab('caja')">💵 Caja</button>
-                <button class="nav-tab-btn" onclick="switchTab('catalogo')">📦 Catálogo</button>
-            </div>
-        </header>
+  <!-- APLICACIÓN PRINCIPAL DE CAJA -->
+  <div id="mainApp" class="container" style="display: block;">
+    
+    <header class="app-header">
+      <div class="header-title">
+        <h1>Control De Caja Ultra</h1>
+        <span id="trialBadge" class="badge">Cargando estado...</span>
+      </div>
+    </header>
 
-        <!-- SECCIÓN 1: CAJA / MOVIMIENTOS (Tu sistema original intacto) -->
-        <div id="tab-caja" class="tab-content">
-            <div class="card">
-                <h3>Registrar Movimiento</h3>
-                <!-- Tu formulario original de movimientos de caja -->
-                <form id="movementForm">
-                    <!-- Tus inputs de tipo, monto, descripción, etc. -->
-                </form>
-            </div>
-            <div class="card" style="margin-top: 15px;">
-                <h3>Movimientos del Día</h3>
-                <div id="movementsList"></div>
-            </div>
+    <!-- CARGA DE MOVIMIENTOS -->
+    <section class="card">
+      <h3>➕ Registrar Movimiento Diario</h3>
+      <div class="form-row">
+        <input type="text" id="movDesc" placeholder="Descripción (ej: Venta de producto, Insumos...)" autocomplete="off">
+        <input type="number" id="movAmount" placeholder="Monto ($)" min="0" step="any">
+        <select id="movType">
+          <option value="income">🟢 Ingreso / Venta</option>
+          <option value="expense">🔴 Gasto / Compra</option>
+        </select>
+        <button id="btnAddMov" class="btn btn-primary">Cargar</button>
+      </div>
+    </section>
+
+    <!-- TABLA DE MOVIMIENTOS DE HOY -->
+    <section class="card">
+      <h3>📋 Movimientos de Hoy</h3>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Detalle</th>
+              <th>Tipo</th>
+              <th style="text-align: right;">Monto</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="movList">
+            <!-- Se carga dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="day-totals">
+        <div>Total Ingresos: <span id="lblTotalIncome" class="text-success">$0</span></div>
+        <div>Total Gastos: <span id="lblTotalExpense" class="text-danger">$0</span></div>
+        <div class="total-net">Balance Hoy: <span id="lblNetBalance">$0</span></div>
+      </div>
+
+      <div class="actions-row">
+        <button id="btnCloseDay" class="btn btn-success">🔒 Realizar Cierre de Caja</button>
+      </div>
+    </section>
+
+    <!-- HISTORIAL DE CIERRES DIARIOS -->
+    <section class="card">
+      <div class="summary-header">
+        <h3>📂 Historial de Cierres Diarios</h3>
+        <button id="btnClearHistory" class="btn btn-danger-soft">Limpiar Historial</button>
+      </div>
+      
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Totales</th>
+              <th style="text-align: right;">Neto</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="closedDaysList">
+            <!-- Se carga dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- RESUMEN MENSUAL Y DE RENTABILIDAD -->
+    <section class="card card-summary">
+      <div class="summary-header">
+        <h3>📊 Rentabilidad y Resumen Mensual</h3>
+        <select id="monthSelector" class="month-select">
+          <!-- Opciones dinámicas -->
+        </select>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <small>Ventas del Mes</small>
+          <h4 id="lblMonthIncome" class="text-success">$0</h4>
         </div>
-
-        <!-- SECCIÓN 2: CATÁLOGO DE PRODUCTOS (Módulo nuevo independiente) -->
-        <div id="tab-catalogo" class="tab-content" style="display: none;">
-            <div class="card">
-                <h3>📦 Nuevo Producto</h3>
-                <form id="formProduct" onsubmit="saveProduct(event)">
-                    <div class="form-group">
-                        <label>Nombre del Producto</label>
-                        <input type="text" id="prodName" placeholder="Ej: Gaseosa 2.25L" required>
-                    </div>
-                    <div class="form-row" style="display: flex; gap: 10px;">
-                        <div class="form-group" style="flex: 1;">
-                            <label>Precio ($)</label>
-                            <input type="number" step="0.01" id="prodPrice" placeholder="1500" required>
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Stock Inicial</label>
-                            <input type="number" id="prodStock" placeholder="24" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">💾 Guardar Producto</button>
-                </form>
-            </div>
-
-            <div class="card" style="margin-top: 15px;">
-                <h3>📋 Productos en Inventario</h3>
-                <div id="productList">
-                    <!-- Se cargan dinámicamente -->
-                </div>
-            </div>
+        <div class="metric-card">
+          <small>Gastos del Mes</small>
+          <h4 id="lblMonthExpense" class="text-danger">$0</h4>
         </div>
+        <div class="metric-card">
+          <small>Rentabilidad s/ Costo</small>
+          <h4 id="lblMonthMargin">0%</h4>
+        </div>
+        <div class="metric-card">
+          <small>Ganancia Neta</small>
+          <h4 id="lblMonthNet">$0</h4>
+        </div>
+      </div>
+
+      <button id="btnWhatsApp" class="btn btn-wa-share">
+        📲 Compartir Resumen por WhatsApp
+      </button>
+    </section>
+
+  </div>
+
+  <!-- BOTÓN FLOTANTE DE SOPORTE WHATSAPP -->
+  <a href="https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20necesito%20soporte%20con%20la%20app%20Control%20De%20Caja%20Ultra." target="_blank" class="float-wa" title="Soporte por WhatsApp">
+    💬
+  </a>
+
+  <!-- MODAL DE DETALLE DE DÍA -->
+  <div id="dayModal" class="modal" style="display: none;">
+    <div class="modal-content card">
+      <h3 id="modalTitle">Detalle del Cierre</h3>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Detalle</th>
+              <th>Tipo</th>
+              <th style="text-align: right;">Monto</th>
+            </tr>
+          </thead>
+          <tbody id="modalMovList"></tbody>
+        </table>
+      </div>
+      <button id="btnCloseModal" class="btn btn-primary" style="margin-top: 15px;">Cerrar Ventana</button>
     </div>
+  </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <!-- Tu script principal -->
-    <script src="script.js"></script>
+  <!-- SDK DE FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  
+  <script src="script.js"></script>
 </body>
 </html>
