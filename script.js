@@ -40,7 +40,7 @@ function switchTab(tab) {
       btnCatalogo.style.background = '#333';
       btnCatalogo.style.color = '#ccc';
     }
-    loadProductOptions(); // Actualizar opciones para autocompletar
+    loadProductOptions(); // Actualizar opciones del selector en la caja
   } else if (tab === 'catalogo') {
     secCaja.style.display = 'none';
     secCatalogo.style.display = 'block';
@@ -94,29 +94,38 @@ function loadProducts() {
     });
 }
 
-// Cargar opciones para autocompletar en el input de caja
+// Cargar opciones en el selector desplegable de la caja y guardar precios
+window.productosCatalogoMap = {};
+
 function loadProductOptions() {
   const deviceId = localStorage.getItem('ultraDeviceId');
-  const movDescInput = document.getElementById('movDesc');
-  if (!deviceId || !movDescInput) return;
+  const movDescSelect = document.getElementById('movDesc');
+  if (!deviceId || !movDescSelect) return;
 
   db.collection('licenses').doc(deviceId).collection('products').get().then((snapshot) => {
-    let datalist = document.getElementById('productsDatalist');
-    if (!datalist) {
-      datalist = document.createElement('datalist');
-      datalist.id = 'productsDatalist';
-      document.body.appendChild(datalist);
-      movDescInput.setAttribute('list', 'productsDatalist');
-    }
-    datalist.innerHTML = '';
+    movDescSelect.innerHTML = '<option value="">Selecciona un producto del catálogo...</option>';
+    window.productosCatalogoMap = {};
+
     snapshot.forEach((doc) => {
       const p = doc.data();
+      window.productosCatalogoMap[p.name.trim().toLowerCase()] = p.price;
+
       const option = document.createElement('option');
       option.value = p.name;
-      option.textContent = `$${p.price} (Stock: ${p.stock})`;
-      datalist.appendChild(option);
+      option.textContent = `📦 ${p.name} - $${Number(p.price).toLocaleString('es-AR')} (Stock: ${p.stock})`;
+      movDescSelect.appendChild(option);
     });
   });
+}
+
+// Autocompletar el monto cuando el usuario elige un producto del selector
+function autocompletarPrecio(selectElement) {
+  const nombreProd = selectElement.value.trim().toLowerCase();
+  const movAmountInput = document.getElementById('movAmount');
+  
+  if (window.productosCatalogoMap && window.productosCatalogoMap[nombreProd] !== undefined) {
+    movAmountInput.value = window.productosCatalogoMap[nombreProd];
+  }
 }
 
 // Guardar producto en Firebase
@@ -319,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const type = movTypeSelect.value;
 
       if (!desc || isNaN(amount) || amount <= 0) {
-        alert('Por favor, ingresa una descripción y un monto válido.');
+        alert('Por favor, selecciona un producto y asegúrate de que el monto sea válido.');
         return;
       }
 
