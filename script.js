@@ -40,7 +40,7 @@ function switchTab(tab) {
       btnCatalogo.style.background = '#333';
       btnCatalogo.style.color = '#ccc';
     }
-    loadProductOptions();
+    loadProductOptions(); // 👈 CARGA LA CACHÉ AL VOLVER A LA CAJA
   } else if (tab === 'catalogo') {
     secCaja.style.display = 'none';
     secCatalogo.style.display = 'block';
@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Cargar opciones iniciales del catálogo
+  // 👈 CARGAR OPCIONES DEL CATÁLOGO AL ABRIR LA APP
   loadProductOptions();
 
   // --- LÓGICA DE MOVIMIENTOS Y CAJA ---
