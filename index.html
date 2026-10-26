@@ -60,15 +60,16 @@
 
     <!-- SECCIÓN 1: CAJA Y MOVIMIENTOS -->
     <div id="sectionCaja" style="display: block;">
-      <!-- CARGA DE MOVIMIENTOS (Con buscador flotante inteligente) -->
+      <!-- CARGA DE MOVIMIENTOS (Con buscador de texto y lista flotante) -->
       <section class="card">
         <h3>➕ Registrar Movimiento Diario</h3>
         <div class="form-row" style="position: relative;">
           
+          <!-- Contenedor del buscador de productos -->
           <div style="position: relative; flex: 1; min-width: 200px;">
             <input type="text" id="movDesc" placeholder="Escribe producto (ej: Pantalón)..." autocomplete="off" oninput="filtrarProductosSugeridos(this.value)">
-            <!-- Lista flotante de sugerencias -->
-            <div id="sugerenciasBox" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-radius: 4px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></div>
+            <!-- Lista flotante de sugerencias desplegables -->
+            <div id="sugerenciasBox" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-radius: 4px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.15);"></div>
           </div>
 
           <input type="number" id="movAmount" placeholder="Monto ($)" min="0" step="any">
@@ -202,7 +203,7 @@
       </section>
     </div>
 
-  </div> <!-- Cierre de #mainApp -->
+  </div>
 
   <!-- BOTÓN FLOTANTE DE SOPORTE WHATSAPP -->
   <a href="https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20necesito%20soporte%20con%20la%20app%20Control%20De%20Caja%20Ultra." target="_blank" class="float-wa" title="Soporte por WhatsApp">
