@@ -82,8 +82,9 @@ function loadProducts() {
             <td><strong>${p.name}</strong></td>
             <td>$${Number(p.price).toLocaleString('es-AR')}</td>
             <td><span class="badge ${p.stock > 0 ? 'text-success' : 'text-danger'}">${p.stock} u.</span></td>
-            <td style="text-align: right;">
-              <button onclick="deleteProduct('${p.id}')" class="btn btn-danger-soft" style="padding: 4px 8px; font-size: 0.85rem;">🗑️ Eliminar</button>
+            <td style="text-align: right; display: flex; gap: 5px; justify-content: flex-end;">
+              <button onclick="editProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, ${p.stock})" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8rem;">✏️ Editar</button>
+              <button onclick="deleteProduct('${p.id}')" class="btn btn-danger-soft" style="padding: 4px 8px; font-size: 0.8rem;">🗑️ Eliminar</button>
             </td>
           </tr>
         `;
@@ -166,7 +167,6 @@ function filtrarProductosSugeridos(texto) {
       </div>
     `;
 
-    // Al tocar la sugerencia, guarda el precio unitario y multiplica por la cantidad actual
     item.addEventListener('mousedown', (e) => {
       e.preventDefault();
       document.getElementById('movDesc').value = prod.name;
@@ -193,12 +193,27 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Guardar producto en Firebase
+// Cargar datos en el formulario para editar producto
+function editProduct(id, name, price, stock) {
+  document.getElementById('editProductId').value = id;
+  document.getElementById('prodName').value = name;
+  document.getElementById('prodPrice').value = price;
+  document.getElementById('prodStock').value = stock;
+  
+  document.getElementById('formProductTitle').textContent = '✏️ Modificar Producto';
+  document.getElementById('btnSaveProduct').textContent = '💾 Actualizar Cambios';
+  
+  // Desplazar suavemente hacia arriba para ver el formulario
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Guardar o Actualizar producto en Firebase
 async function saveProduct(e) {
   e.preventDefault();
   const deviceId = localStorage.getItem('ultraDeviceId');
   if (!deviceId) return;
 
+  const editId = document.getElementById('editProductId').value;
   const name = document.getElementById('prodName').value.trim();
   const price = parseFloat(document.getElementById('prodPrice').value);
   const stock = parseInt(document.getElementById('prodStock').value);
@@ -206,14 +221,32 @@ async function saveProduct(e) {
   if (!name || isNaN(price) || isNaN(stock)) return;
 
   try {
-    await db.collection('licenses').doc(deviceId).collection('products').add({
-      name,
-      price,
-      stock,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
+    const productsRef = db.collection('licenses').doc(deviceId).collection('products');
 
+    if (editId) {
+      // Actualizar producto existente
+      await productsRef.doc(editId).update({
+        name,
+        price,
+        stock
+      });
+      alert('¡Producto actualizado con éxito!');
+    } else {
+      // Crear nuevo producto
+      await productsRef.add({
+        name,
+        price,
+        stock,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+
+    // Resetear formulario y volver al estado original
     document.getElementById('formProduct').reset();
+    document.getElementById('editProductId').value = '';
+    document.getElementById('formProductTitle').textContent = '📦 Agregar Producto';
+    document.getElementById('btnSaveProduct').textContent = '💾 Guardar';
+
     loadProductOptions();
   } catch (err) {
     console.error("Error al guardar producto:", err);
@@ -398,7 +431,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Si la cantidad es mayor a 1, se indica en el detalle
       const detalleTexto = qty > 1 ? `${desc} (x${qty})` : desc;
 
       movements.unshift({ 
