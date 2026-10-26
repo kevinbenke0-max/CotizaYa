@@ -60,24 +60,28 @@
 
     <!-- SECCIÓN 1: CAJA Y MOVIMIENTOS -->
     <div id="sectionCaja" style="display: block;">
-      <!-- CARGA DE MOVIMIENTOS -->
+      <!-- CARGA DE MOVIMIENTOS (Con buscador y selector de cantidad al lado) -->
       <section class="card">
         <h3>➕ Registrar Movimiento Diario</h3>
-        <div class="form-row" style="position: relative;">
+        <div class="form-row" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
           
-          <!-- Contenedor del buscador de productos -->
-          <div style="position: relative; flex: 1; min-width: 200px;">
-            <input type="text" id="movDesc" placeholder="Escribe producto (ej: Pantalón)..." autocomplete="off" oninput="filtrarProductosSugeridos(this.value)">
-            <!-- Lista flotante de sugerencias desplegables -->
+          <!-- Buscador de productos con lista flotante -->
+          <div style="position: relative; flex: 2; min-width: 180px;">
+            <input type="text" id="movDesc" placeholder="Escribe producto..." autocomplete="off" oninput="filtrarProductosSugeridos(this.value)">
             <div id="sugerenciasBox" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-radius: 4px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.15);"></div>
           </div>
 
-          <input type="number" id="movAmount" placeholder="Monto ($)" min="0" step="any">
-          <select id="movType">
+          <!-- Selector de cantidad -->
+          <input type="number" id="movQty" value="1" min="1" step="1" title="Cantidad" style="flex: 0.8; min-width: 70px;" oninput="actualizarMontoPorCantidad()">
+
+          <input type="number" id="movAmount" placeholder="Monto ($)" min="0" step="any" style="flex: 1.2; min-width: 100px;">
+          
+          <select id="movType" style="flex: 1.2; min-width: 130px;">
             <option value="income">🟢 Ingreso / Venta</option>
             <option value="expense">🔴 Gasto / Compra</option>
           </select>
-          <button id="btnAddMov" class="btn btn-primary">Cargar</button>
+          
+          <button id="btnAddMov" class="btn btn-primary" style="flex: 1; min-width: 90px;">Cargar</button>
         </div>
       </section>
 
