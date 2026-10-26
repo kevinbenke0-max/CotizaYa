@@ -40,7 +40,7 @@ function switchTab(tab) {
       btnCatalogo.style.background = '#333';
       btnCatalogo.style.color = '#ccc';
     }
-    loadProductOptions(); // Actualizar productos en la caja
+    loadProductOptions(); // Actualizar opciones para autocompletar
   } else if (tab === 'catalogo') {
     secCaja.style.display = 'none';
     secCatalogo.style.display = 'block';
@@ -94,7 +94,7 @@ function loadProducts() {
     });
 }
 
-// Cargar lista de productos en la caja para autocompletar o descontar stock
+// Cargar opciones para autocompletar en el input de caja
 function loadProductOptions() {
   const deviceId = localStorage.getItem('ultraDeviceId');
   const movDescInput = document.getElementById('movDesc');
@@ -119,7 +119,7 @@ function loadProductOptions() {
   });
 }
 
-// Guardar producto en el catálogo
+// Guardar producto en Firebase
 async function saveProduct(e) {
   e.preventDefault();
   const deviceId = localStorage.getItem('ultraDeviceId');
@@ -147,7 +147,7 @@ async function saveProduct(e) {
   }
 }
 
-// Eliminar producto del catálogo
+// Eliminar producto de Firebase
 async function deleteProduct(id) {
   if (!confirm('¿Seguro que deseas eliminar este producto del catálogo?')) return;
   const deviceId = localStorage.getItem('ultraDeviceId');
@@ -161,24 +161,28 @@ async function deleteProduct(id) {
   }
 }
 
-// Descontar stock automáticamente en Firestore si el movimiento coincide con un producto
+// Descontar stock automáticamente de forma sincronizada en Firestore
 async function descontarStockSiExiste(nombreProducto) {
   const deviceId = localStorage.getItem('ultraDeviceId');
   if (!deviceId || !nombreProducto) return;
 
   try {
     const productsRef = db.collection('licenses').doc(deviceId).collection('products');
-    const snapshot = await productsRef.where('name', '==', nombreProducto.trim()).get();
+    const snapshot = await productsRef.get();
 
-    if (!snapshot.empty) {
-      snapshot.forEach(async (doc) => {
-        const prodData = doc.data();
-        const nuevoStock = Math.max(0, (prodData.stock || 0) - 1); // Resta 1 unidad por venta
-        await productsRef.doc(doc.id).update({ stock: nuevoStock });
-      });
-    }
+    snapshot.forEach(async (docSnap) => {
+      const prod = docSnap.data();
+      if (prod.name.trim().toLowerCase() === nombreProducto.trim().toLowerCase()) {
+        const stockActual = Number(prod.stock) || 0;
+        const nuevoStock = Math.max(0, stockActual - 1); // Descuenta 1 unidad
+
+        await productsRef.doc(docSnap.id).update({
+          stock: nuevoStock
+        });
+      }
+    });
   } catch (err) {
-    console.error("Error al descontar stock:", err);
+    console.error("Error al sincronizar el stock:", err);
   }
 }
 
@@ -272,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Cargar opciones de productos en la caja al iniciar
+  // Cargar opciones iniciales del catálogo en la caja
   loadProductOptions();
 
   // --- LÓGICA DE MOVIMIENTOS Y CAJA ---
@@ -326,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
       });
       
-      // Si es un ingreso (venta), intentamos descontar del stock en Firestore
+      // Si es un ingreso (venta), se descuenta automáticamente del stock en Firestore
       if (type === 'income') {
         descontarStockSiExiste(desc);
       }
