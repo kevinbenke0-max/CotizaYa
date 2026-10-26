@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel Admin - Control De Caja Ultra</title>
-    <!-- Firebase SDK (v8 o similar como usas en tu proyecto) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <style>
@@ -64,10 +64,6 @@
         .btn:hover {
             background-color: #00c853;
         }
-        .btn-block {
-            background-color: #ff5252;
-            color: #fff;
-        }
     </style>
 </head>
 <body>
@@ -78,14 +74,14 @@
 </div>
 
 <script>
-    // 1. PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE (Tal cual la tienes en script.js)
+    // Configuración real de tu proyecto en Firebase
     const firebaseConfig = {
-        apiKey: "TU_API_KEY",
-        authDomain: "TU_PROJECT_ID.firebaseapp.com",
-        projectId: "TU_PROJECT_ID",
-        storageBucket: "TU_PROJECT_ID.appspot.com",
-        messagingSenderId: "TU_SENDER_ID",
-        appId: "TU_APP_ID"
+        apiKey: "AIzaSyB4eg-yFaE9Fqe9dB3WNeOj9JJwi...",
+        authDomain: "control-caja-ultra.firebaseapp.com",
+        projectId: "control-caja-ultra",
+        storageBucket: "control-caja-ultra.appspot.com",
+        messagingSenderId: "76362765432",
+        appId: "1:76362765432:web:1e44c161254bec0..."
     };
 
     // Inicializar Firebase
@@ -94,7 +90,7 @@
     }
     const db = firebase.firestore();
 
-    // 2. Escuchar en tiempo real los dispositivos cargados en la colección "licenses"
+    // Escuchar en tiempo real los dispositivos de la colección "licenses"
     db.collection("licenses").onSnapshot((snapshot) => {
         const contenedor = document.getElementById("lista-dispositivos");
         contenedor.innerHTML = "";
@@ -135,9 +131,12 @@
             `;
             contenedor.appendChild(card);
         });
+    }, (error) => {
+        console.error("Error al cargar licencias: ", error);
+        document.getElementById("lista-dispositivos").innerHTML = "<p style='color: #ff5252;'>Error al conectar con la base de datos.</p>";
     });
 
-    // 3. Función para renovar 30 días exactos con un clic
+    // Función para sumar exactamente 30 días de forma automática
     function renovar30Dias(deviceId) {
         const ahora = Date.now();
         const treintaDiasEnMilisegundos = 30 * 24 * 60 * 60 * 1000; // 30 días exactos
