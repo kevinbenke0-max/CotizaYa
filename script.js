@@ -40,7 +40,7 @@ function switchTab(tab) {
       btnCatalogo.style.background = '#333';
       btnCatalogo.style.color = '#ccc';
     }
-    loadProductOptions(); // 👈 CARGA LA CACHÉ AL VOLVER A LA CAJA
+    loadProductOptions();
   } else if (tab === 'catalogo') {
     secCaja.style.display = 'none';
     secCatalogo.style.display = 'block';
@@ -94,8 +94,9 @@ function loadProducts() {
     });
 }
 
-// Caché global para el buscador flotante
+// Caché global para el buscador flotante con precio unitario
 window.listaProductosCache = [];
+window.precioUnitarioSeleccionado = 0;
 
 function loadProductOptions() {
   const deviceId = localStorage.getItem('ultraDeviceId');
@@ -112,6 +113,16 @@ function loadProductOptions() {
       });
     });
   });
+}
+
+// Actualizar el monto automáticamente al cambiar la cantidad
+function actualizarMontoPorCantidad() {
+  const qty = parseInt(document.getElementById('movQty').value) || 1;
+  const movAmountInput = document.getElementById('movAmount');
+  
+  if (window.precioUnitarioSeleccionado > 0) {
+    movAmountInput.value = window.precioUnitarioSeleccionado * qty;
+  }
 }
 
 // Mostrar sugerencias flotantes al escribir en la caja
@@ -156,11 +167,15 @@ function filtrarProductosSugeridos(texto) {
       </div>
     `;
 
-    // Al tocar la sugerencia con el dedo, se completa el campo y el monto
+    // Al tocar la sugerencia con el dedo, se guarda el precio unitario y calcula el monto por cantidad
     item.addEventListener('mousedown', (e) => {
       e.preventDefault();
       document.getElementById('movDesc').value = prod.name;
-      document.getElementById('movAmount').value = prod.price;
+      window.precioUnitarioSeleccionado = prod.price;
+      
+      const qty = parseInt(document.getElementById('movQty').value) || 1;
+      document.getElementById('movAmount').value = prod.price * qty;
+
       box.style.display = 'none';
       box.innerHTML = '';
     });
@@ -222,8 +237,8 @@ async function deleteProduct(id) {
   }
 }
 
-// Descontar stock automáticamente de forma sincronizada en Firestore
-async function descontarStockSiExiste(nombreProducto) {
+// Descontar la cantidad exacta vendida del stock en Firestore
+async function descontarStockCantidad(nombreProducto, cantidadVenta) {
   const deviceId = localStorage.getItem('ultraDeviceId');
   if (!deviceId || !nombreProducto) return;
 
@@ -235,7 +250,7 @@ async function descontarStockSiExiste(nombreProducto) {
       const prod = docSnap.data();
       if (prod.name.trim().toLowerCase() === nombreProducto.trim().toLowerCase()) {
         const stockActual = Number(prod.stock) || 0;
-        const nuevoStock = Math.max(0, stockActual - 1); // Descuenta 1 unidad
+        const nuevoStock = Math.max(0, stockActual - cantidadVenta); // Resta la cantidad exacta
 
         await productsRef.doc(docSnap.id).update({
           stock: nuevoStock
@@ -337,7 +352,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 👈 CARGAR OPCIONES DEL CATÁLOGO AL ABRIR LA APP
   loadProductOptions();
 
   // --- LÓGICA DE MOVIMIENTOS Y CAJA ---
@@ -345,6 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let closedDays = JSON.parse(localStorage.getItem('closedDaysHistory')) || [];
 
   const movDescInput = document.getElementById('movDesc');
+  const movQtyInput = document.getElementById('movQty');
   const movAmountInput = document.getElementById('movAmount');
   const movTypeSelect = document.getElementById('movType');
   const btnAddMov = document.getElementById('btnAddMov');
@@ -376,27 +391,33 @@ document.addEventListener('DOMContentLoaded', () => {
   if (btnAddMov) {
     btnAddMov.addEventListener('click', () => {
       const desc = movDescInput.value.trim();
+      const qty = parseInt(movQtyInput.value) || 1;
       const amount = parseFloat(movAmountInput.value);
       const type = movTypeSelect.value;
 
-      if (!desc || isNaN(amount) || amount <= 0) {
-        alert('Por favor, ingresa una descripción y un monto válido.');
+      if (!desc || isNaN(amount) || amount <= 0 || qty <= 0) {
+        alert('Por favor, completa la descripción, cantidad y un monto válido.');
         return;
       }
 
+      // Mostramos la cantidad en el detalle de la caja si es mayor a 1
+      const detalleTexto = qty > 1 ? `${desc} (x${qty})` : desc;
+
       movements.unshift({ 
-        desc, 
+        desc: detalleTexto, 
         amount, 
         type, 
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
       });
       
       if (type === 'income') {
-        descontarStockSiExiste(desc);
+        descontarStockCantidad(desc, qty);
       }
       
       movDescInput.value = '';
+      movQtyInput.value = '1';
       movAmountInput.value = '';
+      window.precioUnitarioSeleccionado = 0;
       
       saveAndRender();
     });
@@ -652,6 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     lblMonthIncome.textContent = `$${monthIncome.toLocaleString()}`;
+    lblMonthExpense.textContent = `$${monthMonthExpense || monthExpense.toLocaleString()}`;
     lblMonthExpense.textContent = `$${monthExpense.toLocaleString()}`;
     lblMonthMargin.textContent = `${profitMargin.toFixed(1)}%`;
     lblMonthMargin.className = profitMargin >= 0 ? 'text-success' : 'text-danger';
