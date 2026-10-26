@@ -467,3 +467,110 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+// ==========================================
+// MÓDULO DE PESTAÑAS Y CATÁLOGO
+// ==========================================
+
+function switchTab(tab) {
+  const secCaja = document.getElementById('mainApp'); // O tu sección de movimientos si la separas
+  const secCatalogo = document.getElementById('sectionCatalogo');
+  const btnCaja = document.getElementById('btnTabCaja');
+  const btnCatalogo = document.getElementById('btnTabCatalogo');
+
+  // Seleccionamos las secciones de contenido de caja de manera segura
+  const cajaSections = document.querySelectorAll('#mainApp > .card');
+
+  if (tab === 'caja') {
+    // Mostrar caja, ocultar catálogo
+    if (secCatalogo) secCatalogo.style.display = 'none';
+    cajaSections.forEach(el => {
+      if (el.id !== 'sectionCatalogo') el.style.display = 'block';
+    });
+    btnCaja.style.background = ''; // Vuelve al color primario
+    btnCatalogo.style.background = '#333';
+    btnCatalogo.style.color = '#ccc';
+  } else if (tab === 'catalogo') {
+    // Ocultar caja, mostrar catálogo
+    cajaSections.forEach(el => {
+      if (el.id !== 'sectionCatalogo' && !el.classList.contains('app-header')) el.style.display = 'none';
+    });
+    if (secCatalogo) secCatalogo.style.display = 'block';
+    btnCatalogo.style.background = '';
+    btnCatalogo.style.color = '#fff';
+    btnCaja.style.background = '#333';
+    
+    loadProducts(); // Cargar productos al abrir la pestaña
+  }
+}
+
+// Cargar productos desde Firebase
+function loadProducts() {
+  const deviceId = localStorage.getItem('ultraDeviceId');
+  if (!deviceId) return;
+
+  db.collection('licenses').doc(deviceId).collection('products')
+    .onSnapshot((snapshot) => {
+      const list = document.getElementById('productList');
+      if (!list) return;
+      list.innerHTML = '';
+
+      if (snapshot.empty) {
+        list.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888;">No hay productos cargados en el inventario.</td></tr>`;
+        return;
+      }
+
+      snapshot.forEach((doc) => {
+        const p = { id: doc.id, ...doc.data() };
+        list.innerHTML += `
+          <tr>
+            <td><strong>${p.name}</strong></td>
+            <td>$${p.price.toLocaleString('es-AR')}</td>
+            <td><span class="badge ${p.stock > 0 ? 'text-success' : 'text-danger'}">${p.stock} u.</span></td>
+            <td style="text-align: right;">
+              <button onclick="deleteProduct('${p.id}')" class="btn btn-danger-soft" style="padding: 4px 8px; font-size: 0.85rem;">🗑️ Eliminar</button>
+            </td>
+          </tr>
+        `;
+      });
+    });
+}
+
+// Guardar producto
+async function saveProduct(e) {
+  e.preventDefault();
+  const deviceId = localStorage.getItem('ultraDeviceId');
+  if (!deviceId) return;
+
+  const name = document.getElementById('prodName').value.trim();
+  const price = parseFloat(document.getElementById('prodPrice').value);
+  const stock = parseInt(document.getElementById('prodStock').value);
+
+  if (!name || isNaN(price) || isNaN(stock)) return;
+
+  try {
+    await db.collection('licenses').doc(deviceId).collection('products').add({
+      name,
+      price,
+      stock,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    document.getElementById('formProduct').reset();
+  } catch (err) {
+    console.error("Error al guardar producto:", err);
+    alert("Hubo un error al guardar el producto.");
+  }
+}
+
+// Eliminar producto
+async function deleteProduct(id) {
+  if (!confirm('¿Seguro que deseas eliminar este producto del catálogo?')) return;
+  const deviceId = localStorage.getItem('ultraDeviceId');
+  if (!deviceId) return;
+
+  try {
+    await db.collection('licenses').doc(deviceId).collection('products').doc(id).delete();
+  } catch (err) {
+    console.error("Error al eliminar producto:", err);
+  }
+}
