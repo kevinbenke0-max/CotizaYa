@@ -40,6 +40,7 @@ function switchTab(tab) {
       btnCatalogo.style.background = '#333';
       btnCatalogo.style.color = '#ccc';
     }
+    loadProductOptions(); // Actualizar productos en la caja
   } else if (tab === 'catalogo') {
     secCaja.style.display = 'none';
     secCatalogo.style.display = 'block';
@@ -59,7 +60,7 @@ function switchTab(tab) {
   }
 }
 
-// Cargar productos desde Firebase
+// Cargar productos desde Firebase para el inventario
 function loadProducts() {
   const deviceId = localStorage.getItem('ultraDeviceId');
   if (!deviceId) return;
@@ -93,7 +94,32 @@ function loadProducts() {
     });
 }
 
-// Guardar producto
+// Cargar lista de productos en la caja para autocompletar o descontar stock
+function loadProductOptions() {
+  const deviceId = localStorage.getItem('ultraDeviceId');
+  const movDescInput = document.getElementById('movDesc');
+  if (!deviceId || !movDescInput) return;
+
+  db.collection('licenses').doc(deviceId).collection('products').get().then((snapshot) => {
+    let datalist = document.getElementById('productsDatalist');
+    if (!datalist) {
+      datalist = document.createElement('datalist');
+      datalist.id = 'productsDatalist';
+      document.body.appendChild(datalist);
+      movDescInput.setAttribute('list', 'productsDatalist');
+    }
+    datalist.innerHTML = '';
+    snapshot.forEach((doc) => {
+      const p = doc.data();
+      const option = document.createElement('option');
+      option.value = p.name;
+      option.textContent = `$${p.price} (Stock: ${p.stock})`;
+      datalist.appendChild(option);
+    });
+  });
+}
+
+// Guardar producto en el catálogo
 async function saveProduct(e) {
   e.preventDefault();
   const deviceId = localStorage.getItem('ultraDeviceId');
@@ -114,13 +140,14 @@ async function saveProduct(e) {
     });
 
     document.getElementById('formProduct').reset();
+    loadProductOptions();
   } catch (err) {
     console.error("Error al guardar producto:", err);
     alert("Hubo un error al guardar el producto.");
   }
 }
 
-// Eliminar producto
+// Eliminar producto del catálogo
 async function deleteProduct(id) {
   if (!confirm('¿Seguro que deseas eliminar este producto del catálogo?')) return;
   const deviceId = localStorage.getItem('ultraDeviceId');
@@ -128,13 +155,34 @@ async function deleteProduct(id) {
 
   try {
     await db.collection('licenses').doc(deviceId).collection('products').doc(id).delete();
+    loadProductOptions();
   } catch (err) {
     console.error("Error al eliminar producto:", err);
   }
 }
 
+// Descontar stock automáticamente en Firestore si el movimiento coincide con un producto
+async function descontarStockSiExiste(nombreProducto) {
+  const deviceId = localStorage.getItem('ultraDeviceId');
+  if (!deviceId || !nombreProducto) return;
+
+  try {
+    const productsRef = db.collection('licenses').doc(deviceId).collection('products');
+    const snapshot = await productsRef.where('name', '==', nombreProducto.trim()).get();
+
+    if (!snapshot.empty) {
+      snapshot.forEach(async (doc) => {
+        const prodData = doc.data();
+        const nuevoStock = Math.max(0, (prodData.stock || 0) - 1); // Resta 1 unidad por venta
+        await productsRef.doc(doc.id).update({ stock: nuevoStock });
+      });
+    }
+  } catch (err) {
+    console.error("Error al descontar stock:", err);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Generar o recuperar ID único del dispositivo
   let deviceId = localStorage.getItem('ultraDeviceId');
   if (!deviceId) {
     deviceId = 'DEV-' + Math.random().toString(36).substring(2, 9).toUpperCase();
@@ -150,21 +198,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (userDeviceIdLabel) userDeviceIdLabel.textContent = deviceId;
 
-  // Cargar nombre previo guardado en el teléfono si existe
   const savedName = localStorage.getItem('ultraLockUserName') || '';
   if (lockUserName && savedName) {
     lockUserName.value = savedName;
   }
 
-  // Actualizar enlace de WhatsApp y guardar en memoria local
   function updateWhatsAppLink() {
     if (!btnRenovarWA) return;
     const userName = lockUserName.value.trim();
-    
     if (userName) {
       localStorage.setItem('ultraLockUserName', userName);
     }
-
     const displayName = userName || "No especificado";
     const text = `Hola, realicé el pago de mi suscripción de Control De Caja Ultra.\nMi nombre en el comprobante es: *${displayName}*\nMi ID es: *${deviceId}*`;
     btnRenovarWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=${encodeURIComponent(text)}`;
@@ -228,6 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Cargar opciones de productos en la caja al iniciar
+  loadProductOptions();
+
   // --- LÓGICA DE MOVIMIENTOS Y CAJA ---
   let movements = JSON.parse(localStorage.getItem('cashMovements')) || [];
   let closedDays = JSON.parse(localStorage.getItem('closedDaysHistory')) || [];
@@ -278,6 +325,11 @@ document.addEventListener('DOMContentLoaded', () => {
         type, 
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
       });
+      
+      // Si es un ingreso (venta), intentamos descontar del stock en Firestore
+      if (type === 'income') {
+        descontarStockSiExiste(desc);
+      }
       
       movDescInput.value = '';
       movAmountInput.value = '';
