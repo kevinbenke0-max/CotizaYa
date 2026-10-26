@@ -60,28 +60,32 @@
 
     <!-- SECCIÓN 1: CAJA Y MOVIMIENTOS -->
     <div id="sectionCaja" style="display: block;">
-      <!-- CARGA DE MOVIMIENTOS (Con buscador y selector de cantidad al lado) -->
+      <!-- CARGA DE MOVIMIENTOS -->
       <section class="card">
         <h3>➕ Registrar Movimiento Diario</h3>
-        <div class="form-row" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+        
+        <!-- Fila principal de registro -->
+        <div class="form-row">
           
-          <!-- Buscador de productos con lista flotante -->
-          <div style="position: relative; flex: 2; min-width: 180px;">
-            <input type="text" id="movDesc" placeholder="Escribe producto..." autocomplete="off" oninput="filtrarProductosSugeridos(this.value)">
-            <div id="sugerenciasBox" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-radius: 4px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.15);"></div>
+          <!-- Contenedor compacto: Buscador de productos + Input pequeño de cantidad al lado -->
+          <div style="display: flex; gap: 8px; flex: 2; min-width: 250px;">
+            <div style="position: relative; flex: 1;">
+              <input type="text" id="movDesc" placeholder="Escribe producto..." autocomplete="off" oninput="filtrarProductosSugeridos(this.value)">
+              <div id="sugerenciasBox" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-radius: 4px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.15);"></div>
+            </div>
+            
+            <!-- Cantidad compacta al lado del buscador -->
+            <input type="number" id="movQty" value="1" min="1" step="1" title="Cantidad" style="width: 65px; text-align: center; padding: 8px 4px;" oninput="actualizarMontoPorCantidad()">
           </div>
 
-          <!-- Selector de cantidad -->
-          <input type="number" id="movQty" value="1" min="1" step="1" title="Cantidad" style="flex: 0.8; min-width: 70px;" oninput="actualizarMontoPorCantidad()">
-
-          <input type="number" id="movAmount" placeholder="Monto ($)" min="0" step="any" style="flex: 1.2; min-width: 100px;">
+          <input type="number" id="movAmount" placeholder="Monto ($)" min="0" step="any" style="flex: 1; min-width: 110px;">
           
-          <select id="movType" style="flex: 1.2; min-width: 130px;">
+          <select id="movType" style="flex: 1; min-width: 130px;">
             <option value="income">🟢 Ingreso / Venta</option>
             <option value="expense">🔴 Gasto / Compra</option>
           </select>
           
-          <button id="btnAddMov" class="btn btn-primary" style="flex: 1; min-width: 90px;">Cargar</button>
+          <button id="btnAddMov" class="btn btn-primary" style="flex: 0.8; min-width: 90px;">Cargar</button>
         </div>
       </section>
 
