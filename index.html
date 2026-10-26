@@ -43,10 +43,18 @@
   <!-- APLICACIÓN PRINCIPAL DE CAJA -->
   <div id="mainApp" class="container" style="display: block;">
     
-    <header class="app-header">
-      <div class="header-title">
-        <h1>Control De Caja Ultra</h1>
-        <span id="trialBadge" class="badge">Cargando estado...</span>
+    <header class="app-header" style="flex-direction: column; align-items: stretch; gap: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div class="header-title">
+          <h1>Control De Caja Ultra</h1>
+          <span id="trialBadge" class="badge">Cargando estado...</span>
+        </div>
+      </div>
+
+      <!-- BOTONES DE NAVEGACIÓN SUPERIOR (Caja y Catálogo) -->
+      <div class="nav-tabs" style="display: flex; gap: 10px; border-top: 1px solid #333; padding-top: 10px;">
+        <button id="btnTabCaja" class="btn btn-primary" onclick="switchTab('caja')" style="flex: 1; font-weight: bold;">💵 Caja / Movimientos</button>
+        <button id="btnTabCatalogo" class="btn btn-secondary" onclick="switchTab('catalogo')" style="flex: 1; font-weight: bold; background: #333; color: #ccc;">📦 Catálogo / Stock</button>
       </div>
     </header>
 
@@ -150,6 +158,40 @@
         📲 Compartir Resumen por WhatsApp
       </button>
     </section>
+
+    <!-- SECCIÓN NUEVA: CATÁLOGO DE PRODUCTOS (Oculta por defecto al iniciar) -->
+    <div id="sectionCatalogo" style="display: none;">
+      <section class="card">
+        <h3>📦 Agregar / Modificar Producto</h3>
+        <form id="formProduct" onsubmit="saveProduct(event)">
+          <div class="form-row">
+            <input type="text" id="prodName" placeholder="Nombre del producto (ej: Gaseosa 2.25L)" required autocomplete="off">
+            <input type="number" step="any" id="prodPrice" placeholder="Precio ($)" min="0" required>
+            <input type="number" id="prodStock" placeholder="Stock inicial" min="0" required>
+            <button type="submit" class="btn btn-primary">💾 Guardar</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card">
+        <h3>📋 Inventario de Productos</h3>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th style="text-align: right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="productList">
+              <!-- Se carga dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
 
   </div>
 
