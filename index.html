@@ -60,13 +60,11 @@
 
     <!-- SECCIÓN 1: CAJA Y MOVIMIENTOS -->
     <div id="sectionCaja" style="display: block;">
-      <!-- CARGA DE MOVIMIENTOS -->
+      <!-- CARGA DE MOVIMIENTOS (Input libre con datalist de sugerencias) -->
       <section class="card">
         <h3>➕ Registrar Movimiento Diario</h3>
         <div class="form-row">
-          <select id="movDesc" onchange="autocompletarPrecio(this)">
-            <option value="">Selecciona un producto del catálogo...</option>
-          </select>
+          <input type="text" id="movDesc" placeholder="Escribe producto o concepto..." autocomplete="off" list="productsDatalist" oninput="autocompletarPrecioPorTexto(this)">
           <input type="number" id="movAmount" placeholder="Monto ($)" min="0" step="any">
           <select id="movType">
             <option value="income">🟢 Ingreso / Venta</option>
@@ -198,7 +196,7 @@
       </section>
     </div>
 
-  </div> <!-- Cierre correcto de #mainApp -->
+  </div>
 
   <!-- BOTÓN FLOTANTE DE SOPORTE WHATSAPP -->
   <a href="https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20necesito%20soporte%20con%20la%20app%20Control%20De%20Caja%20Ultra." target="_blank" class="float-wa" title="Soporte por WhatsApp">
