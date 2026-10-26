@@ -60,11 +60,11 @@
 
     <!-- SECCIÓN 1: CAJA Y MOVIMIENTOS -->
     <div id="sectionCaja" style="display: block;">
-      <!-- CARGA DE MOVIMIENTOS -->
+      <!-- CARGA DE MOVIMIENTOS (Con soporte de lista autocompletado para el catálogo) -->
       <section class="card">
         <h3>➕ Registrar Movimiento Diario</h3>
         <div class="form-row">
-          <input type="text" id="movDesc" placeholder="Descripción (ej: Venta de producto, Insumos...)" autocomplete="off">
+          <input type="text" id="movDesc" placeholder="Descripción (ej: Venta de producto, Insumos...)" autocomplete="off" list="productsDatalist">
           <input type="number" id="movAmount" placeholder="Monto ($)" min="0" step="any">
           <select id="movType">
             <option value="income">🟢 Ingreso / Venta</option>
