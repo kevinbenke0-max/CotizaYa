@@ -466,16 +466,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 
 function switchTab(tab) {
-  // Seleccionamos todas las tarjetas de la caja (excepto el header y el catálogo)
-  const cards = document.querySelectorAll('#mainApp > .card');
+  const secCaja = document.getElementById('sectionCaja');
   const secCatalogo = document.getElementById('sectionCatalogo');
   const btnCaja = document.getElementById('btnTabCaja');
   const btnCatalogo = document.getElementById('btnTabCatalogo');
 
   if (tab === 'caja') {
-    cards.forEach(card => {
-      card.style.display = 'block';
-    });
+    if (secCaja) secCaja.style.display = 'block';
     if (secCatalogo) secCatalogo.style.display = 'none';
 
     if (btnCaja) {
@@ -489,9 +486,7 @@ function switchTab(tab) {
       btnCatalogo.style.color = '#ccc';
     }
   } else if (tab === 'catalogo') {
-    cards.forEach(card => {
-      card.style.display = 'none';
-    });
+    if (secCaja) secCaja.style.display = 'none';
     if (secCatalogo) secCatalogo.style.display = 'block';
 
     if (btnCatalogo) {
@@ -506,79 +501,5 @@ function switchTab(tab) {
     }
     
     loadProducts(); // Cargar productos al instante
-  }
-}
-
-// Cargar productos desde Firebase
-function loadProducts() {
-  const deviceId = localStorage.getItem('ultraDeviceId');
-  if (!deviceId) return;
-
-  db.collection('licenses').doc(deviceId).collection('products')
-    .onSnapshot((snapshot) => {
-      const list = document.getElementById('productList');
-      if (!list) return;
-      list.innerHTML = '';
-
-      if (snapshot.empty) {
-        list.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888;">No hay productos cargados en el inventario.</td></tr>`;
-        return;
-      }
-
-      snapshot.forEach((doc) => {
-        const p = { id: doc.id, ...doc.data() };
-        list.innerHTML += `
-          <tr>
-            <td><strong>${p.name}</strong></td>
-            <td>$${p.price.toLocaleString('es-AR')}</td>
-            <td><span class="badge ${p.stock > 0 ? 'text-success' : 'text-danger'}">${p.stock} u.</span></td>
-            <td style="text-align: right;">
-              <button onclick="deleteProduct('${p.id}')" class="btn btn-danger-soft" style="padding: 4px 8px; font-size: 0.85rem;">🗑️ Eliminar</button>
-            </td>
-          </tr>
-        `;
-      });
-    }, (err) => {
-      console.error("Error al escuchar productos:", err);
-    });
-}
-
-// Guardar producto
-async function saveProduct(e) {
-  e.preventDefault();
-  const deviceId = localStorage.getItem('ultraDeviceId');
-  if (!deviceId) return;
-
-  const name = document.getElementById('prodName').value.trim();
-  const price = parseFloat(document.getElementById('prodPrice').value);
-  const stock = parseInt(document.getElementById('prodStock').value);
-
-  if (!name || isNaN(price) || isNaN(stock)) return;
-
-  try {
-    await db.collection('licenses').doc(deviceId).collection('products').add({
-      name,
-      price,
-      stock,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    document.getElementById('formProduct').reset();
-  } catch (err) {
-    console.error("Error al guardar producto:", err);
-    alert("Hubo un error al guardar el producto.");
-  }
-}
-
-// Eliminar producto
-async function deleteProduct(id) {
-  if (!confirm('¿Seguro que deseas eliminar este producto del catálogo?')) return;
-  const deviceId = localStorage.getItem('ultraDeviceId');
-  if (!deviceId) return;
-
-  try {
-    await db.collection('licenses').doc(deviceId).collection('products').doc(id).delete();
-  } catch (err) {
-    console.error("Error al eliminar producto:", err);
   }
 }
