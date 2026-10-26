@@ -40,7 +40,7 @@ function switchTab(tab) {
       btnCatalogo.style.background = '#333';
       btnCatalogo.style.color = '#ccc';
     }
-    loadProductOptions(); // Actualizar opciones del selector en la caja
+    loadProductOptions();
   } else if (tab === 'catalogo') {
     secCaja.style.display = 'none';
     secCatalogo.style.display = 'block';
@@ -56,7 +56,7 @@ function switchTab(tab) {
       btnCaja.style.color = '#ccc';
     }
     
-    loadProducts(); // Cargar productos al instante
+    loadProducts();
   }
 }
 
@@ -94,16 +94,24 @@ function loadProducts() {
     });
 }
 
-// Cargar opciones en el selector desplegable de la caja y guardar precios
+// Cargar opciones en el datalist para sugerencias al escribir
 window.productosCatalogoMap = {};
 
 function loadProductOptions() {
   const deviceId = localStorage.getItem('ultraDeviceId');
-  const movDescSelect = document.getElementById('movDesc');
-  if (!deviceId || !movDescSelect) return;
+  if (!deviceId) return;
 
   db.collection('licenses').doc(deviceId).collection('products').get().then((snapshot) => {
-    movDescSelect.innerHTML = '<option value="">Selecciona un producto del catálogo...</option>';
+    let datalist = document.getElementById('productsDatalist');
+    if (!datalist) {
+      datalist = document.createElement('datalist');
+      datalist.id = 'productsDatalist';
+      document.body.appendChild(datalist);
+      const movDescInput = document.getElementById('movDesc');
+      if (movDescInput) movDescInput.setAttribute('list', 'productsDatalist');
+    }
+
+    datalist.innerHTML = '';
     window.productosCatalogoMap = {};
 
     snapshot.forEach((doc) => {
@@ -112,19 +120,19 @@ function loadProductOptions() {
 
       const option = document.createElement('option');
       option.value = p.name;
-      option.textContent = `📦 ${p.name} - $${Number(p.price).toLocaleString('es-AR')} (Stock: ${p.stock})`;
-      movDescSelect.appendChild(option);
+      option.label = `$${Number(p.price).toLocaleString('es-AR')} (Stock: ${p.stock})`;
+      datalist.appendChild(option);
     });
   });
 }
 
-// Autocompletar el monto cuando el usuario elige un producto del selector
-function autocompletarPrecio(selectElement) {
-  const nombreProd = selectElement.value.trim().toLowerCase();
+// Autocompletar el monto cuando el texto coincide con un producto
+function autocompletarPrecioPorTexto(inputElement) {
+  const textoEscrito = inputElement.value.trim().toLowerCase();
   const movAmountInput = document.getElementById('movAmount');
   
-  if (window.productosCatalogoMap && window.productosCatalogoMap[nombreProd] !== undefined) {
-    movAmountInput.value = window.productosCatalogoMap[nombreProd];
+  if (window.productosCatalogoMap && window.productosCatalogoMap[textoEscrito] !== undefined) {
+    movAmountInput.value = window.productosCatalogoMap[textoEscrito];
   }
 }
 
@@ -328,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const type = movTypeSelect.value;
 
       if (!desc || isNaN(amount) || amount <= 0) {
-        alert('Por favor, selecciona un producto y asegúrate de que el monto sea válido.');
+        alert('Por favor, ingresa una descripción y un monto válido.');
         return;
       }
 
