@@ -64,17 +64,13 @@
       <section class="card">
         <h3>➕ Registrar Movimiento Diario</h3>
         
-        <!-- Fila principal de registro -->
         <div class="form-row">
-          
-          <!-- Contenedor compacto: Buscador de productos + Input pequeño de cantidad al lado -->
           <div style="display: flex; gap: 8px; flex: 2; min-width: 250px;">
             <div style="position: relative; flex: 1;">
               <input type="text" id="movDesc" placeholder="Escribe producto..." autocomplete="off" oninput="filtrarProductosSugeridos(this.value)">
               <div id="sugerenciasBox" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-radius: 4px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.15);"></div>
             </div>
             
-            <!-- Cantidad compacta al lado del buscador -->
             <input type="number" id="movQty" value="1" min="1" step="1" title="Cantidad" style="width: 65px; text-align: center; padding: 8px 4px;" oninput="actualizarMontoPorCantidad()">
           </div>
 
@@ -180,13 +176,16 @@
     <!-- SECCIÓN 2: CATÁLOGO DE PRODUCTOS (Oculta por defecto) -->
     <div id="sectionCatalogo" style="display: none;">
       <section class="card">
-        <h3>📦 Agregar / Modificar Producto</h3>
+        <h3 id="formProductTitle">📦 Agregar Producto</h3>
         <form id="formProduct" onsubmit="saveProduct(event)">
+          <!-- Campo oculto para saber si estamos editando un producto existente -->
+          <input type="hidden" id="editProductId" value="">
+          
           <div class="form-row">
             <input type="text" id="prodName" placeholder="Nombre del producto (ej: Gaseosa 2.25L)" required autocomplete="off">
             <input type="number" step="any" id="prodPrice" placeholder="Precio ($)" min="0" required>
-            <input type="number" id="prodStock" placeholder="Stock inicial" min="0" required>
-            <button type="submit" class="btn btn-primary">💾 Guardar</button>
+            <input type="number" id="prodStock" placeholder="Stock" min="0" required>
+            <button type="submit" id="btnSaveProduct" class="btn btn-primary">💾 Guardar</button>
           </div>
         </form>
       </section>
