@@ -42,7 +42,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!btnRenovarWA) return;
     const userName = lockUserName.value.trim();
     
-    // Guardar en la memoria del navegador para que no se borre al recargar
     if (userName) {
       localStorage.setItem('ultraLockUserName', userName);
     }
@@ -57,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   updateWhatsAppLink();
 
-  // Bloquear el clic en WhatsApp si no puso su nombre todavía
   if (btnRenovarWA) {
     btnRenovarWA.addEventListener('click', (e) => {
       const userName = lockUserName.value.trim();
@@ -76,7 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const nowMs = new Date().getTime();
 
     if (!doc.exists) {
-      // Registrar usuario nuevo con 3 días de prueba gratis
       const trialMs = 3 * 24 * 60 * 60 * 1000;
       const expireTime = nowMs + trialMs;
 
@@ -94,11 +91,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
 
     if (diffMs <= 0) {
-      // SUSCRIPCIÓN EXPIRADA -> BLOQUEAR ACCESO
       mainApp.style.display = 'none';
       lockScreen.style.display = 'flex';
     } else {
-      // SUSCRIPCIÓN O PRUEBA ACTIVA
       lockScreen.style.display = 'none';
       mainApp.style.display = 'block';
 
@@ -113,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
-
 
   // --- LÓGICA DE MOVIMIENTOS Y CAJA ---
   let movements = JSON.parse(localStorage.getItem('cashMovements')) || [];
@@ -354,7 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const monthNames = {
-      "01": "Enero", "02": "Febrero", "03": "Marzo", "04": "Abryl",
+      "01": "Enero", "02": "Febrero", "03": "Marzo", "04": "Abril",
       "05": "Mayo", "06": "Junio", "07": "Julio", "08": "Agosto",
       "09": "Septiembre", "10": "Octubre", "11": "Noviembre", "12": "Diciembre"
     };
@@ -417,7 +411,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     let monthNet = monthIncome - monthExpense;
-    
     let profitMargin = 0;
     if (monthExpense > 0) {
       profitMargin = (monthNet / monthExpense) * 100;
@@ -467,39 +460,52 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
 // ==========================================
-// MÓDULO DE PESTAÑAS Y CATÁLOGO
+// MÓDULO DE PESTAÑAS Y CATÁLOGO (GLOBALES)
 // ==========================================
 
 function switchTab(tab) {
-  const secCaja = document.getElementById('mainApp'); // O tu sección de movimientos si la separas
+  // Seleccionamos todas las tarjetas de la caja (excepto el header y el catálogo)
+  const cards = document.querySelectorAll('#mainApp > .card');
   const secCatalogo = document.getElementById('sectionCatalogo');
   const btnCaja = document.getElementById('btnTabCaja');
   const btnCatalogo = document.getElementById('btnTabCatalogo');
 
-  // Seleccionamos las secciones de contenido de caja de manera segura
-  const cajaSections = document.querySelectorAll('#mainApp > .card');
-
   if (tab === 'caja') {
-    // Mostrar caja, ocultar catálogo
-    if (secCatalogo) secCatalogo.style.display = 'none';
-    cajaSections.forEach(el => {
-      if (el.id !== 'sectionCatalogo') el.style.display = 'block';
+    cards.forEach(card => {
+      card.style.display = 'block';
     });
-    btnCaja.style.background = ''; // Vuelve al color primario
-    btnCatalogo.style.background = '#333';
-    btnCatalogo.style.color = '#ccc';
+    if (secCatalogo) secCatalogo.style.display = 'none';
+
+    if (btnCaja) {
+      btnCaja.className = 'btn btn-primary';
+      btnCaja.style.background = '';
+      btnCaja.style.color = '#fff';
+    }
+    if (btnCatalogo) {
+      btnCatalogo.className = 'btn btn-secondary';
+      btnCatalogo.style.background = '#333';
+      btnCatalogo.style.color = '#ccc';
+    }
   } else if (tab === 'catalogo') {
-    // Ocultar caja, mostrar catálogo
-    cajaSections.forEach(el => {
-      if (el.id !== 'sectionCatalogo' && !el.classList.contains('app-header')) el.style.display = 'none';
+    cards.forEach(card => {
+      card.style.display = 'none';
     });
     if (secCatalogo) secCatalogo.style.display = 'block';
-    btnCatalogo.style.background = '';
-    btnCatalogo.style.color = '#fff';
-    btnCaja.style.background = '#333';
+
+    if (btnCatalogo) {
+      btnCatalogo.className = 'btn btn-primary';
+      btnCatalogo.style.background = '';
+      btnCatalogo.style.color = '#fff';
+    }
+    if (btnCaja) {
+      btnCaja.className = 'btn btn-secondary';
+      btnCaja.style.background = '#333';
+      btnCaja.style.color = '#ccc';
+    }
     
-    loadProducts(); // Cargar productos al abrir la pestaña
+    loadProducts(); // Cargar productos al instante
   }
 }
 
@@ -532,6 +538,8 @@ function loadProducts() {
           </tr>
         `;
       });
+    }, (err) => {
+      console.error("Error al escuchar productos:", err);
     });
 }
 
