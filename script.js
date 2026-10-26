@@ -14,6 +14,125 @@ if (!firebase.apps.length) {
 }
 const db = firebase.firestore();
 
+// ==========================================
+// MÓDULO DE PESTAÑAS Y CATÁLOGO (GLOBALES)
+// ==========================================
+
+function switchTab(tab) {
+  const secCaja = document.getElementById('sectionCaja');
+  const secCatalogo = document.getElementById('sectionCatalogo');
+  const btnCaja = document.getElementById('btnTabCaja');
+  const btnCatalogo = document.getElementById('btnTabCatalogo');
+
+  if (!secCaja || !secCatalogo) return;
+
+  if (tab === 'caja') {
+    secCaja.style.display = 'block';
+    secCatalogo.style.display = 'none';
+
+    if (btnCaja) {
+      btnCaja.className = 'btn btn-primary';
+      btnCaja.style.background = '';
+      btnCaja.style.color = '#fff';
+    }
+    if (btnCatalogo) {
+      btnCatalogo.className = 'btn btn-secondary';
+      btnCatalogo.style.background = '#333';
+      btnCatalogo.style.color = '#ccc';
+    }
+  } else if (tab === 'catalogo') {
+    secCaja.style.display = 'none';
+    secCatalogo.style.display = 'block';
+
+    if (btnCatalogo) {
+      btnCatalogo.className = 'btn btn-primary';
+      btnCatalogo.style.background = '';
+      btnCatalogo.style.color = '#fff';
+    }
+    if (btnCaja) {
+      btnCaja.className = 'btn btn-secondary';
+      btnCaja.style.background = '#333';
+      btnCaja.style.color = '#ccc';
+    }
+    
+    loadProducts(); // Cargar productos al instante
+  }
+}
+
+// Cargar productos desde Firebase
+function loadProducts() {
+  const deviceId = localStorage.getItem('ultraDeviceId');
+  if (!deviceId) return;
+
+  db.collection('licenses').doc(deviceId).collection('products')
+    .onSnapshot((snapshot) => {
+      const list = document.getElementById('productList');
+      if (!list) return;
+      list.innerHTML = '';
+
+      if (snapshot.empty) {
+        list.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #888;">No hay productos cargados en el inventario.</td></tr>`;
+        return;
+      }
+
+      snapshot.forEach((doc) => {
+        const p = { id: doc.id, ...doc.data() };
+        list.innerHTML += `
+          <tr>
+            <td><strong>${p.name}</strong></td>
+            <td>$${Number(p.price).toLocaleString('es-AR')}</td>
+            <td><span class="badge ${p.stock > 0 ? 'text-success' : 'text-danger'}">${p.stock} u.</span></td>
+            <td style="text-align: right;">
+              <button onclick="deleteProduct('${p.id}')" class="btn btn-danger-soft" style="padding: 4px 8px; font-size: 0.85rem;">🗑️ Eliminar</button>
+            </td>
+          </tr>
+        `;
+      });
+    }, (err) => {
+      console.error("Error al escuchar productos:", err);
+    });
+}
+
+// Guardar producto
+async function saveProduct(e) {
+  e.preventDefault();
+  const deviceId = localStorage.getItem('ultraDeviceId');
+  if (!deviceId) return;
+
+  const name = document.getElementById('prodName').value.trim();
+  const price = parseFloat(document.getElementById('prodPrice').value);
+  const stock = parseInt(document.getElementById('prodStock').value);
+
+  if (!name || isNaN(price) || isNaN(stock)) return;
+
+  try {
+    await db.collection('licenses').doc(deviceId).collection('products').add({
+      name,
+      price,
+      stock,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    document.getElementById('formProduct').reset();
+  } catch (err) {
+    console.error("Error al guardar producto:", err);
+    alert("Hubo un error al guardar el producto.");
+  }
+}
+
+// Eliminar producto
+async function deleteProduct(id) {
+  if (!confirm('¿Seguro que deseas eliminar este producto del catálogo?')) return;
+  const deviceId = localStorage.getItem('ultraDeviceId');
+  if (!deviceId) return;
+
+  try {
+    await db.collection('licenses').doc(deviceId).collection('products').doc(id).delete();
+  } catch (err) {
+    console.error("Error al eliminar producto:", err);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Generar o recuperar ID único del dispositivo
   let deviceId = localStorage.getItem('ultraDeviceId');
@@ -460,46 +579,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
-// ==========================================
-// MÓDULO DE PESTAÑAS Y CATÁLOGO (GLOBALES)
-// ==========================================
-
-function switchTab(tab) {
-  const secCaja = document.getElementById('sectionCaja');
-  const secCatalogo = document.getElementById('sectionCatalogo');
-  const btnCaja = document.getElementById('btnTabCaja');
-  const btnCatalogo = document.getElementById('btnTabCatalogo');
-
-  if (tab === 'caja') {
-    if (secCaja) secCaja.style.display = 'block';
-    if (secCatalogo) secCatalogo.style.display = 'none';
-
-    if (btnCaja) {
-      btnCaja.className = 'btn btn-primary';
-      btnCaja.style.background = '';
-      btnCaja.style.color = '#fff';
-    }
-    if (btnCatalogo) {
-      btnCatalogo.className = 'btn btn-secondary';
-      btnCatalogo.style.background = '#333';
-      btnCatalogo.style.color = '#ccc';
-    }
-  } else if (tab === 'catalogo') {
-    if (secCaja) secCaja.style.display = 'none';
-    if (secCatalogo) secCatalogo.style.display = 'block';
-
-    if (btnCatalogo) {
-      btnCatalogo.className = 'btn btn-primary';
-      btnCatalogo.style.background = '';
-      btnCatalogo.style.color = '#fff';
-    }
-    if (btnCaja) {
-      btnCaja.className = 'btn btn-secondary';
-      btnCaja.style.background = '#333';
-      btnCaja.style.color = '#ccc';
-    }
-    
-    loadProducts(); // Cargar productos al instante
-  }
-}
