@@ -8,7 +8,6 @@ const firebaseConfig = {
   appId: "1:76362765432:web:1e44c161254bec0..."
 };
 
-// Inicializar Firebase
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -60,7 +59,7 @@ function switchTab(tab) {
   }
 }
 
-// Cargar productos desde Firebase para la tabla de inventario
+// Cargar productos desde Firebase para el inventario
 function loadProducts() {
   const deviceId = localStorage.getItem('ultraDeviceId');
   if (!deviceId) return;
@@ -94,7 +93,7 @@ function loadProducts() {
     });
 }
 
-// Caché global para el buscador flotante con precio unitario
+// Caché global para el buscador flotante
 window.listaProductosCache = [];
 window.precioUnitarioSeleccionado = 0;
 
@@ -115,7 +114,7 @@ function loadProductOptions() {
   });
 }
 
-// Actualizar el monto automáticamente al cambiar la cantidad
+// Actualizar el monto automáticamente al modificar la cantidad pequeña
 function actualizarMontoPorCantidad() {
   const qty = parseInt(document.getElementById('movQty').value) || 1;
   const movAmountInput = document.getElementById('movAmount');
@@ -125,7 +124,7 @@ function actualizarMontoPorCantidad() {
   }
 }
 
-// Mostrar sugerencias flotantes al escribir en la caja
+// Mostrar sugerencias flotantes al escribir
 function filtrarProductosSugeridos(texto) {
   const box = document.getElementById('sugerenciasBox');
   if (!box) return;
@@ -167,7 +166,7 @@ function filtrarProductosSugeridos(texto) {
       </div>
     `;
 
-    // Al tocar la sugerencia con el dedo, se guarda el precio unitario y calcula el monto por cantidad
+    // Al tocar la sugerencia, guarda el precio unitario y multiplica por la cantidad actual
     item.addEventListener('mousedown', (e) => {
       e.preventDefault();
       document.getElementById('movDesc').value = prod.name;
@@ -186,7 +185,6 @@ function filtrarProductosSugeridos(texto) {
   box.style.display = 'block';
 }
 
-// Ocultar sugerencias al hacer clic fuera
 document.addEventListener('click', (e) => {
   const box = document.getElementById('sugerenciasBox');
   const input = document.getElementById('movDesc');
@@ -250,7 +248,7 @@ async function descontarStockCantidad(nombreProducto, cantidadVenta) {
       const prod = docSnap.data();
       if (prod.name.trim().toLowerCase() === nombreProducto.trim().toLowerCase()) {
         const stockActual = Number(prod.stock) || 0;
-        const nuevoStock = Math.max(0, stockActual - cantidadVenta); // Resta la cantidad exacta
+        const nuevoStock = Math.max(0, stockActual - cantidadVenta);
 
         await productsRef.doc(docSnap.id).update({
           stock: nuevoStock
@@ -310,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // CONSULTAR LICENCIA EN FIREBASE FIRESTORE EN TIEMPO REAL
+  // CONSULTAR LICENCIA EN TIEMPO REAL
   const docRef = db.collection("licenses").doc(deviceId);
 
   docRef.onSnapshot((doc) => {
@@ -396,11 +394,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const type = movTypeSelect.value;
 
       if (!desc || isNaN(amount) || amount <= 0 || qty <= 0) {
-        alert('Por favor, completa la descripción, cantidad y un monto válido.');
+        alert('Por favor, ingresa una descripción, cantidad y un monto válido.');
         return;
       }
 
-      // Mostramos la cantidad en el detalle de la caja si es mayor a 1
+      // Si la cantidad es mayor a 1, se indica en el detalle
       const detalleTexto = qty > 1 ? `${desc} (x${qty})` : desc;
 
       movements.unshift({ 
@@ -673,7 +671,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     lblMonthIncome.textContent = `$${monthIncome.toLocaleString()}`;
-    lblMonthExpense.textContent = `$${monthMonthExpense || monthExpense.toLocaleString()}`;
     lblMonthExpense.textContent = `$${monthExpense.toLocaleString()}`;
     lblMonthMargin.textContent = `${profitMargin.toFixed(1)}%`;
     lblMonthMargin.className = profitMargin >= 0 ? 'text-success' : 'text-danger';
