@@ -94,47 +94,91 @@ function loadProducts() {
     });
 }
 
-// Cargar opciones en el datalist para sugerencias al escribir
-window.productosCatalogoMap = {};
+// Caché global para el buscador flotante
+window.listaProductosCache = [];
 
 function loadProductOptions() {
   const deviceId = localStorage.getItem('ultraDeviceId');
   if (!deviceId) return;
 
   db.collection('licenses').doc(deviceId).collection('products').get().then((snapshot) => {
-    let datalist = document.getElementById('productsDatalist');
-    if (!datalist) {
-      datalist = document.createElement('datalist');
-      datalist.id = 'productsDatalist';
-      document.body.appendChild(datalist);
-      const movDescInput = document.getElementById('movDesc');
-      if (movDescInput) movDescInput.setAttribute('list', 'productsDatalist');
-    }
-
-    datalist.innerHTML = '';
-    window.productosCatalogoMap = {};
-
+    window.listaProductosCache = [];
     snapshot.forEach((doc) => {
       const p = doc.data();
-      window.productosCatalogoMap[p.name.trim().toLowerCase()] = p.price;
-
-      const option = document.createElement('option');
-      option.value = p.name;
-      option.label = `$${Number(p.price).toLocaleString('es-AR')} (Stock: ${p.stock})`;
-      datalist.appendChild(option);
+      window.listaProductosCache.push({
+        name: p.name,
+        price: p.price,
+        stock: p.stock
+      });
     });
   });
 }
 
-// Autocompletar el monto cuando el texto coincide con un producto
-function autocompletarPrecioPorTexto(inputElement) {
-  const textoEscrito = inputElement.value.trim().toLowerCase();
-  const movAmountInput = document.getElementById('movAmount');
-  
-  if (window.productosCatalogoMap && window.productosCatalogoMap[textoEscrito] !== undefined) {
-    movAmountInput.value = window.productosCatalogoMap[textoEscrito];
+// Mostrar sugerencias flotantes estilo lista al escribir
+function filtrarProductosSugeridos(texto) {
+  const box = document.getElementById('sugerenciasBox');
+  if (!box) return;
+
+  const query = texto.trim().toLowerCase();
+  if (query === '' || window.listaProductosCache.length === 0) {
+    box.style.display = 'none';
+    box.innerHTML = '';
+    return;
   }
+
+  const matches = window.listaProductosCache.filter(p => p.name.toLowerCase().includes(query));
+
+  if (matches.length === 0) {
+    box.style.display = 'none';
+    box.innerHTML = '';
+    return;
+  }
+
+  box.innerHTML = '';
+  matches.forEach(prod => {
+    const item = document.createElement('div');
+    item.style.padding = '10px 12px';
+    item.style.cursor = 'pointer';
+    item.style.borderBottom = '1px solid #eee';
+    item.style.display = 'flex';
+    item.style.justifyContent = 'space-between';
+    item.style.alignItems = 'center';
+    item.style.color = '#333';
+    item.style.background = '#fff';
+
+    item.innerHTML = `
+      <div>
+        <strong>${prod.name}</strong><br>
+        <small style="color: #666;">Stock: ${prod.stock} u.</small>
+      </div>
+      <div style="color: #0066cc; font-weight: bold;">
+        $${Number(prod.price).toLocaleString('es-AR')}
+      </div>
+    `;
+
+    // Al tocar la sugerencia con el dedo, se completa el campo y el monto
+    item.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      document.getElementById('movDesc').value = prod.name;
+      document.getElementById('movAmount').value = prod.price;
+      box.style.display = 'none';
+      box.innerHTML = '';
+    });
+
+    box.appendChild(item);
+  });
+
+  box.style.display = 'block';
 }
+
+// Ocultar sugerencias al hacer clic fuera
+document.addEventListener('click', (e) => {
+  const box = document.getElementById('sugerenciasBox');
+  const input = document.getElementById('movDesc');
+  if (box && input && !input.contains(e.target) && !box.contains(e.target)) {
+    box.style.display = 'none';
+  }
+});
 
 // Guardar producto en Firebase
 async function saveProduct(e) {
@@ -293,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Cargar opciones iniciales del catálogo en la caja
+  // Cargar opciones iniciales del catálogo
   loadProductOptions();
 
   // --- LÓGICA DE MOVIMIENTOS Y CAJA ---
@@ -347,7 +391,6 @@ document.addEventListener('DOMContentLoaded', () => {
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
       });
       
-      // Si es un ingreso (venta), se descuenta automáticamente del stock en Firestore
       if (type === 'income') {
         descontarStockSiExiste(desc);
       }
