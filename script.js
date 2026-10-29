@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// VERIFICACIÓN DE SUSCRIPCIÓN
+// VERIFICACIÓN DE LICENCIA (Conectado a 'licenses')
 // ==========================================
 function verificarSuscripcionYArrancar() {
   const badge = document.getElementById('trialBadge');
@@ -62,12 +62,13 @@ function verificarSuscripcionYArrancar() {
     inicializarAplicacion();
   };
 
-  // Respaldo por si Firestore tarda
+  // Respaldo por seguridad si Firestore demora
   const timerSeguridad = setTimeout(() => {
     arrancarAppSegura(30, true);
   }, 2000);
 
-  db.collection("suscripciones").doc(deviceId).get().then((doc) => {
+  // Consultamos tu colección real 'licenses'
+  db.collection("licenses").doc(deviceId).get().then((doc) => {
     clearTimeout(timerSeguridad);
     let diasRestantes = 0;
     let activo = false;
@@ -75,7 +76,14 @@ function verificarSuscripcionYArrancar() {
     if (doc.exists) {
       const data = doc.data();
       if (data.expirationDate) {
-        const expDate = new Date(data.expirationDate);
+        let expDate;
+        // Soportamos tanto Firestore Timestamp como número/milisegundos
+        if (typeof data.expirationDate.toDate === 'function') {
+          expDate = data.expirationDate.toDate();
+        } else {
+          expDate = new Date(data.expirationDate);
+        }
+
         const hoy = new Date();
         const diferenciaTiempo = expDate - hoy;
         diasRestantes = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
@@ -83,12 +91,23 @@ function verificarSuscripcionYArrancar() {
           activo = true;
         }
       }
+    } else {
+      // Si el dispositivo no está en licenses, le creamos su registro inicial de 30 días
+      const fechaExp = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      db.collection("licenses").doc(deviceId).set({
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        expirationDate: fechaExp.getTime(),
+        status: "true"
+      }).catch(e => console.log("Error creando licencia:", e));
+
+      diasRestantes = 30;
+      activo = true;
     }
 
     arrancarAppSegura(diasRestantes, activo);
   }).catch((err) => {
     clearTimeout(timerSeguridad);
-    console.warn("Aviso de red al verificar suscripción:", err);
+    console.warn("Aviso de red en licenses:", err);
     arrancarAppSegura(30, true);
   });
 }
@@ -210,7 +229,7 @@ function eliminarProducto(id) {
 }
 
 // ==========================================
-// MOVIMIENTOS Y VENTAS
+// MOVIMIENTOS Y VENTAS (REGISTRO DIARIO)
 // ==========================================
 function filtrarProductosSugeridos(texto) {
   const box = document.getElementById('sugerenciasBox');
