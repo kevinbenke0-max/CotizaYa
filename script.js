@@ -10,9 +10,6 @@ if (!firebase.apps.length) {
 }
 const db = firebase.firestore();
 
-// Variables globales
-let html5QrCode = null;
-let escanerContexto = ''; // 'caja' o 'catalogo'
 let productosCache = [];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -20,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// VERIFICACIÓN DE SUSCRIPCIÓN (Con cálculo exacto de días)
+// VERIFICACIÓN DE SUSCRIPCIÓN Y DÍAS RESTANTES
 // ==========================================
 function verificarSuscripcionYArrancar() {
   const badge = document.getElementById('trialBadge');
@@ -116,85 +113,6 @@ function switchTab(tab) {
 }
 
 // ==========================================
-// ESCÁNER DE CÓDIGO DE BARRAS (CÁMARA CORREGIDA)
-// ==========================================
-function abrirEscaner(contexto) {
-  escanerContexto = contexto;
-  const modal = document.getElementById('scannerModal');
-  modal.style.display = 'flex'; // Mostramos el modal para dar dimensiones reales a #reader
-
-  setTimeout(() => {
-    if (!html5QrCode) {
-      html5QrCode = new Html5Qrcode("reader");
-    }
-
-    const config = { fps: 10, qrbox: { width: 250, height: 150 } };
-
-    html5QrCode.start(
-      { facingMode: "environment" },
-      config,
-      onScanSuccess,
-      onScanFailure
-    ).catch(err => {
-      console.warn("Cámara trasera no disponible, probando frontal o genérica...", err);
-      html5QrCode.start(
-        { facingMode: "user" },
-        config,
-        onScanSuccess,
-        onScanFailure
-      ).catch(err2 => {
-        console.error("Error al iniciar la cámara:", err2);
-        alert("No se pudo acceder a la cámara. Revisa los permisos en tu navegador.");
-        cerrarEscaner();
-      });
-    });
-  }, 200);
-}
-
-function cerrarEscaner() {
-  const modal = document.getElementById('scannerModal');
-  modal.style.display = 'none';
-
-  if (html5QrCode) {
-    try {
-      if (html5QrCode.isScanning) {
-        html5QrCode.stop().then(() => {
-          html5QrCode.clear();
-          html5QrCode = null;
-        }).catch(err => {
-          console.error("Error al detener escáner:", err);
-          html5QrCode = null;
-        });
-      } else {
-        html5QrCode = null;
-      }
-    } catch (e) {
-      html5QrCode = null;
-    }
-  }
-}
-
-function onScanSuccess(decodedText) {
-  console.log(`Código escaneado: ${decodedText}`);
-  cerrarEscaner();
-
-  if (escanerContexto === 'catalogo') {
-    const barcodeInput = document.getElementById('prodBarcode');
-    if (barcodeInput) barcodeInput.value = decodedText;
-  } else if (escanerContexto === 'caja') {
-    const movDesc = document.getElementById('movDesc');
-    if (movDesc) {
-      movDesc.value = decodedText;
-      buscarYSeleccionarPorCodigoOTexto(decodedText);
-    }
-  }
-}
-
-function onScanFailure(error) {
-  // Ignoramos errores cuadro por cuadro mientras busca
-}
-
-// ==========================================
 // CATÁLOGO Y PRODUCTOS
 // ==========================================
 function cargarProductosCache() {
@@ -210,12 +128,11 @@ function cargarProductosCache() {
       if (productList) {
         productList.innerHTML += `
           <tr>
-            <td><code>${prod.barcode || '-'}</code></td>
             <td><strong>${prod.name}</strong></td>
             <td>$${Number(prod.price || 0).toLocaleString()}</td>
             <td>${prod.stock || 0}</td>
             <td style="text-align: right;">
-              <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="editarProducto('${prod.id}', '${prod.name}', '${prod.barcode || ''}', ${prod.price}, ${prod.stock})">✏️</button>
+              <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="editarProducto('${prod.id}', '${prod.name}', ${prod.price}, ${prod.stock})">✏️</button>
               <button class="btn btn-danger-soft" style="padding: 4px 8px; font-size: 0.8rem;" onclick="eliminarProducto('${prod.id}')">🗑️</button>
             </td>
           </tr>
@@ -230,13 +147,11 @@ function saveProduct(event) {
 
   const editId = document.getElementById('editProductId').value;
   const name = document.getElementById('prodName').value.trim();
-  const barcode = document.getElementById('prodBarcode').value.trim();
   const price = parseFloat(document.getElementById('prodPrice').value);
   const stock = parseInt(document.getElementById('prodStock').value);
 
   const productoData = {
     name: name,
-    barcode: barcode !== "" ? barcode : null,
     price: price,
     stock: stock,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -258,10 +173,9 @@ function saveProduct(event) {
   });
 }
 
-function editarProducto(id, name, barcode, price, stock) {
+function editarProducto(id, name, price, stock) {
   document.getElementById('editProductId').value = id;
   document.getElementById('prodName').value = name;
-  document.getElementById('prodBarcode').value = (barcode && barcode !== 'null') ? barcode : '';
   document.getElementById('prodPrice').value = price;
   document.getElementById('prodStock').value = stock;
 
@@ -291,9 +205,7 @@ function filtrarProductosSugeridos(texto) {
   }
 
   const query = texto.toLowerCase().trim();
-  const filtrados = productosCache.filter(p =>
-    p.name.toLowerCase().includes(query) || (p.barcode && p.barcode.toLowerCase().includes(query))
-  );
+  const filtrados = productosCache.filter(p => p.name.toLowerCase().includes(query));
 
   if (filtrados.length === 0) {
     box.style.display = 'none';
@@ -316,22 +228,10 @@ function seleccionarProductoVenta(nombre, precio) {
   actualizarMontoPorCantidad();
 }
 
-function buscarYSeleccionarPorCodigoOTexto(valor) {
-  const query = valor.trim().toLowerCase();
-  const encontrado = productosCache.find(p => (p.barcode && p.barcode.toLowerCase() === query) || p.name.toLowerCase() === query);
-
-  if (encontrado) {
-    document.getElementById('movDesc').value = encontrado.name;
-    document.getElementById('movAmount').value = encontrado.price;
-    document.getElementById('sugerenciasBox').style.display = 'none';
-    actualizarMontoPorCantidad();
-  }
-}
-
 function actualizarMontoPorCantidad() {
   const desc = document.getElementById('movDesc').value.trim().toLowerCase();
   const qty = parseInt(document.getElementById('movQty').value) || 1;
-  const encontrado = productosCache.find(p => p.name.toLowerCase() === desc || (p.barcode && p.barcode.toLowerCase() === desc));
+  const encontrado = productosCache.find(p => p.name.toLowerCase() === desc);
 
   if (encontrado) {
     document.getElementById('movAmount').value = encontrado.price * qty;
