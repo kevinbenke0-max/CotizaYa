@@ -1,3 +1,7 @@
+window.onerror = function(msg, url, line) {
+  alert("Error en la app: " + msg + " (Línea: " + line + ")");
+};
+
 // ==========================================
 // CONFIGURACIÓN DE FIREBASE
 // ==========================================
