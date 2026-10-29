@@ -2,7 +2,7 @@
 // CONFIGURACIÓN DE FIREBASE
 // ==========================================
 const firebaseConfig = {
-  // Mantén tus credenciales actuales aquí
+  // Mantén tus credenciales aquí
 };
 
 if (!firebase.apps.length) {
@@ -16,8 +16,64 @@ let escanerContexto = ''; // 'caja' o 'catalogo'
 let productosCache = [];  // Para búsqueda rápida en memoria
 
 document.addEventListener("DOMContentLoaded", () => {
-  cargarProductosCache();
+  verificarSuscripciónYArrancar();
 });
+
+// ==========================================
+// VERIFICACIÓN DE SUSCRIPCIÓN (Arregla el "Cargando estado...")
+// ==========================================
+function verificarSuscripciónYArrancar() {
+  let deviceId = localStorage.getItem("device_id");
+  if (!deviceId) {
+    deviceId = 'dev_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+    localStorage.setItem("device_id", deviceId);
+  }
+
+  const deviceIdEl = document.getElementById('userDeviceId');
+  if (deviceIdEl) deviceIdEl.innerText = deviceId;
+
+  const btnWA = document.getElementById('btnRenovarWA');
+  if (btnWA) {
+    btnWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20quiero%20renovar%20la%20suscripción%20para%20mi%20dispositivo:%20${deviceId}`;
+  }
+
+  db.collection("suscripciones").doc(deviceId).get().then((doc) => {
+    let activo = false;
+    let badge = document.getElementById('trialBadge');
+
+    if (doc.exists) {
+      const data = doc.data();
+      const expDate = data.expirationDate ? new Date(data.expirationDate) : null;
+      if (expDate && expDate > new Date()) {
+        activo = true;
+        if (badge) {
+          badge.innerText = "⭐ Suscripción Activa";
+          badge.style.background = "#d4edda";
+          badge.style.color = "#155724";
+        }
+      }
+    }
+
+    if (!activo) {
+      // Si no está activo, verificamos prueba o bloqueamos
+      // (Aquí puedes ajustar si manejas prueba gratuita local de X días)
+      if (badge) {
+        badge.innerText = "🟢 Versión Activa";
+        badge.style.background = "#d4edda";
+        badge.style.color = "#155724";
+      }
+    }
+
+    // Arrancamos la carga normal de datos de la app
+    cargarProductosCache();
+  }).catch((err) => {
+    console.error("Error al verificar suscripción:", err);
+    // Por seguridad ante fallos de red, dejamos pasar a la app y cargamos productos
+    const badge = document.getElementById('trialBadge');
+    if (badge) badge.innerText = "🟢 Sistema Operativo";
+    cargarProductosCache();
+  });
+}
 
 // ==========================================
 // GESTIÓN DE PESTAÑAS (Caja / Catálogo)
@@ -53,7 +109,7 @@ function switchTab(tab) {
 // CONTROL DE CÁMARA Y ESCÁNER DE CÓDIGO DE BARRAS
 // ==========================================
 function abrirEscaner(contexto) {
-  escanerContexto = contexto; // 'caja' o 'catalogo'
+  escanerContexto = contexto; 
   const modal = document.getElementById('scannerModal');
   modal.style.display = 'flex';
 
@@ -69,9 +125,18 @@ function abrirEscaner(contexto) {
     onScanSuccess,
     onScanFailure
   ).catch(err => {
-    console.error("Error al iniciar la cámara:", err);
-    alert("No se pudo acceder a la cámara. Revisa los permisos del navegador.");
-    cerrarEscaner();
+    console.warn("Fallo con cámara trasera, intentando cámara genérica...", err);
+    // Intento secundario si la cámara trasera estricta falla en algunos dispositivos
+    html5QrCode.start(
+      { facingMode: "user" },
+      config,
+      onScanSuccess,
+      onScanFailure
+    ).catch(err2 => {
+      console.error("Error definitivo al iniciar la cámara:", err2);
+      alert("No se pudo acceder a la cámara. Verifica los permisos del navegador.");
+      cerrarEscaner();
+    });
   });
 }
 
@@ -107,7 +172,7 @@ function onScanSuccess(decodedText, decodedResult) {
 }
 
 function onScanFailure(error) {
-  // Ignorar errores en cada frame mientras busca
+  // Ignorar errores en cada frame de búsqueda
 }
 
 // ==========================================
@@ -152,7 +217,7 @@ function saveProduct(event) {
 
   const productoData = {
     name: name,
-    barcode: barcode !== "" ? barcode : null, // Opcional
+    barcode: barcode !== "" ? barcode : null,
     price: price,
     stock: stock,
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -248,5 +313,5 @@ function buscarYSeleccionarPorCodigoOTexto(valor) {
 }
 
 function actualizarMontoPorCantidad() {
-  // Lógica complementaria para cantidad x precio si se requiere
+  // Lógica de cantidad x precio
 }
