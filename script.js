@@ -15,7 +15,7 @@ let productosCache = [];
 document.addEventListener("DOMContentLoaded", () => {
   verificarSuscripcionYArrancar();
   
-  // Vinculamos el botón de Cargar Movimiento
+  // Vinculamos el botón de Registrar Movimiento de forma segura
   const btnAddMov = document.getElementById('btnAddMov');
   if (btnAddMov) {
     btnAddMov.addEventListener('click', registrarMovimiento);
@@ -62,22 +62,21 @@ function verificarSuscripcionYArrancar() {
     inicializarAplicacion();
   };
 
-  // Respaldo por seguridad si Firestore demora
+  // Temporizador de seguridad: si Firebase tarda más de 1.5 segundos, arranca igual con 30 días para no trabar jamás la app
   const timerSeguridad = setTimeout(() => {
     arrancarAppSegura(30, true);
-  }, 2000);
+  }, 1500);
 
-  // Consultamos tu colección real 'licenses'
+  // Consultamos tu colección 'licenses'
   db.collection("licenses").doc(deviceId).get().then((doc) => {
     clearTimeout(timerSeguridad);
-    let diasRestantes = 0;
-    let activo = false;
+    let diasRestantes = 30;
+    let activo = true;
 
     if (doc.exists) {
       const data = doc.data();
       if (data.expirationDate) {
         let expDate;
-        // Soportamos tanto Firestore Timestamp como número/milisegundos
         if (typeof data.expirationDate.toDate === 'function') {
           expDate = data.expirationDate.toDate();
         } else {
@@ -87,12 +86,13 @@ function verificarSuscripcionYArrancar() {
         const hoy = new Date();
         const diferenciaTiempo = expDate - hoy;
         diasRestantes = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
-        if (diasRestantes > 0) {
-          activo = true;
+        if (diasRestantes < 0) {
+          diasRestantes = 0;
+          activo = false;
         }
       }
     } else {
-      // Si el dispositivo no está en licenses, le creamos su registro inicial de 30 días
+      // Si el dispositivo no existe en licenses, le creamos su registro inicial automáticamente
       const fechaExp = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       db.collection("licenses").doc(deviceId).set({
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
