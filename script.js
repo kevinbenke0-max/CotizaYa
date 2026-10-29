@@ -2,7 +2,7 @@
 // CONFIGURACIÓN DE FIREBASE
 // ==========================================
 const firebaseConfig = {
-  // Coloca aquí tus credenciales de Firebase
+  // Mantén tus credenciales aquí
 };
 
 if (!firebase.apps.length) {
@@ -20,9 +20,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// VERIFICACIÓN DE SUSCRIPCIÓN Y ESTADO
+// VERIFICACIÓN DE SUSCRIPCIÓN (Con cálculo exacto de días)
 // ==========================================
 function verificarSuscripcionYArrancar() {
+  const badge = document.getElementById('trialBadge');
+  
   let deviceId = localStorage.getItem("device_id");
   if (!deviceId) {
     deviceId = 'dev_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -37,35 +39,38 @@ function verificarSuscripcionYArrancar() {
     btnWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20quiero%20renovar%20la%20suscripción%20para%20mi%20dispositivo:%20${deviceId}`;
   }
 
-  const badge = document.getElementById('trialBadge');
-
   db.collection("suscripciones").doc(deviceId).get().then((doc) => {
+    let diasRestantes = 0;
     let activo = false;
 
     if (doc.exists) {
       const data = doc.data();
-      const expDate = data.expirationDate ? new Date(data.expirationDate) : null;
-      if (expDate && expDate > new Date()) {
-        activo = true;
-        if (badge) {
-          badge.innerText = "⭐ Suscripción Activa";
-          badge.style.background = "#d4edda";
-          badge.style.color = "#155724";
-        }
+      if (data.expirationDate) {
+        const expDate = new Date(data.expirationDate);
+        const hoy = new Date();
+        const diferenciaTiempo = expDate - hoy;
+        diasRestantes = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
+        if (diasRestantes > 0) activo = true;
       }
     }
 
-    if (!activo && badge) {
-      badge.innerText = "🟢 Versión Activa";
-      badge.style.background = "#d4edda";
-      badge.style.color = "#155724";
+    if (badge) {
+      if (activo) {
+        badge.innerText = `⭐ Suscripción Activa (${diasRestantes} días)`;
+        badge.style.background = "#d4edda";
+        badge.style.color = "#155724";
+      } else {
+        badge.innerText = "🟢 Versión Activa";
+        badge.style.background = "#d4edda";
+        badge.style.color = "#155724";
+      }
     }
 
     inicializarAplicacion();
   }).catch((err) => {
-    console.error("Error al verificar suscripción:", err);
+    console.warn("Aviso de suscripción:", err);
     if (badge) {
-      badge.innerText = "🟢 Sistema Operativo";
+      badge.innerText = "🟢 Versión Activa";
       badge.style.background = "#d4edda";
       badge.style.color = "#155724";
     }
@@ -111,47 +116,39 @@ function switchTab(tab) {
 }
 
 // ==========================================
-// ESCÁNER DE CÓDIGO DE BARRAS (CÁMARA)
+// ESCÁNER DE CÓDIGO DE BARRAS (CÁMARA CORREGIDA)
 // ==========================================
 function abrirEscaner(contexto) {
   escanerContexto = contexto;
   const modal = document.getElementById('scannerModal');
-  modal.style.display = 'flex';
+  modal.style.display = 'flex'; // Mostramos el modal para dar dimensiones reales a #reader
 
-  if (typeof Html5Qrcode === 'undefined') {
-    alert("La librería del escáner está cargando. Reintenta en unos segundos.");
-    cerrarEscaner();
-    return;
-  }
+  setTimeout(() => {
+    if (!html5QrCode) {
+      html5QrCode = new Html5Qrcode("reader");
+    }
 
-  if (!html5QrCode) {
-    html5QrCode = new Html5Qrcode("reader");
-  }
+    const config = { fps: 10, qrbox: { width: 250, height: 150 } };
 
-  const config = {
-    fps: 15,
-    qrbox: { width: 250, height: 150 },
-    aspectRatio: 1.0
-  };
-
-  html5QrCode.start(
-    { facingMode: { exact: "environment" } },
-    config,
-    onScanSuccess,
-    onScanFailure
-  ).catch(() => {
-    // Reintento genérico si el modo 'exact environment' falla en el dispositivo
     html5QrCode.start(
       { facingMode: "environment" },
       config,
       onScanSuccess,
       onScanFailure
-    ).catch((err) => {
-      console.error("Error al iniciar cámara:", err);
-      alert("No se pudo iniciar la cámara. Verifica los permisos de la aplicación en tu navegador.");
-      cerrarEscaner();
+    ).catch(err => {
+      console.warn("Cámara trasera no disponible, probando frontal o genérica...", err);
+      html5QrCode.start(
+        { facingMode: "user" },
+        config,
+        onScanSuccess,
+        onScanFailure
+      ).catch(err2 => {
+        console.error("Error al iniciar la cámara:", err2);
+        alert("No se pudo acceder a la cámara. Revisa los permisos en tu navegador.");
+        cerrarEscaner();
+      });
     });
-  });
+  }, 200);
 }
 
 function cerrarEscaner() {
@@ -163,15 +160,22 @@ function cerrarEscaner() {
       if (html5QrCode.isScanning) {
         html5QrCode.stop().then(() => {
           html5QrCode.clear();
-        }).catch(err => console.error("Error al detener escáner:", err));
+          html5QrCode = null;
+        }).catch(err => {
+          console.error("Error al detener escáner:", err);
+          html5QrCode = null;
+        });
+      } else {
+        html5QrCode = null;
       }
     } catch (e) {
-      console.log("Escáner cerrado");
+      html5QrCode = null;
     }
   }
 }
 
 function onScanSuccess(decodedText) {
+  console.log(`Código escaneado: ${decodedText}`);
   cerrarEscaner();
 
   if (escanerContexto === 'catalogo') {
@@ -187,11 +191,11 @@ function onScanSuccess(decodedText) {
 }
 
 function onScanFailure(error) {
-  // Búsqueda continua en cada fotograma
+  // Ignoramos errores cuadro por cuadro mientras busca
 }
 
 // ==========================================
-// CATÁLOGO Y PRODUCTOS (INVENTARIO)
+// CATÁLOGO Y PRODUCTOS
 // ==========================================
 function cargarProductosCache() {
   db.collection("productos").onSnapshot((snapshot) => {
@@ -247,10 +251,10 @@ function saveProduct(event) {
     document.getElementById('editProductId').value = '';
     document.getElementById('formProductTitle').innerText = '📦 Agregar Producto';
     document.getElementById('btnSaveProduct').innerText = '💾 Guardar';
-    alert("¡Producto guardado con éxito!");
+    alert("¡Producto guardado correctamente!");
   }).catch((err) => {
     console.error("Error al guardar producto:", err);
-    alert("Error al intentar guardar el producto.");
+    alert("Hubo un error al guardar el producto.");
   });
 }
 
@@ -268,13 +272,13 @@ function editarProducto(id, name, barcode, price, stock) {
 }
 
 function eliminarProducto(id) {
-  if (confirm("¿Estás seguro de eliminar este producto del catálogo?")) {
+  if (confirm("¿Estás seguro de eliminar este producto?")) {
     db.collection("productos").doc(id).delete();
   }
 }
 
 // ==========================================
-// REGISTRO DE MOVIMIENTOS Y BÚSQUEDA
+// MOVIMIENTOS Y VENTAS
 // ==========================================
 function filtrarProductosSugeridos(texto) {
   const box = document.getElementById('sugerenciasBox');
@@ -394,5 +398,5 @@ function cargarHistorialCierres() {
 }
 
 function cargarResumenMensual() {
-  // Lógica de métricas de rentabilidad y saldo mensual
+  // Lógica de rentabilidad mensual
 }
