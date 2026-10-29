@@ -1,10 +1,3 @@
-window.onerror = function(msg, url, line) {
-  alert("Error en la app: " + msg + " (Línea: " + line + ")");
-};
-
-// ==========================================
-// CONFIGURACIÓN DE FIREBASE
-// ==========================================
 const firebaseConfig = {
   // Mantén tus credenciales aquí
 };
@@ -19,16 +12,12 @@ let productosCache = [];
 document.addEventListener("DOMContentLoaded", () => {
   verificarSuscripcionYArrancar();
   
-  // Vinculamos el botón de Registrar Movimiento de forma segura
   const btnAddMov = document.getElementById('btnAddMov');
   if (btnAddMov) {
     btnAddMov.addEventListener('click', registrarMovimiento);
   }
 });
 
-// ==========================================
-// VERIFICACIÓN DE LICENCIA (Conectado a 'licenses')
-// ==========================================
 function verificarSuscripcionYArrancar() {
   const badge = document.getElementById('trialBadge');
   
@@ -66,16 +55,14 @@ function verificarSuscripcionYArrancar() {
     inicializarAplicacion();
   };
 
-  // Temporizador de seguridad: si Firebase tarda más de 1.5 segundos, arranca igual con 30 días para no trabar jamás la app
   const timerSeguridad = setTimeout(() => {
     arrancarAppSegura(30, true);
-  }, 1500);
+  }, 2000);
 
-  // Consultamos tu colección 'licenses'
   db.collection("licenses").doc(deviceId).get().then((doc) => {
     clearTimeout(timerSeguridad);
-    let diasRestantes = 30;
-    let activo = true;
+    let diasRestantes = 0;
+    let activo = false;
 
     if (doc.exists) {
       const data = doc.data();
@@ -90,13 +77,11 @@ function verificarSuscripcionYArrancar() {
         const hoy = new Date();
         const diferenciaTiempo = expDate - hoy;
         diasRestantes = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
-        if (diasRestantes < 0) {
-          diasRestantes = 0;
-          activo = false;
+        if (diasRestantes > 0) {
+          activo = true;
         }
       }
     } else {
-      // Si el dispositivo no existe en licenses, le creamos su registro inicial automáticamente
       const fechaExp = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       db.collection("licenses").doc(deviceId).set({
         createdAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -111,7 +96,6 @@ function verificarSuscripcionYArrancar() {
     arrancarAppSegura(diasRestantes, activo);
   }).catch((err) => {
     clearTimeout(timerSeguridad);
-    console.warn("Aviso de red en licenses:", err);
     arrancarAppSegura(30, true);
   });
 }
@@ -123,9 +107,6 @@ function inicializarAplicacion() {
   cargarResumenMensual();
 }
 
-// ==========================================
-// GESTIÓN DE PESTAÑAS (Caja / Catálogo)
-// ==========================================
 function switchTab(tab) {
   const secCaja = document.getElementById('sectionCaja');
   const secCatalogo = document.getElementById('sectionCatalogo');
@@ -153,9 +134,6 @@ function switchTab(tab) {
   }
 }
 
-// ==========================================
-// CATÁLOGO Y PRODUCTOS
-// ==========================================
 function cargarProductosCache() {
   db.collection("productos").onSnapshot((snapshot) => {
     productosCache = [];
@@ -209,7 +187,6 @@ function saveProduct(event) {
     document.getElementById('btnSaveProduct').innerText = '💾 Guardar';
     alert("¡Producto guardado correctamente!");
   }).catch((err) => {
-    console.error("Error al guardar producto:", err);
     alert("Hubo un error al guardar el producto.");
   });
 }
@@ -232,9 +209,6 @@ function eliminarProducto(id) {
   }
 }
 
-// ==========================================
-// MOVIMIENTOS Y VENTAS (REGISTRO DIARIO)
-// ==========================================
 function filtrarProductosSugeridos(texto) {
   const box = document.getElementById('sugerenciasBox');
   if (!box) return;
@@ -305,7 +279,6 @@ function registrarMovimiento() {
     document.getElementById('movAmount').value = '';
     document.getElementById('movType').value = 'income';
   }).catch((err) => {
-    console.error("Error al registrar movimiento:", err);
     alert("Hubo un error al registrar el movimiento.");
   });
 }
@@ -369,6 +342,4 @@ function cargarHistorialCierres() {
   });
 }
 
-function cargarResumenMensual() {
-  // Lógica de rentabilidad mensual
-}
+function cargarResumenMensual() {}
