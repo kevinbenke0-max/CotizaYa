@@ -2,7 +2,7 @@
 // CONFIGURACIÓN DE FIREBASE
 // ==========================================
 const firebaseConfig = {
-  // Mantén tus credenciales aquí
+  // Coloca aquí tus credenciales de Firebase
 };
 
 if (!firebase.apps.length) {
@@ -10,19 +10,19 @@ if (!firebase.apps.length) {
 }
 const db = firebase.firestore();
 
-// Variables globales para control de escáner y app
+// Variables globales
 let html5QrCode = null;
 let escanerContexto = ''; // 'caja' o 'catalogo'
-let productosCache = [];  // Para búsqueda rápida en memoria
+let productosCache = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-  verificarSuscripciónYArrancar();
+  verificarSuscripcionYArrancar();
 });
 
 // ==========================================
-// VERIFICACIÓN DE SUSCRIPCIÓN (Arregla el "Cargando estado...")
+// VERIFICACIÓN DE SUSCRIPCIÓN Y ESTADO
 // ==========================================
-function verificarSuscripciónYArrancar() {
+function verificarSuscripcionYArrancar() {
   let deviceId = localStorage.getItem("device_id");
   if (!deviceId) {
     deviceId = 'dev_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -37,9 +37,10 @@ function verificarSuscripciónYArrancar() {
     btnWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20quiero%20renovar%20la%20suscripción%20para%20mi%20dispositivo:%20${deviceId}`;
   }
 
+  const badge = document.getElementById('trialBadge');
+
   db.collection("suscripciones").doc(deviceId).get().then((doc) => {
     let activo = false;
-    let badge = document.getElementById('trialBadge');
 
     if (doc.exists) {
       const data = doc.data();
@@ -54,25 +55,29 @@ function verificarSuscripciónYArrancar() {
       }
     }
 
-    if (!activo) {
-      // Si no está activo, verificamos prueba o bloqueamos
-      // (Aquí puedes ajustar si manejas prueba gratuita local de X días)
-      if (badge) {
-        badge.innerText = "🟢 Versión Activa";
-        badge.style.background = "#d4edda";
-        badge.style.color = "#155724";
-      }
+    if (!activo && badge) {
+      badge.innerText = "🟢 Versión Activa";
+      badge.style.background = "#d4edda";
+      badge.style.color = "#155724";
     }
 
-    // Arrancamos la carga normal de datos de la app
-    cargarProductosCache();
+    inicializarAplicacion();
   }).catch((err) => {
     console.error("Error al verificar suscripción:", err);
-    // Por seguridad ante fallos de red, dejamos pasar a la app y cargamos productos
-    const badge = document.getElementById('trialBadge');
-    if (badge) badge.innerText = "🟢 Sistema Operativo";
-    cargarProductosCache();
+    if (badge) {
+      badge.innerText = "🟢 Sistema Operativo";
+      badge.style.background = "#d4edda";
+      badge.style.color = "#155724";
+    }
+    inicializarAplicacion();
   });
+}
+
+function inicializarAplicacion() {
+  cargarProductosCache();
+  cargarMovimientosHoy();
+  cargarHistorialCierres();
+  cargarResumenMensual();
 }
 
 // ==========================================
@@ -106,35 +111,44 @@ function switchTab(tab) {
 }
 
 // ==========================================
-// CONTROL DE CÁMARA Y ESCÁNER DE CÓDIGO DE BARRAS
+// ESCÁNER DE CÓDIGO DE BARRAS (CÁMARA)
 // ==========================================
 function abrirEscaner(contexto) {
-  escanerContexto = contexto; 
+  escanerContexto = contexto;
   const modal = document.getElementById('scannerModal');
   modal.style.display = 'flex';
+
+  if (typeof Html5Qrcode === 'undefined') {
+    alert("La librería del escáner está cargando. Reintenta en unos segundos.");
+    cerrarEscaner();
+    return;
+  }
 
   if (!html5QrCode) {
     html5QrCode = new Html5Qrcode("reader");
   }
 
-  const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+  const config = {
+    fps: 15,
+    qrbox: { width: 250, height: 150 },
+    aspectRatio: 1.0
+  };
 
   html5QrCode.start(
-    { facingMode: "environment" },
+    { facingMode: { exact: "environment" } },
     config,
     onScanSuccess,
     onScanFailure
-  ).catch(err => {
-    console.warn("Fallo con cámara trasera, intentando cámara genérica...", err);
-    // Intento secundario si la cámara trasera estricta falla en algunos dispositivos
+  ).catch(() => {
+    // Reintento genérico si el modo 'exact environment' falla en el dispositivo
     html5QrCode.start(
-      { facingMode: "user" },
+      { facingMode: "environment" },
       config,
       onScanSuccess,
       onScanFailure
-    ).catch(err2 => {
-      console.error("Error definitivo al iniciar la cámara:", err2);
-      alert("No se pudo acceder a la cámara. Verifica los permisos del navegador.");
+    ).catch((err) => {
+      console.error("Error al iniciar cámara:", err);
+      alert("No se pudo iniciar la cámara. Verifica los permisos de la aplicación en tu navegador.");
       cerrarEscaner();
     });
   });
@@ -144,24 +158,25 @@ function cerrarEscaner() {
   const modal = document.getElementById('scannerModal');
   modal.style.display = 'none';
 
-  if (html5QrCode && html5QrCode.isScanning) {
-    html5QrCode.stop().then(() => {
-      console.log("Escáner detenido.");
-    }).catch(err => {
-      console.error("Error al detener el escáner:", err);
-    });
+  if (html5QrCode) {
+    try {
+      if (html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => {
+          html5QrCode.clear();
+        }).catch(err => console.error("Error al detener escáner:", err));
+      }
+    } catch (e) {
+      console.log("Escáner cerrado");
+    }
   }
 }
 
-function onScanSuccess(decodedText, decodedResult) {
-  console.log(`Código detectado: ${decodedText}`);
+function onScanSuccess(decodedText) {
   cerrarEscaner();
 
   if (escanerContexto === 'catalogo') {
     const barcodeInput = document.getElementById('prodBarcode');
-    if (barcodeInput) {
-      barcodeInput.value = decodedText;
-    }
+    if (barcodeInput) barcodeInput.value = decodedText;
   } else if (escanerContexto === 'caja') {
     const movDesc = document.getElementById('movDesc');
     if (movDesc) {
@@ -172,11 +187,11 @@ function onScanSuccess(decodedText, decodedResult) {
 }
 
 function onScanFailure(error) {
-  // Ignorar errores en cada frame de búsqueda
+  // Búsqueda continua en cada fotograma
 }
 
 // ==========================================
-// CACHÉ Y GESTIÓN DE PRODUCTOS / STOCK
+// CATÁLOGO Y PRODUCTOS (INVENTARIO)
 // ==========================================
 function cargarProductosCache() {
   db.collection("productos").onSnapshot((snapshot) => {
@@ -193,8 +208,8 @@ function cargarProductosCache() {
           <tr>
             <td><code>${prod.barcode || '-'}</code></td>
             <td><strong>${prod.name}</strong></td>
-            <td>$${Number(prod.price).toLocaleString()}</td>
-            <td>${prod.stock}</td>
+            <td>$${Number(prod.price || 0).toLocaleString()}</td>
+            <td>${prod.stock || 0}</td>
             <td style="text-align: right;">
               <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="editarProducto('${prod.id}', '${prod.name}', '${prod.barcode || ''}', ${prod.price}, ${prod.stock})">✏️</button>
               <button class="btn btn-danger-soft" style="padding: 4px 8px; font-size: 0.8rem;" onclick="eliminarProducto('${prod.id}')">🗑️</button>
@@ -208,7 +223,7 @@ function cargarProductosCache() {
 
 function saveProduct(event) {
   event.preventDefault();
-  
+
   const editId = document.getElementById('editProductId').value;
   const name = document.getElementById('prodName').value.trim();
   const barcode = document.getElementById('prodBarcode').value.trim();
@@ -223,8 +238,8 @@ function saveProduct(event) {
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  const action = editId ? 
-    db.collection("productos").doc(editId).update(productoData) : 
+  const action = editId ?
+    db.collection("productos").doc(editId).update(productoData) :
     db.collection("productos").add({ ...productoData, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
 
   action.then(() => {
@@ -232,38 +247,34 @@ function saveProduct(event) {
     document.getElementById('editProductId').value = '';
     document.getElementById('formProductTitle').innerText = '📦 Agregar Producto';
     document.getElementById('btnSaveProduct').innerText = '💾 Guardar';
-    alert("¡Producto guardado correctamente!");
-  }).catch(error => {
-    console.error("Error al guardar producto:", error);
-    alert("Hubo un error al guardar el producto.");
+    alert("¡Producto guardado con éxito!");
+  }).catch((err) => {
+    console.error("Error al guardar producto:", err);
+    alert("Error al intentar guardar el producto.");
   });
 }
 
 function editarProducto(id, name, barcode, price, stock) {
   document.getElementById('editProductId').value = id;
   document.getElementById('prodName').value = name;
-  document.getElementById('prodBarcode').value = barcode !== 'null' ? barcode : '';
+  document.getElementById('prodBarcode').value = (barcode && barcode !== 'null') ? barcode : '';
   document.getElementById('prodPrice').value = price;
   document.getElementById('prodStock').value = stock;
-  
+
   document.getElementById('formProductTitle').innerText = '✏️ Editar Producto';
   document.getElementById('btnSaveProduct').innerText = '💾 Actualizar';
-  
+
   switchTab('catalogo');
 }
 
 function eliminarProducto(id) {
-  if (confirm("¿Estás seguro de eliminar este producto del inventario?")) {
-    db.collection("productos").doc(id).delete().then(() => {
-      console.log("Producto eliminado");
-    }).catch(err => {
-      console.error("Error al eliminar:", err);
-    });
+  if (confirm("¿Estás seguro de eliminar este producto del catálogo?")) {
+    db.collection("productos").doc(id).delete();
   }
 }
 
 // ==========================================
-// LÓGICA DE VENTAS Y BÚSQUEDA INTELIGENTE
+// REGISTRO DE MOVIMIENTOS Y BÚSQUEDA
 // ==========================================
 function filtrarProductosSugeridos(texto) {
   const box = document.getElementById('sugerenciasBox');
@@ -275,8 +286,8 @@ function filtrarProductosSugeridos(texto) {
     return;
   }
 
-  const query = texto.toLowerCase();
-  const filtrados = productosCache.filter(p => 
+  const query = texto.toLowerCase().trim();
+  const filtrados = productosCache.filter(p =>
     p.name.toLowerCase().includes(query) || (p.barcode && p.barcode.toLowerCase().includes(query))
   );
 
@@ -298,20 +309,90 @@ function seleccionarProductoVenta(nombre, precio) {
   document.getElementById('movDesc').value = nombre;
   document.getElementById('movAmount').value = precio;
   document.getElementById('sugerenciasBox').style.display = 'none';
-  document.getElementById('movQty').focus();
+  actualizarMontoPorCantidad();
 }
 
 function buscarYSeleccionarPorCodigoOTexto(valor) {
   const query = valor.trim().toLowerCase();
-  const encontrado = productosCache.find(p => p.barcode === query || p.name.toLowerCase() === query);
-  
+  const encontrado = productosCache.find(p => (p.barcode && p.barcode.toLowerCase() === query) || p.name.toLowerCase() === query);
+
   if (encontrado) {
     document.getElementById('movDesc').value = encontrado.name;
     document.getElementById('movAmount').value = encontrado.price;
     document.getElementById('sugerenciasBox').style.display = 'none';
+    actualizarMontoPorCantidad();
   }
 }
 
 function actualizarMontoPorCantidad() {
-  // Lógica de cantidad x precio
+  const desc = document.getElementById('movDesc').value.trim().toLowerCase();
+  const qty = parseInt(document.getElementById('movQty').value) || 1;
+  const encontrado = productosCache.find(p => p.name.toLowerCase() === desc || (p.barcode && p.barcode.toLowerCase() === desc));
+
+  if (encontrado) {
+    document.getElementById('movAmount').value = encontrado.price * qty;
+  }
+}
+
+function cargarMovimientosHoy() {
+  const hoyStr = new Date().toISOString().split('T')[0];
+  db.collection("movimientos").where("fechaStr", "==", hoyStr).onSnapshot((snapshot) => {
+    const movList = document.getElementById('movList');
+    if (!movList) return;
+
+    movList.innerHTML = '';
+    let totalIngresos = 0;
+    let totalGastos = 0;
+
+    snapshot.forEach((doc) => {
+      const mov = doc.data();
+      const monto = Number(mov.amount) || 0;
+
+      if (mov.type === 'income') totalIngresos += monto;
+      else totalGastos += monto;
+
+      movList.innerHTML += `
+        <tr>
+          <td>${mov.desc} x${mov.qty || 1}</td>
+          <td>${mov.type === 'income' ? '🟢 Ingreso' : '🔴 Gasto'}</td>
+          <td style="text-align: right;">$${monto.toLocaleString()}</td>
+          <td><button class="btn btn-danger-soft" onclick="eliminarMovimiento('${doc.id}')">🗑️</button></td>
+        </tr>
+      `;
+    });
+
+    document.getElementById('lblTotalIncome').innerText = `$${totalIngresos.toLocaleString()}`;
+    document.getElementById('lblTotalExpense').innerText = `$${totalGastos.toLocaleString()}`;
+    document.getElementById('lblNetBalance').innerText = `$${(totalIngresos - totalGastos).toLocaleString()}`;
+  });
+}
+
+function eliminarMovimiento(id) {
+  if (confirm("¿Deseas eliminar este movimiento?")) {
+    db.collection("movimientos").doc(id).delete();
+  }
+}
+
+function cargarHistorialCierres() {
+  db.collection("cierres").orderBy("createdAt", "desc").onSnapshot((snapshot) => {
+    const list = document.getElementById('closedDaysList');
+    if (!list) return;
+
+    list.innerHTML = '';
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      list.innerHTML += `
+        <tr>
+          <td>${data.fecha || '-'}</td>
+          <td><small>Ing: $${data.totalIngresos || 0}</small></td>
+          <td style="text-align: right; font-weight: bold;">$${data.neto || 0}</td>
+          <td><button class="btn btn-secondary" onclick="verDetalleCierre('${doc.id}')">👁️</button></td>
+        </tr>
+      `;
+    });
+  });
+}
+
+function cargarResumenMensual() {
+  // Lógica de métricas de rentabilidad y saldo mensual
 }
