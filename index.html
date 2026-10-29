@@ -69,8 +69,9 @@
         
         <div class="form-row">
           <div style="display: flex; gap: 8px; flex: 2; min-width: 250px;">
-            <div style="position: relative; flex: 1;">
-              <input type="text" id="movDesc" placeholder="Escribe producto..." autocomplete="off" oninput="filtrarProductosSugeridos(this.value)">
+            <div style="position: relative; flex: 1; display: flex; gap: 4px;">
+              <input type="text" id="movDesc" placeholder="Buscar producto o código..." autocomplete="off" oninput="filtrarProductosSugeridos(this.value)">
+              <button type="button" class="btn btn-secondary" title="Escanear Código para Venta" onclick="abrirEscaner('caja')" style="padding: 0 10px; font-size: 1.1rem;">📷</button>
               <div id="sugerenciasBox" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-radius: 4px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.15);"></div>
             </div>
             
@@ -184,11 +185,18 @@
           <!-- Campo oculto para saber si estamos editando un producto existente -->
           <input type="hidden" id="editProductId" value="">
           
-          <div class="form-row">
-            <input type="text" id="prodName" placeholder="Nombre del producto (ej: Gaseosa 2.25L)" required autocomplete="off">
-            <input type="number" step="any" id="prodPrice" placeholder="Precio ($)" min="0" required>
-            <input type="number" id="prodStock" placeholder="Stock" min="0" required>
-            <button type="submit" id="btnSaveProduct" class="btn btn-primary">💾 Guardar</button>
+          <div class="form-row" style="flex-wrap: wrap;">
+            <input type="text" id="prodName" placeholder="Nombre del producto (ej: Gaseosa 2.25L)" required autocomplete="off" style="flex: 2; min-width: 200px;">
+            
+            <!-- Campo de código de barras OPCIONAL con escáner -->
+            <div style="display: flex; gap: 4px; flex: 1.5; min-width: 180px;">
+              <input type="text" id="prodBarcode" placeholder="Cód. Barras (Opcional)" autocomplete="off" style="flex: 1;">
+              <button type="button" class="btn btn-secondary" title="Escanear con Cámara" onclick="abrirEscaner('catalogo')" style="padding: 0 10px; font-size: 1.1rem;">📷</button>
+            </div>
+
+            <input type="number" step="any" id="prodPrice" placeholder="Precio ($)" min="0" required style="flex: 1; min-width: 100px;">
+            <input type="number" id="prodStock" placeholder="Stock" min="0" required style="flex: 1; min-width: 80px;">
+            <button type="submit" id="btnSaveProduct" class="btn btn-primary" style="flex: 1; min-width: 110px;">💾 Guardar</button>
           </div>
         </form>
       </section>
@@ -199,6 +207,7 @@
           <table>
             <thead>
               <tr>
+                <th>Código</th>
                 <th>Producto</th>
                 <th>Precio</th>
                 <th>Stock</th>
@@ -219,6 +228,19 @@
   <a href="https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20necesito%20soporte%20con%20la%20app%20Control%20De%20Caja%20Ultra." target="_blank" class="float-wa" title="Soporte por WhatsApp">
     💬
   </a>
+
+  <!-- MODAL DE CÁMARA PARA ESCANEAR CÓDIGO DE BARRAS -->
+  <div id="scannerModal" class="modal" style="display: none; z-index: 2000;">
+    <div class="modal-content card" style="max-width: 450px; text-align: center; padding: 15px;">
+      <h3>📷 Escanear Código de Barras</h3>
+      <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 10px;">Apunta la cámara de tu celular o PC al código del producto.</p>
+      
+      <!-- Visor de la cámara -->
+      <div id="reader" style="width: 100%; min-height: 250px; background: #000; border-radius: 8px; overflow: hidden;"></div>
+      
+      <button type="button" id="btnCloseScanner" class="btn btn-danger-soft" onclick="cerrarEscaner()" style="margin-top: 15px; width: 100%;">Cancelar Escaneo</button>
+    </div>
+  </div>
 
   <!-- MODAL DE DETALLE DE DÍA -->
   <div id="dayModal" class="modal" style="display: none;">
@@ -244,6 +266,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   
+  <!-- LIBRERÍA DE LECTURA DE CÓDIGO DE BARRAS Y QR CON CÁMARA -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
   <script src="script.js"></script>
 </body>
 </html>
