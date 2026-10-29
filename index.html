@@ -6,7 +6,6 @@
   <title>Control De Caja Ultra - Sistema de Caja y Control de Stock</title>
   <link rel="stylesheet" href="styles.css">
   
-  <!-- ETIQUETA DE VERIFICACIÓN DE GOOGLE SEARCH CONSOLE -->
   <meta name="google-site-verification" content="4om2GB4Heds_-M-txLCnGkDyoScR8eX2vgaXwbGLOSU">
 </head>
 <body>
@@ -25,18 +24,15 @@
 
       <p class="pay-instruction">Para activar tu cuenta al instante, completa tus datos, realiza el pago y envíanos el comprobante:</p>
 
-      <!-- CAMPO OBLIGATORIO DE NOMBRE -->
       <div class="form-group-lock">
         <input type="text" id="lockUserName" placeholder="Tu Nombre y Apellido (como en el comprobante)" autocomplete="name">
         <small class="field-hint">Necesario para cruzar los datos con la transferencia.</small>
       </div>
 
-      <!-- BOTÓN DE MERCADO PAGO -->
       <a href="https://mpago.la/29fxHKM" target="_blank" class="btn btn-mp">
         💳 Pagar Suscripción Mensual ($10.000)
       </a>
 
-      <!-- BOTÓN DE CONTACTO WHATSAPP -->
       <a id="btnRenovarWA" href="#" target="_blank" class="btn btn-wa">
         💬 Notificar Pago por WhatsApp
       </a>
@@ -63,7 +59,6 @@
 
     <!-- SECCIÓN 1: CAJA Y MOVIMIENTOS -->
     <div id="sectionCaja" style="display: block;">
-      <!-- CARGA DE MOVIMIENTOS -->
       <section class="card">
         <h3>➕ Registrar Movimiento Diario</h3>
         
@@ -88,7 +83,6 @@
         </div>
       </section>
 
-      <!-- TABLA DE MOVIMIENTOS DE HOY -->
       <section class="card">
         <h3>📋 Movimientos de Hoy</h3>
         <div class="table-responsive">
@@ -101,9 +95,7 @@
                 <th>Acción</th>
               </tr>
             </thead>
-            <tbody id="movList">
-              <!-- Se carga dinámicamente -->
-            </tbody>
+            <tbody id="movList"></tbody>
           </table>
         </div>
 
@@ -118,7 +110,6 @@
         </div>
       </section>
 
-      <!-- HISTORIAL DE CIERRES DIARIOS -->
       <section class="card">
         <div class="summary-header">
           <h3>📂 Historial de Cierres Diarios</h3>
@@ -135,20 +126,15 @@
                 <th>Acción</th>
               </tr>
             </thead>
-            <tbody id="closedDaysList">
-              <!-- Se carga dinámicamente -->
-            </tbody>
+            <tbody id="closedDaysList"></tbody>
           </table>
         </div>
       </section>
 
-      <!-- RESUMEN MENSUAL Y DE RENTABILIDAD -->
       <section class="card card-summary">
         <div class="summary-header">
           <h3>📊 Rentabilidad y Resumen Mensual</h3>
-          <select id="monthSelector" class="month-select">
-            <!-- Opciones dinámicas -->
-          </select>
+          <select id="monthSelector" class="month-select"></select>
         </div>
 
         <div class="metrics-grid">
@@ -176,16 +162,15 @@
       </section>
     </div>
 
-    <!-- SECCIÓN 2: CATÁLOGO DE PRODUCTOS (Oculta por defecto) -->
+    <!-- SECCIÓN 2: CATÁLOGO DE PRODUCTOS -->
     <div id="sectionCatalogo" style="display: none;">
       <section class="card">
         <h3 id="formProductTitle">📦 Agregar Producto</h3>
         <form id="formProduct" onsubmit="saveProduct(event)">
-          <!-- Campo oculto para saber si estamos editando un producto existente -->
           <input type="hidden" id="editProductId" value="">
           
           <div class="form-row">
-            <input type="text" id="prodName" placeholder="Nombre del producto (ej: Gaseosa 2.25L)" required autocomplete="off">
+            <input type="text" id="prodName" placeholder="Nombre del producto" required autocomplete="off">
             <input type="number" step="any" id="prodPrice" placeholder="Precio ($)" min="0" required>
             <input type="number" id="prodStock" placeholder="Stock" min="0" required>
             <button type="submit" id="btnSaveProduct" class="btn btn-primary">💾 Guardar</button>
@@ -205,9 +190,7 @@
                 <th style="text-align: right;">Acciones</th>
               </tr>
             </thead>
-            <tbody id="productList">
-              <!-- Se carga dinámicamente -->
-            </tbody>
+            <tbody id="productList"></tbody>
           </table>
         </div>
       </section>
@@ -215,35 +198,13 @@
 
   </div>
 
-  <!-- BOTÓN FLOTANTE DE SOPORTE WHATSAPP -->
   <a href="https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20necesito%20soporte%20con%20la%20app%20Control%20De%20Caja%20Ultra." target="_blank" class="float-wa" title="Soporte por WhatsApp">
     💬
   </a>
 
-  <!-- MODAL DE DETALLE DE DÍA -->
-  <div id="dayModal" class="modal" style="display: none;">
-    <div class="modal-content card">
-      <h3 id="modalTitle">Detalle del Cierre</h3>
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Detalle</th>
-              <th>Tipo</th>
-              <th style="text-align: right;">Monto</th>
-            </tr>
-          </thead>
-          <tbody id="modalMovList"></tbody>
-        </table>
-      </div>
-      <button id="btnCloseModal" class="btn btn-primary" style="margin-top: 15px;">Cerrar Ventana</button>
-    </div>
-  </div>
-
   <!-- SDK DE FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  
   <script src="script.js"></script>
 </body>
 </html>
