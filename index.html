@@ -1,274 +1,249 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control De Caja Ultra - Sistema de Caja y Control de Stock</title>
-  <link rel="stylesheet" href="styles.css">
-  
-  <!-- ETIQUETA DE VERIFICACIÓN DE GOOGLE SEARCH CONSOLE -->
-  <meta name="google-site-verification" content="4om2GB4Heds_-M-txLCnGkDyoScR8eX2vgaXwbGLOSU">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control De Caja Ultra - Sistema de Caja y Control de Stock</title>
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- ETIQUETA DE VERIFICACIÓN DE GOOGLE SEARCH CONSOLE -->
+  <meta name="google-site-verification" content="4om2GB4Heds_-M-txLCnGkDyoScR8eX2vgaXwbGLOSU">
 </head>
 <body>
 
-  <!-- PANTALLA DE BLOQUEO POR SUSCRIPCIÓN -->
-  <div id="lockScreen" class="lock-screen" style="display: none;">
-    <div class="lock-card">
-      <div class="lock-icon">🔒</div>
-      <h2>Acceso Requerido</h2>
-      <p>Tu período de prueba gratuita o suscripción mensual ha vencido.</p>
-      
-      <div class="device-info">
-        <small>ID de tu dispositivo:</small>
-        <strong id="userDeviceId">Cargando...</strong>
-      </div>
+  <!-- PANTALLA DE BLOQUEO POR SUSCRIPCIÓN -->
+  <div id="lockScreen" class="lock-screen" style="display: none;">
+    <div class="lock-card">
+      <div class="lock-icon">🔒</div>
+      <h2>Acceso Requerido</h2>
+      <p>Tu período de prueba gratuita o suscripción mensual ha vencido.</p>
+      
+      <div class="device-info">
+        <small>ID de tu dispositivo:</small>
+        <strong id="userDeviceId">Cargando...</strong>
+      </div>
 
-      <p class="pay-instruction">Para activar tu cuenta al instante, completa tus datos, realiza el pago y envíanos el comprobante:</p>
+      <p class="pay-instruction">Para activar tu cuenta al instante, completa tus datos, realiza el pago y envíanos el comprobante:</p>
 
-      <!-- CAMPO OBLIGATORIO DE NOMBRE -->
-      <div class="form-group-lock">
-        <input type="text" id="lockUserName" placeholder="Tu Nombre y Apellido (como en el comprobante)" autocomplete="name">
-        <small class="field-hint">Necesario para cruzar los datos con la transferencia.</small>
-      </div>
+      <!-- CAMPO OBLIGATORIO DE NOMBRE -->
+      <div class="form-group-lock">
+        <input type="text" id="lockUserName" placeholder="Tu Nombre y Apellido (como en el comprobante)" autocomplete="name">
+        <small class="field-hint">Necesario para cruzar los datos con la transferencia.</small>
+      </div>
 
-      <!-- BOTÓN DE MERCADO PAGO -->
-      <a href="https://mpago.la/29fxHKM" target="_blank" class="btn btn-mp">
-        💳 Pagar Suscripción Mensual ($10.000)
-      </a>
+      <!-- BOTÓN DE MERCADO PAGO -->
+      <a href="https://mpago.la/29fxHKM" target="_blank" class="btn btn-mp">
+        💳 Pagar Suscripción Mensual ($10.000)
+      </a>
 
-      <!-- BOTÓN DE CONTACTO WHATSAPP -->
-      <a id="btnRenovarWA" href="#" target="_blank" class="btn btn-wa">
-        💬 Notificar Pago por WhatsApp
-      </a>
-    </div>
-  </div>
+      <!-- BOTÓN DE CONTACTO WHATSAPP -->
+      <a id="btnRenovarWA" href="#" target="_blank" class="btn btn-wa">
+        💬 Notificar Pago por WhatsApp
+      </a>
+    </div>
+  </div>
 
-  <!-- APLICACIÓN PRINCIPAL -->
-  <div id="mainApp" class="container" style="display: block;">
-    
-    <header class="app-header" style="flex-direction: column; align-items: stretch; gap: 10px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <div class="header-title">
-          <h1>Control De Caja Ultra</h1>
-          <span id="trialBadge" class="badge">Cargando estado...</span>
-        </div>
-      </div>
+  <!-- APLICACIÓN PRINCIPAL -->
+  <div id="mainApp" class="container" style="display: block;">
+    
+    <header class="app-header" style="flex-direction: column; align-items: stretch; gap: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div class="header-title">
+          <h1>Control De Caja Ultra</h1>
+          <span id="trialBadge" class="badge">Cargando estado...</span>
+        </div>
+      </div>
 
-      <!-- BOTONES DE NAVEGACIÓN SUPERIOR -->
-      <div class="nav-tabs" style="display: flex; gap: 10px; border-top: 1px solid #333; padding-top: 10px;">
-        <button type="button" id="btnTabCaja" class="btn btn-primary" onclick="switchTab('caja')" style="flex: 1; font-weight: bold;">💵 Caja / Movimientos</button>
-        <button type="button" id="btnTabCatalogo" class="btn btn-secondary" onclick="switchTab('catalogo')" style="flex: 1; font-weight: bold; background: #333; color: #ccc;">📦 Catálogo / Stock</button>
-      </div>
-    </header>
+      <!-- BOTONES DE NAVEGACIÓN SUPERIOR -->
+      <div class="nav-tabs" style="display: flex; gap: 10px; border-top: 1px solid #333; padding-top: 10px;">
+        <button type="button" id="btnTabCaja" class="btn btn-primary" onclick="switchTab('caja')" style="flex: 1; font-weight: bold;">💵 Caja / Movimientos</button>
+        <button type="button" id="btnTabCatalogo" class="btn btn-secondary" onclick="switchTab('catalogo')" style="flex: 1; font-weight: bold; background: #333; color: #ccc;">📦 Catálogo / Stock</button>
+      </div>
+    </header>
 
-    <!-- SECCIÓN 1: CAJA Y MOVIMIENTOS -->
-    <div id="sectionCaja" style="display: block;">
-      <!-- CARGA DE MOVIMIENTOS -->
-      <section class="card">
-        <h3>➕ Registrar Movimiento Diario</h3>
-        
-        <div class="form-row">
-          <div style="display: flex; gap: 8px; flex: 2; min-width: 250px;">
-            <div style="position: relative; flex: 1; display: flex; gap: 4px;">
-              <input type="text" id="movDesc" placeholder="Buscar producto o código..." autocomplete="off" oninput="filtrarProductosSugeridos(this.value)">
-              <button type="button" class="btn btn-secondary" title="Escanear Código para Venta" onclick="abrirEscaner('caja')" style="padding: 0 10px; font-size: 1.1rem;">📷</button>
-              <div id="sugerenciasBox" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-radius: 4px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.15);"></div>
-            </div>
-            
-            <input type="number" id="movQty" value="1" min="1" step="1" title="Cantidad" style="width: 65px; text-align: center; padding: 8px 4px;" oninput="actualizarMontoPorCantidad()">
-          </div>
+    <!-- SECCIÓN 1: CAJA Y MOVIMIENTOS -->
+    <div id="sectionCaja" style="display: block;">
+      <!-- CARGA DE MOVIMIENTOS -->
+      <section class="card">
+        <h3>➕ Registrar Movimiento Diario</h3>
+        
+        <div class="form-row">
+          <div style="display: flex; gap: 8px; flex: 2; min-width: 250px;">
+            <div style="position: relative; flex: 1;">
+              <input type="text" id="movDesc" placeholder="Escribe producto..." autocomplete="off" oninput="filtrarProductosSugeridos(this.value)">
+              <div id="sugerenciasBox" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1px solid #ccc; border-radius: 4px; max-height: 180px; overflow-y: auto; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.15);"></div>
+            </div>
+            
+            <input type="number" id="movQty" value="1" min="1" step="1" title="Cantidad" style="width: 65px; text-align: center; padding: 8px 4px;" oninput="actualizarMontoPorCantidad()">
+          </div>
 
-          <input type="number" id="movAmount" placeholder="Monto ($)" min="0" step="any" style="flex: 1; min-width: 110px;">
-          
-          <select id="movType" style="flex: 1; min-width: 130px;">
-            <option value="income">🟢 Ingreso / Venta</option>
-            <option value="expense">🔴 Gasto / Compra</option>
-          </select>
-          
-          <button id="btnAddMov" class="btn btn-primary" style="flex: 0.8; min-width: 90px;">Cargar</button>
-        </div>
-      </section>
+          <input type="number" id="movAmount" placeholder="Monto ($)" min="0" step="any" style="flex: 1; min-width: 110px;">
+          
+          <select id="movType" style="flex: 1; min-width: 130px;">
+            <option value="income">🟢 Ingreso / Venta</option>
+            <option value="expense">🔴 Gasto / Compra</option>
+          </select>
+          
+          <button id="btnAddMov" class="btn btn-primary" style="flex: 0.8; min-width: 90px;">Cargar</button>
+        </div>
+      </section>
 
-      <!-- TABLA DE MOVIMIENTOS DE HOY -->
-      <section class="card">
-        <h3>📋 Movimientos de Hoy</h3>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Detalle</th>
-                <th>Tipo</th>
-                <th style="text-align: right;">Monto</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody id="movList">
-              <!-- Se carga dinámicamente -->
-            </tbody>
-          </table>
-        </div>
+      <!-- TABLA DE MOVIMIENTOS DE HOY -->
+      <section class="card">
+        <h3>📋 Movimientos de Hoy</h3>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Detalle</th>
+                <th>Tipo</th>
+                <th style="text-align: right;">Monto</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="movList">
+              <!-- Se carga dinámicamente -->
+            </tbody>
+          </table>
+        </div>
 
-        <div class="day-totals">
-          <div>Total Ingresos: <span id="lblTotalIncome" class="text-success">$0</span></div>
-          <div>Total Gastos: <span id="lblTotalExpense" class="text-danger">$0</span></div>
-          <div class="total-net">Balance Hoy: <span id="lblNetBalance">$0</span></div>
-        </div>
+        <div class="day-totals">
+          <div>Total Ingresos: <span id="lblTotalIncome" class="text-success">$0</span></div>
+          <div>Total Gastos: <span id="lblTotalExpense" class="text-danger">$0</span></div>
+          <div class="total-net">Balance Hoy: <span id="lblNetBalance">$0</span></div>
+        </div>
 
-        <div class="actions-row">
-          <button id="btnCloseDay" class="btn btn-success">🔒 Realizar Cierre de Caja</button>
-        </div>
-      </section>
+        <div class="actions-row">
+          <button id="btnCloseDay" class="btn btn-success">🔒 Realizar Cierre de Caja</button>
+        </div>
+      </section>
 
-      <!-- HISTORIAL DE CIERRES DIARIOS -->
-      <section class="card">
-        <div class="summary-header">
-          <h3>📂 Historial de Cierres Diarios</h3>
-          <button id="btnClearHistory" class="btn btn-danger-soft">Limpiar Historial</button>
-        </div>
-        
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Totales</th>
-                <th style="text-align: right;">Neto</th>
-                <th>Acción</th>
-              </tr>
-            </thead>
-            <tbody id="closedDaysList">
-              <!-- Se carga dinámicamente -->
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <!-- HISTORIAL DE CIERRES DIARIOS -->
+      <section class="card">
+        <div class="summary-header">
+          <h3>📂 Historial de Cierres Diarios</h3>
+          <button id="btnClearHistory" class="btn btn-danger-soft">Limpiar Historial</button>
+        </div>
+        
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Totales</th>
+                <th style="text-align: right;">Neto</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="closedDaysList">
+              <!-- Se carga dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-      <!-- RESUMEN MENSUAL Y DE RENTABILIDAD -->
-      <section class="card card-summary">
-        <div class="summary-header">
-          <h3>📊 Rentabilidad y Resumen Mensual</h3>
-          <select id="monthSelector" class="month-select">
-            <!-- Opciones dinámicas -->
-          </select>
-        </div>
+      <!-- RESUMEN MENSUAL Y DE RENTABILIDAD -->
+      <section class="card card-summary">
+        <div class="summary-header">
+          <h3>📊 Rentabilidad y Resumen Mensual</h3>
+          <select id="monthSelector" class="month-select">
+            <!-- Opciones dinámicas -->
+          </select>
+        </div>
 
-        <div class="metrics-grid">
-          <div class="metric-card">
-            <small>Ventas del Mes</small>
-            <h4 id="lblMonthIncome" class="text-success">$0</h4>
-          </div>
-          <div class="metric-card">
-            <small>Gastos del Mes</small>
-            <h4 id="lblMonthExpense" class="text-danger">$0</h4>
-          </div>
-          <div class="metric-card">
-            <small>Rentabilidad s/ Costo</small>
-            <h4 id="lblMonthMargin">0%</h4>
-          </div>
-          <div class="metric-card">
-            <small>Ganancia Neta</small>
-            <h4 id="lblMonthNet">$0</h4>
-          </div>
-        </div>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <small>Ventas del Mes</small>
+            <h4 id="lblMonthIncome" class="text-success">$0</h4>
+          </div>
+          <div class="metric-card">
+            <small>Gastos del Mes</small>
+            <h4 id="lblMonthExpense" class="text-danger">$0</h4>
+          </div>
+          <div class="metric-card">
+            <small>Rentabilidad s/ Costo</small>
+            <h4 id="lblMonthMargin">0%</h4>
+          </div>
+          <div class="metric-card">
+            <small>Ganancia Neta</small>
+            <h4 id="lblMonthNet">$0</h4>
+          </div>
+        </div>
 
-        <button id="btnWhatsApp" class="btn btn-wa-share">
-          📲 Compartir Resumen por WhatsApp
-        </button>
-      </section>
-    </div>
+        <button id="btnWhatsApp" class="btn btn-wa-share">
+          📲 Compartir Resumen por WhatsApp
+        </button>
+      </section>
+    </div>
 
-    <!-- SECCIÓN 2: CATÁLOGO DE PRODUCTOS (Oculta por defecto) -->
-    <div id="sectionCatalogo" style="display: none;">
-      <section class="card">
-        <h3 id="formProductTitle">📦 Agregar Producto</h3>
-        <form id="formProduct" onsubmit="saveProduct(event)">
-          <!-- Campo oculto para saber si estamos editando un producto existente -->
-          <input type="hidden" id="editProductId" value="">
-          
-          <div class="form-row" style="flex-wrap: wrap;">
-            <input type="text" id="prodName" placeholder="Nombre del producto (ej: Gaseosa 2.25L)" required autocomplete="off" style="flex: 2; min-width: 200px;">
-            
-            <!-- Campo de código de barras OPCIONAL con escáner -->
-            <div style="display: flex; gap: 4px; flex: 1.5; min-width: 180px;">
-              <input type="text" id="prodBarcode" placeholder="Cód. Barras (Opcional)" autocomplete="off" style="flex: 1;">
-              <button type="button" class="btn btn-secondary" title="Escanear con Cámara" onclick="abrirEscaner('catalogo')" style="padding: 0 10px; font-size: 1.1rem;">📷</button>
-            </div>
+    <!-- SECCIÓN 2: CATÁLOGO DE PRODUCTOS (Oculta por defecto) -->
+    <div id="sectionCatalogo" style="display: none;">
+      <section class="card">
+        <h3 id="formProductTitle">📦 Agregar Producto</h3>
+        <form id="formProduct" onsubmit="saveProduct(event)">
+          <!-- Campo oculto para saber si estamos editando un producto existente -->
+          <input type="hidden" id="editProductId" value="">
+          
+          <div class="form-row">
+            <input type="text" id="prodName" placeholder="Nombre del producto (ej: Gaseosa 2.25L)" required autocomplete="off">
+            <input type="number" step="any" id="prodPrice" placeholder="Precio ($)" min="0" required>
+            <input type="number" id="prodStock" placeholder="Stock" min="0" required>
+            <button type="submit" id="btnSaveProduct" class="btn btn-primary">💾 Guardar</button>
+          </div>
+        </form>
+      </section>
 
-            <input type="number" step="any" id="prodPrice" placeholder="Precio ($)" min="0" required style="flex: 1; min-width: 100px;">
-            <input type="number" id="prodStock" placeholder="Stock" min="0" required style="flex: 1; min-width: 80px;">
-            <button type="submit" id="btnSaveProduct" class="btn btn-primary" style="flex: 1; min-width: 110px;">💾 Guardar</button>
-          </div>
-        </form>
-      </section>
+      <section class="card">
+        <h3>📋 Inventario de Productos</h3>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th style="text-align: right;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="productList">
+              <!-- Se carga dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
 
-      <section class="card">
-        <h3>📋 Inventario de Productos</h3>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr>
-                <th>Código</th>
-                <th>Producto</th>
-                <th>Precio</th>
-                <th>Stock</th>
-                <th style="text-align: right;">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="productList">
-              <!-- Se carga dinámicamente -->
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
+  </div>
 
-  </div>
+  <!-- BOTÓN FLOTANTE DE SOPORTE WHATSAPP -->
+  <a href="https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20necesito%20soporte%20con%20la%20app%20Control%20De%20Caja%20Ultra." target="_blank" class="float-wa" title="Soporte por WhatsApp">
+    💬
+  </a>
 
-  <!-- BOTÓN FLOTANTE DE SOPORTE WHATSAPP -->
-  <a href="https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20necesito%20soporte%20con%20la%20app%20Control%20De%20Caja%20Ultra." target="_blank" class="float-wa" title="Soporte por WhatsApp">
-    💬
-  </a>
+  <!-- MODAL DE DETALLE DE DÍA -->
+  <div id="dayModal" class="modal" style="display: none;">
+    <div class="modal-content card">
+      <h3 id="modalTitle">Detalle del Cierre</h3>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Detalle</th>
+              <th>Tipo</th>
+              <th style="text-align: right;">Monto</th>
+            </tr>
+          </thead>
+          <tbody id="modalMovList"></tbody>
+        </table>
+      </div>
+      <button id="btnCloseModal" class="btn btn-primary" style="margin-top: 15px;">Cerrar Ventana</button>
+    </div>
+  </div>
 
-  <!-- MODAL DE CÁMARA PARA ESCANEAR CÓDIGO DE BARRAS -->
-  <div id="scannerModal" class="modal" style="display: none; z-index: 2000;">
-    <div class="modal-content card" style="max-width: 450px; text-align: center; padding: 15px;">
-      <h3>📷 Escanear Código de Barras</h3>
-      <p style="font-size: 0.85rem; color: #aaa; margin-bottom: 10px;">Apunta la cámara de tu celular o PC al código del producto.</p>
-      
-      <!-- Visor de la cámara -->
-      <div id="reader" style="width: 100%; min-height: 250px; background: #000; border-radius: 8px; overflow: hidden;"></div>
-      
-      <button type="button" id="btnCloseScanner" class="btn btn-danger-soft" onclick="cerrarEscaner()" style="margin-top: 15px; width: 100%;">Cancelar Escaneo</button>
-    </div>
-  </div>
-
-  <!-- MODAL DE DETALLE DE DÍA -->
-  <div id="dayModal" class="modal" style="display: none;">
-    <div class="modal-content card">
-      <h3 id="modalTitle">Detalle del Cierre</h3>
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Detalle</th>
-              <th>Tipo</th>
-              <th style="text-align: right;">Monto</th>
-            </tr>
-          </thead>
-          <tbody id="modalMovList"></tbody>
-        </table>
-      </div>
-      <button id="btnCloseModal" class="btn btn-primary" style="margin-top: 15px;">Cerrar Ventana</button>
-    </div>
-  </div>
-
-  <!-- SDK DE FIREBASE -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  
-  <!-- LIBRERÍA DE LECTURA DE CÓDIGO DE BARRAS Y QR CON CÁMARA -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-
-  <script src="script.js"></script>
+  <!-- SDK DE FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  
+  <script src="script.js"></script>
 </body>
 </html>
