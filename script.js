@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ==========================================
-// VERIFICACIÓN DE SUSCRIPCIÓN (Como antes: muestra días exactos)
+// VERIFICACIÓN DE SUSCRIPCIÓN
 // ==========================================
 function verificarSuscripcionYArrancar() {
   const badge = document.getElementById('trialBadge');
@@ -42,7 +42,6 @@ function verificarSuscripcionYArrancar() {
     btnWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20quiero%20renovar%20la%20suscripción%20para%20mi%20dispositivo:%20${deviceId}`;
   }
 
-  // Bandera para asegurar que la app arranque pase lo que pase
   let appIniciada = false;
   const arrancarAppSegura = (dias, activo) => {
     if (appIniciada) return;
@@ -60,16 +59,14 @@ function verificarSuscripcionYArrancar() {
       }
     }
 
-    // Arrancamos todo el motor de la app (productos, movimientos, etc.)
     inicializarAplicacion();
   };
 
-  // Respaldo de seguridad (si Firestore tarda más de 2 segundos, arranca igual con 30 días para no trabar)
+  // Respaldo por si Firestore tarda
   const timerSeguridad = setTimeout(() => {
     arrancarAppSegura(30, true);
   }, 2000);
 
-  // Consulta original a Firestore
   db.collection("suscripciones").doc(deviceId).get().then((doc) => {
     clearTimeout(timerSeguridad);
     let diasRestantes = 0;
@@ -213,7 +210,7 @@ function eliminarProducto(id) {
 }
 
 // ==========================================
-// MOVIMIENTOS Y VENTAS (REGISTRO DIARIO)
+// MOVIMIENTOS Y VENTAS
 // ==========================================
 function filtrarProductosSugeridos(texto) {
   const box = document.getElementById('sugerenciasBox');
