@@ -14,10 +14,16 @@ let productosCache = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   verificarSuscripcionYArrancar();
+  
+  // Vinculamos el botón de Cargar Movimiento
+  const btnAddMov = document.getElementById('btnAddMov');
+  if (btnAddMov) {
+    btnAddMov.addEventListener('click', registrarMovimiento);
+  }
 });
 
 // ==========================================
-// VERIFICACIÓN DE SUSCRIPCIÓN Y DÍAS RESTANTES
+// VERIFICACIÓN DE SUSCRIPCIÓN (Como antes: muestra días exactos)
 // ==========================================
 function verificarSuscripcionYArrancar() {
   const badge = document.getElementById('trialBadge');
@@ -36,7 +42,36 @@ function verificarSuscripcionYArrancar() {
     btnWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=Hola,%20quiero%20renovar%20la%20suscripción%20para%20mi%20dispositivo:%20${deviceId}`;
   }
 
+  // Bandera para asegurar que la app arranque pase lo que pase
+  let appIniciada = false;
+  const arrancarAppSegura = (dias, activo) => {
+    if (appIniciada) return;
+    appIniciada = true;
+
+    if (badge) {
+      if (activo) {
+        badge.innerText = `⭐ Suscripción Activa (${dias} días)`;
+        badge.style.background = "#d4edda";
+        badge.style.color = "#155724";
+      } else {
+        badge.innerText = `⚠️ Suscripción Vencida`;
+        badge.style.background = "#f8d7da";
+        badge.style.color = "#721c24";
+      }
+    }
+
+    // Arrancamos todo el motor de la app (productos, movimientos, etc.)
+    inicializarAplicacion();
+  };
+
+  // Respaldo de seguridad (si Firestore tarda más de 2 segundos, arranca igual con 30 días para no trabar)
+  const timerSeguridad = setTimeout(() => {
+    arrancarAppSegura(30, true);
+  }, 2000);
+
+  // Consulta original a Firestore
   db.collection("suscripciones").doc(deviceId).get().then((doc) => {
+    clearTimeout(timerSeguridad);
     let diasRestantes = 0;
     let activo = false;
 
@@ -47,31 +82,17 @@ function verificarSuscripcionYArrancar() {
         const hoy = new Date();
         const diferenciaTiempo = expDate - hoy;
         diasRestantes = Math.ceil(diferenciaTiempo / (1000 * 60 * 60 * 24));
-        if (diasRestantes > 0) activo = true;
+        if (diasRestantes > 0) {
+          activo = true;
+        }
       }
     }
 
-    if (badge) {
-      if (activo) {
-        badge.innerText = `⭐ Suscripción Activa (${diasRestantes} días)`;
-        badge.style.background = "#d4edda";
-        badge.style.color = "#155724";
-      } else {
-        badge.innerText = "🟢 Versión Activa";
-        badge.style.background = "#d4edda";
-        badge.style.color = "#155724";
-      }
-    }
-
-    inicializarAplicacion();
+    arrancarAppSegura(diasRestantes, activo);
   }).catch((err) => {
-    console.warn("Aviso de suscripción:", err);
-    if (badge) {
-      badge.innerText = "🟢 Versión Activa";
-      badge.style.background = "#d4edda";
-      badge.style.color = "#155724";
-    }
-    inicializarAplicacion();
+    clearTimeout(timerSeguridad);
+    console.warn("Aviso de red al verificar suscripción:", err);
+    arrancarAppSegura(30, true);
   });
 }
 
@@ -192,7 +213,7 @@ function eliminarProducto(id) {
 }
 
 // ==========================================
-// MOVIMIENTOS Y VENTAS
+// MOVIMIENTOS Y VENTAS (REGISTRO DIARIO)
 // ==========================================
 function filtrarProductosSugeridos(texto) {
   const box = document.getElementById('sugerenciasBox');
@@ -236,6 +257,37 @@ function actualizarMontoPorCantidad() {
   if (encontrado) {
     document.getElementById('movAmount').value = encontrado.price * qty;
   }
+}
+
+function registrarMovimiento() {
+  const desc = document.getElementById('movDesc').value.trim();
+  const qty = parseInt(document.getElementById('movQty').value) || 1;
+  const amount = parseFloat(document.getElementById('movAmount').value);
+  const type = document.getElementById('movType').value;
+
+  if (!desc || isNaN(amount) || amount <= 0) {
+    alert("Por favor completa el detalle y un monto válido.");
+    return;
+  }
+
+  const hoyStr = new Date().toISOString().split('T')[0];
+
+  db.collection("movimientos").add({
+    desc: desc,
+    qty: qty,
+    amount: amount,
+    type: type,
+    fechaStr: hoyStr,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    document.getElementById('movDesc').value = '';
+    document.getElementById('movQty').value = '1';
+    document.getElementById('movAmount').value = '';
+    document.getElementById('movType').value = 'income';
+  }).catch((err) => {
+    console.error("Error al registrar movimiento:", err);
+    alert("Hubo un error al registrar el movimiento.");
+  });
 }
 
 function cargarMovimientosHoy() {
