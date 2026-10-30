@@ -203,7 +203,6 @@ function editProduct(id, name, price, stock) {
   document.getElementById('formProductTitle').textContent = '✏️ Modificar Producto';
   document.getElementById('btnSaveProduct').textContent = '💾 Actualizar Cambios';
   
-  // Desplazar suavemente hacia arriba para ver el formulario
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -224,15 +223,9 @@ async function saveProduct(e) {
     const productsRef = db.collection('licenses').doc(deviceId).collection('products');
 
     if (editId) {
-      // Actualizar producto existente
-      await productsRef.doc(editId).update({
-        name,
-        price,
-        stock
-      });
+      await productsRef.doc(editId).update({ name, price, stock });
       alert('¡Producto actualizado con éxito!');
     } else {
-      // Crear nuevo producto
       await productsRef.add({
         name,
         price,
@@ -241,7 +234,6 @@ async function saveProduct(e) {
       });
     }
 
-    // Resetear formulario y volver al estado original
     document.getElementById('formProduct').reset();
     document.getElementById('editProductId').value = '';
     document.getElementById('formProductTitle').textContent = '📦 Agregar Producto';
@@ -283,14 +275,86 @@ async function descontarStockCantidad(nombreProducto, cantidadVenta) {
         const stockActual = Number(prod.stock) || 0;
         const nuevoStock = Math.max(0, stockActual - cantidadVenta);
 
-        await productsRef.doc(docSnap.id).update({
-          stock: nuevoStock
-        });
+        await productsRef.doc(docSnap.id).update({ stock: nuevoStock });
       }
     });
   } catch (err) {
     console.error("Error al sincronizar el stock:", err);
   }
+}
+
+// ==========================================
+// CARRITO TEMPORAL DE VENTAS (MÚLTIPLES ÍTEMS)
+// ==========================================
+let carritoVenta = [];
+
+function agregarItemAlCarrito() {
+  const desc = document.getElementById('movDesc').value.trim();
+  const qty = parseInt(document.getElementById('movQty').value) || 1;
+  const amount = parseFloat(document.getElementById('movAmount').value);
+  const type = document.getElementById('movType').value;
+
+  if (!desc || isNaN(amount) || amount <= 0 || qty <= 0) {
+    alert('Por favor, ingresa un producto, cantidad y un monto válido.');
+    return;
+  }
+
+  carritoVenta.push({
+    desc: desc,
+    qty: qty,
+    amount: amount,
+    type: type,
+    subtotal: amount
+  });
+
+  document.getElementById('movDesc').value = '';
+  document.getElementById('movQty').value = '1';
+  document.getElementById('movAmount').value = '';
+  window.precioUnitarioSeleccionado = 0;
+  const box = document.getElementById('sugerenciasBox');
+  if (box) box.style.display = 'none';
+
+  renderizarCarrito();
+}
+
+function renderizarCarrito() {
+  const container = document.getElementById('ticketContainer');
+  const list = document.getElementById('carritoList');
+  const lblTotal = document.getElementById('lblCarritoTotal');
+
+  if (!container || !list || !lblTotal) return;
+
+  if (carritoVenta.length === 0) {
+    container.style.display = 'none';
+    list.innerHTML = '';
+    lblTotal.textContent = '$0';
+    return;
+  }
+
+  container.style.display = 'block';
+  list.innerHTML = '';
+  let totalGeneral = 0;
+
+  carritoVenta.forEach((item, index) => {
+    totalGeneral += item.subtotal;
+    const sign = item.type === 'income' ? '+' : '-';
+    list.innerHTML += `
+      <tr style="border-bottom: 1px solid #333;">
+        <td style="padding: 6px 0; color: #fff;">${item.desc} ${item.qty > 1 ? '(x' + item.qty + ')' : ''}</td>
+        <td style="text-align: right; padding: 6px 0;" class="${item.type === 'income' ? 'text-success' : 'text-danger'}">${sign}$${item.subtotal.toLocaleString()}</td>
+        <td style="text-align: right; padding: 6px 0; width: 35px;">
+          <button type="button" onclick="eliminarItemCarrito(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.9rem;" title="Quitar">❌</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  lblTotal.textContent = `$${totalGeneral.toLocaleString()}`;
+}
+
+function eliminarItemCarrito(index) {
+  carritoVenta.splice(index, 1);
+  renderizarCarrito();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -419,15 +483,39 @@ document.addEventListener('DOMContentLoaded', () => {
   renderMovements();
   renderClosedDays();
 
+  // BOTÓN PRINCIPAL: CONFIRMAR Y CARGAR VENTA DEL CARRITO (O CARGA RÁPIDA SI ESTÁ VACÍO)
   if (btnAddMov) {
     btnAddMov.addEventListener('click', () => {
+      if (carritoVenta.length > 0) {
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        carritoVenta.forEach(item => {
+          const detalleTexto = item.qty > 1 ? `${item.desc} (x${item.qty})` : item.desc;
+          movements.unshift({ 
+            desc: detalleTexto, 
+            amount: item.amount, 
+            type: item.type, 
+            time: timeStr 
+          });
+
+          if (item.type === 'income') {
+            descontarStockCantidad(item.desc, item.qty);
+          }
+        });
+
+        carritoVenta = [];
+        renderizarCarrito();
+        saveAndRender();
+        return;
+      }
+
       const desc = movDescInput.value.trim();
       const qty = parseInt(movQtyInput.value) || 1;
       const amount = parseFloat(movAmountInput.value);
       const type = movTypeSelect.value;
 
       if (!desc || isNaN(amount) || amount <= 0 || qty <= 0) {
-        alert('Por favor, ingresa una descripción, cantidad y un monto válido.');
+        alert('Por favor, agrega productos al carrito o completa los campos para registrar un movimiento.');
         return;
       }
 
