@@ -340,8 +340,8 @@ function renderizarCarrito() {
     const sign = item.type === 'income' ? '+' : '-';
     list.innerHTML += `
       <tr style="border-bottom: 1px solid #333;">
-        <td style="padding: 6px 0; color: #fff;">${item.desc} ${item.qty > 1 ? '(x' + item.qty + ')' : ''}</td>
-        <td style="text-align: right; padding: 6px 0;" class="${item.type === 'income' ? 'text-success' : 'text-danger'}">${sign}$${item.subtotal.toLocaleString()}</td>
+        <td style="padding: 6px 0; color: #fff;"><strong>${item.qty}x</strong> ${item.desc}</td>
+        <td style="text-align: right; padding: 6px 0;" class="${item.type === 'income' ? 'text-success' : 'text-danger'}"><strong>${sign}$${item.subtotal.toLocaleString()}</strong></td>
         <td style="text-align: right; padding: 6px 0; width: 35px;">
           <button type="button" onclick="eliminarItemCarrito(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.9rem;" title="Quitar">❌</button>
         </td>
@@ -493,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const detalleTexto = item.qty > 1 ? `${item.desc} (x${item.qty})` : item.desc;
           movements.unshift({ 
             desc: detalleTexto, 
-            amount: item.amount, 
+            amount: item.subtotal, 
             type: item.type, 
             time: timeStr 
           });
