@@ -299,10 +299,11 @@ function agregarItemAlCarrito() {
     return;
   }
 
+  // Guardamos el precio unitario o el monto total ingresado para este bloque
   carritoVenta.push({
     desc: desc,
     qty: qty,
-    amount: amount,
+    amount: amount, // precio total ingresado para esta cantidad
     type: type,
     subtotal: amount
   });
@@ -490,10 +491,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         carritoVenta.forEach(item => {
-          const detalleTexto = item.qty > 1 ? `${item.desc} (x${item.qty})` : item.desc;
+          const detalleTexto = item.qty > 1 ? `${item.qty}x ${item.desc}` : item.desc;
+          const montoTotalItem = item.amount; // subtotal calculado
+
           movements.unshift({ 
             desc: detalleTexto, 
-            amount: item.subtotal, 
+            amount: montoTotalItem, 
             type: item.type, 
             time: timeStr 
           });
@@ -519,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const detalleTexto = qty > 1 ? `${desc} (x${qty})` : desc;
+      const detalleTexto = qty > 1 ? `${qty}x ${desc}` : desc;
 
       movements.unshift({ 
         desc: detalleTexto, 
