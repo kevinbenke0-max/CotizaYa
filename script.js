@@ -125,7 +125,7 @@ function actualizarMontoPorCantidad() {
   }
 }
 
-// Mostrar sugerencias flotantes al escribir
+// Mostrar sugerencias flotantes al escribir (Con asignación directa y segura)
 function filtrarProductosSugeridos(texto) {
   const box = document.getElementById('sugerenciasBox');
   if (!box) return;
@@ -169,11 +169,21 @@ function filtrarProductosSugeridos(texto) {
 
     item.addEventListener('mousedown', (e) => {
       e.preventDefault();
-      document.getElementById('movDesc').value = prod.name;
+      
+      const inputDesc = document.getElementById('movDesc');
+      const inputQty = document.getElementById('movQty');
+      const inputAmount = document.getElementById('movAmount');
+
+      if (inputDesc) {
+        inputDesc.value = prod.name;
+      }
+      
       window.precioUnitarioSeleccionado = Number(prod.price);
       
-      const qty = parseInt(document.getElementById('movQty').value) || 1;
-      document.getElementById('movAmount').value = window.precioUnitarioSeleccionado * qty;
+      const qty = inputQty ? (parseInt(inputQty.value) || 1) : 1;
+      if (inputAmount) {
+        inputAmount.value = window.precioUnitarioSeleccionado * qty;
+      }
 
       box.style.display = 'none';
       box.innerHTML = '';
@@ -299,7 +309,7 @@ function agregarItemAlCarrito() {
     return;
   }
 
-  // Guardar ítem con nombre y total corregido
+  // Guardar ítem con nombre y subtotal
   carritoVenta.push({
     desc: desc,
     qty: qty,
@@ -308,7 +318,7 @@ function agregarItemAlCarrito() {
     subtotal: amountInput
   });
 
-  // Limpiar inputs
+  // Limpiar inputs de carga rápida
   document.getElementById('movDesc').value = '';
   document.getElementById('movQty').value = '1';
   document.getElementById('movAmount').value = '';
@@ -342,18 +352,18 @@ function renderizarCarrito() {
     totalGeneral += item.subtotal;
     const sign = item.type === 'income' ? '+' : '-';
     
-    // Generar la fila asegurando que se imprima el nombre (item.desc)
     const tr = document.createElement('tr');
-    tr.style.borderBottom = '1px solid #333';
+    tr.style.borderBottom = '1px dashed #444';
     tr.innerHTML = `
-      <td style="padding: 6px 0; color: #ffffff; text-align: left;">
-        <strong>${item.qty > 1 ? item.qty + 'x ' : ''}</strong>${item.desc}
+      <td style="padding: 8px 4px; color: #ffffff !important; font-size: 0.9rem; text-align: left; width: 70%;">
+        <span style="color: #38bdf8; font-weight: bold; margin-right: 4px;">${item.qty}x</span> 
+        <span style="color: #ffffff; font-weight: 500;">${item.desc}</span>
       </td>
-      <td style="text-align: right; padding: 6px 8px;" class="${item.type === 'income' ? 'text-success' : 'text-danger'}">
-        <strong>${sign}$${Number(item.subtotal).toLocaleString('es-AR')}</strong>
+      <td style="padding: 8px 4px; text-align: right; color: #22c55e !important; font-weight: bold; font-size: 0.95rem; width: 25%;">
+        ${sign}$${Number(item.subtotal).toLocaleString('es-AR')}
       </td>
-      <td style="text-align: right; padding: 6px 0; width: 30px;">
-        <button type="button" onclick="eliminarItemCarrito(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1rem; padding:0;" title="Quitar">❌</button>
+      <td style="padding: 8px 4px; text-align: right; width: 5%;">
+        <button type="button" onclick="eliminarItemCarrito(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1rem; padding:0 4px;" title="Quitar">❌</button>
       </td>
     `;
     list.appendChild(tr);
