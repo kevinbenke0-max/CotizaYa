@@ -115,7 +115,7 @@ function loadProductOptions() {
   });
 }
 
-// Actualizar el monto automáticamente al modificar la cantidad pequeña
+// Actualizar el monto automáticamente al modificar la cantidad
 function actualizarMontoPorCantidad() {
   const qty = parseInt(document.getElementById('movQty').value) || 1;
   const movAmountInput = document.getElementById('movAmount');
@@ -170,10 +170,10 @@ function filtrarProductosSugeridos(texto) {
     item.addEventListener('mousedown', (e) => {
       e.preventDefault();
       document.getElementById('movDesc').value = prod.name;
-      window.precioUnitarioSeleccionado = prod.price;
+      window.precioUnitarioSeleccionado = Number(prod.price);
       
       const qty = parseInt(document.getElementById('movQty').value) || 1;
-      document.getElementById('movAmount').value = prod.price * qty;
+      document.getElementById('movAmount').value = window.precioUnitarioSeleccionado * qty;
 
       box.style.display = 'none';
       box.innerHTML = '';
@@ -291,27 +291,29 @@ let carritoVenta = [];
 function agregarItemAlCarrito() {
   const desc = document.getElementById('movDesc').value.trim();
   const qty = parseInt(document.getElementById('movQty').value) || 1;
-  const amount = parseFloat(document.getElementById('movAmount').value);
+  const amountInput = parseFloat(document.getElementById('movAmount').value);
   const type = document.getElementById('movType').value;
 
-  if (!desc || isNaN(amount) || amount <= 0 || qty <= 0) {
+  if (!desc || isNaN(amountInput) || amountInput <= 0 || qty <= 0) {
     alert('Por favor, ingresa un producto, cantidad y un monto válido.');
     return;
   }
 
-  // Guardamos el precio unitario o el monto total ingresado para este bloque
+  // Guardar ítem con nombre y total corregido
   carritoVenta.push({
     desc: desc,
     qty: qty,
-    amount: amount, // precio total ingresado para esta cantidad
+    amount: amountInput,
     type: type,
-    subtotal: amount
+    subtotal: amountInput
   });
 
+  // Limpiar inputs
   document.getElementById('movDesc').value = '';
   document.getElementById('movQty').value = '1';
   document.getElementById('movAmount').value = '';
   window.precioUnitarioSeleccionado = 0;
+  
   const box = document.getElementById('sugerenciasBox');
   if (box) box.style.display = 'none';
 
@@ -339,18 +341,25 @@ function renderizarCarrito() {
   carritoVenta.forEach((item, index) => {
     totalGeneral += item.subtotal;
     const sign = item.type === 'income' ? '+' : '-';
-    list.innerHTML += `
-      <tr style="border-bottom: 1px solid #333;">
-        <td style="padding: 6px 0; color: #fff;"><strong>${item.qty}x</strong> ${item.desc}</td>
-        <td style="text-align: right; padding: 6px 0;" class="${item.type === 'income' ? 'text-success' : 'text-danger'}"><strong>${sign}$${item.subtotal.toLocaleString()}</strong></td>
-        <td style="text-align: right; padding: 6px 0; width: 35px;">
-          <button type="button" onclick="eliminarItemCarrito(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:0.9rem;" title="Quitar">❌</button>
-        </td>
-      </tr>
+    
+    // Generar la fila asegurando que se imprima el nombre (item.desc)
+    const tr = document.createElement('tr');
+    tr.style.borderBottom = '1px solid #333';
+    tr.innerHTML = `
+      <td style="padding: 6px 0; color: #ffffff; text-align: left;">
+        <strong>${item.qty > 1 ? item.qty + 'x ' : ''}</strong>${item.desc}
+      </td>
+      <td style="text-align: right; padding: 6px 8px;" class="${item.type === 'income' ? 'text-success' : 'text-danger'}">
+        <strong>${sign}$${Number(item.subtotal).toLocaleString('es-AR')}</strong>
+      </td>
+      <td style="text-align: right; padding: 6px 0; width: 30px;">
+        <button type="button" onclick="eliminarItemCarrito(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1rem; padding:0;" title="Quitar">❌</button>
+      </td>
     `;
+    list.appendChild(tr);
   });
 
-  lblTotal.textContent = `$${totalGeneral.toLocaleString()}`;
+  lblTotal.textContent = `$${totalGeneral.toLocaleString('es-AR')}`;
 }
 
 function eliminarItemCarrito(index) {
@@ -491,12 +500,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
         carritoVenta.forEach(item => {
-          const detalleTexto = item.qty > 1 ? `${item.qty}x ${item.desc}` : item.desc;
-          const montoTotalItem = item.amount; // subtotal calculado
-
+          const detalleTexto = item.qty > 1 ? `${item.desc} (x${item.qty})` : item.desc;
           movements.unshift({ 
             desc: detalleTexto, 
-            amount: montoTotalItem, 
+            amount: item.amount, 
             type: item.type, 
             time: timeStr 
           });
@@ -522,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      const detalleTexto = qty > 1 ? `${qty}x ${desc}` : desc;
+      const detalleTexto = qty > 1 ? `${desc} (x${qty})` : desc;
 
       movements.unshift({ 
         desc: detalleTexto, 
@@ -578,16 +585,16 @@ document.addEventListener('DOMContentLoaded', () => {
       tr.innerHTML = `
         <td><strong>${mov.desc}</strong><br><small>${mov.time}</small></td>
         <td>${mov.type === 'income' ? 'Ingreso' : 'Gasto'}</td>
-        <td style="text-align: right;" class="${amountClass}"><strong>${sign}$${mov.amount.toLocaleString()}</strong></td>
+        <td style="text-align: right;" class="${amountClass}"><strong>${sign}$${Number(mov.amount).toLocaleString('es-AR')}</strong></td>
         <td><button class="btn btn-danger" onclick="deleteMovement(${idx})">x</button></td>
       `;
       movList.appendChild(tr);
     });
 
     let net = totalIncome - totalExpense;
-    lblTotalIncome.textContent = `$${totalIncome.toLocaleString()}`;
-    lblTotalExpense.textContent = `$${totalExpense.toLocaleString()}`;
-    lblNetBalance.textContent = `$${net.toLocaleString()}`;
+    lblTotalIncome.textContent = `$${totalIncome.toLocaleString('es-AR')}`;
+    lblTotalExpense.textContent = `$${totalExpense.toLocaleString('es-AR')}`;
+    lblNetBalance.textContent = `$${net.toLocaleString('es-AR')}`;
     lblNetBalance.className = net >= 0 ? 'text-success' : 'text-danger';
   }
 
@@ -651,8 +658,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       tr.innerHTML = `
         <td><strong>📅 ${day.date}</strong> <br><small style="color:#0066cc;">Ver detalle 🔍</small></td>
-        <td><small>➕ $${(day.income || 0).toLocaleString()}</small><br><small>➖ $${(day.expense || 0).toLocaleString()}</small></td>
-        <td style="text-align: right;" class="${netClass}"><strong>${sign}$${(day.net || 0).toLocaleString()}</strong></td>
+        <td><small>➕ $${(day.income || 0).toLocaleString('es-AR')}</small><br><small>➖ $${(day.expense || 0).toLocaleString('es-AR')}</small></td>
+        <td style="text-align: right;" class="${netClass}"><strong>${sign}$${(day.net || 0).toLocaleString('es-AR')}</strong></td>
         <td><button class="btn btn-danger-soft" onclick="event.stopPropagation(); deleteClosedDay(${idx})">x</button></td>
       `;
 
@@ -679,7 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tr.innerHTML = `
           <td><strong>${item.desc}</strong><br><small>${item.time || ''}</small></td>
           <td>${item.type === 'income' ? 'Ingreso' : 'Gasto'}</td>
-          <td style="text-align: right;" class="${amountClass}"><strong>${sign}$${Number(item.amount).toLocaleString()}</strong></td>
+          <td style="text-align: right;" class="${amountClass}"><strong>${sign}$${Number(item.amount).toLocaleString('es-AR')}</strong></td>
         `;
         modalMovList.appendChild(tr);
       });
@@ -793,12 +800,12 @@ document.addEventListener('DOMContentLoaded', () => {
       profitMargin = (monthNet / monthExpense) * 100;
     }
 
-    lblMonthIncome.textContent = `$${monthIncome.toLocaleString()}`;
-    lblMonthExpense.textContent = `$${monthExpense.toLocaleString()}`;
+    lblMonthIncome.textContent = `$${monthIncome.toLocaleString('es-AR')}`;
+    lblMonthExpense.textContent = `$${monthExpense.toLocaleString('es-AR')}`;
     lblMonthMargin.textContent = `${profitMargin.toFixed(1)}%`;
     lblMonthMargin.className = profitMargin >= 0 ? 'text-success' : 'text-danger';
     
-    lblMonthNet.textContent = `$${monthNet.toLocaleString()}`;
+    lblMonthNet.textContent = `$${monthNet.toLocaleString('es-AR')}`;
     lblMonthNet.className = monthNet >= 0 ? 'text-success' : 'text-danger';
   }
 
