@@ -125,7 +125,7 @@ function actualizarMontoPorCantidad() {
   }
 }
 
-// Mostrar sugerencias flotantes al escribir (Con asignación directa y segura)
+// Mostrar sugerencias flotantes al escribir
 function filtrarProductosSugeridos(texto) {
   const box = document.getElementById('sugerenciasBox');
   if (!box) return;
@@ -309,7 +309,6 @@ function agregarItemAlCarrito() {
     return;
   }
 
-  // Guardar ítem con nombre y subtotal
   carritoVenta.push({
     desc: desc,
     qty: qty,
@@ -318,7 +317,6 @@ function agregarItemAlCarrito() {
     subtotal: amountInput
   });
 
-  // Limpiar inputs de carga rápida
   document.getElementById('movDesc').value = '';
   document.getElementById('movQty').value = '1';
   document.getElementById('movAmount').value = '';
@@ -353,17 +351,17 @@ function renderizarCarrito() {
     const sign = item.type === 'income' ? '+' : '-';
     
     const tr = document.createElement('tr');
-    tr.style.borderBottom = '1px dashed #444';
+    tr.style.borderBottom = '1px dashed #ddd';
     tr.innerHTML = `
-      <td style="padding: 8px 4px; color: #ffffff !important; font-size: 0.9rem; text-align: left; width: 70%;">
-        <span style="color: #38bdf8; font-weight: bold; margin-right: 4px;">${item.qty}x</span> 
-        <span style="color: #ffffff; font-weight: 500;">${item.desc}</span>
+      <td style="padding: 8px 4px; color: #1f2937 !important; font-size: 0.9rem; text-align: left; width: 70%;">
+        <span style="color: #0284c7; font-weight: bold; margin-right: 4px;">${item.qty}x</span> 
+        <span style="color: #1f2937; font-weight: 600;">${item.desc}</span>
       </td>
-      <td style="padding: 8px 4px; text-align: right; color: #22c55e !important; font-weight: bold; font-size: 0.95rem; width: 25%;">
+      <td style="padding: 8px 4px; text-align: right; color: #16a34a !important; font-weight: bold; font-size: 0.95rem; width: 25%;">
         ${sign}$${Number(item.subtotal).toLocaleString('es-AR')}
       </td>
       <td style="padding: 8px 4px; text-align: right; width: 5%;">
-        <button type="button" onclick="eliminarItemCarrito(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1rem; padding:0 4px;" title="Quitar">❌</button>
+        <button type="button" onclick="eliminarItemCarrito(${index})" style="background:none; border:none; color:#dc2626; cursor:pointer; font-size:1rem; padding:0 4px;" title="Quitar">❌</button>
       </td>
     `;
     list.appendChild(tr);
