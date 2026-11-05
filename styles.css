@@ -443,3 +443,15 @@ input[type="text"] + div *,
 .suggestions-box * {
   color: #1e293b !important;
 }
+
+/* El Total a Cobrar (del carrito) se queda en blanco */
+.total-net,
+.card .total-net {
+  color: #ffffff !important;
+}
+
+/* Los totales de Movimientos de Hoy (abajo) vuelven a ser oscuros y legibles */
+.day-totals,
+.day-totals * {
+  color: #1e293b !important;
+}
