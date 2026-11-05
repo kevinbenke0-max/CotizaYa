@@ -68,33 +68,38 @@ body {
 .form-row {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-@media (min-width: 500px) {
+@media (min-width: 768px) {
   .form-row {
     flex-direction: row;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
+    gap: 10px;
   }
+  
   .form-row input[type="text"] {
-    flex: 2 1 180px;
-    min-width: 160px;
+    flex: 2.5 1 200px;
   }
+  
   .form-row input[type="number"] {
-    flex: 0 1 70px;
-    min-width: 60px;
+    flex: 0 0 65px;
     text-align: center;
   }
-  .form-row input[type="text"]:not([placeholder*="Buscar"]), 
-  .form-row select {
+
+  .form-row input[type="text"]:not([placeholder*="Buscar"]) {
     flex: 1 1 110px;
-    min-width: 100px;
   }
+
+  .form-row select {
+    flex: 1.2 1 120px;
+  }
+
   .form-row button, .form-row .btn {
-    flex: 1 1 auto;
-    min-width: 130px;
+    flex: 0 0 auto;
     white-space: nowrap;
+    padding: 12px 18px;
   }
 }
 
