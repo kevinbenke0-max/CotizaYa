@@ -399,3 +399,31 @@ td {
   border-radius: 16px;
   padding: 24px;
 }
+/* ==========================================
+   CORRECCIÓN DE COLOR DE TEXTO EN BOTONES Y TOTAL
+   ========================================== */
+
+/* 1. Texto blanco para el botón de Agregar Ítem */
+.form-row button, 
+.form-row .btn, 
+.form-row .btn-primary {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* 2. Texto blanco para la etiqueta "Total a Cobrar:" */
+.card [style*="background"], 
+.card [class*="total"], 
+.card div[style*="#"],
+#totalCobrar, 
+.total-cobrar-label {
+  color: #ffffff !important;
+}
+
+/* Regla directa general para textos oscuros sobre fondo oscuro dentro de las tarjetas */
+div[style*="background-color: rgb(34"], 
+div[style*="background: rgb(34"],
+div[style*="background-color: #"], 
+div[style*="background: #"] {
+  color: #ffffff !important;
+}
