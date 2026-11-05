@@ -64,6 +64,7 @@ body {
   color: #0f172a;
 }
 
+/* FORMULARIO Y FILA DE MOVIMIENTOS OPTIMIZADA PARA PC Y MÓVIL */
 .form-row {
   display: flex;
   flex-direction: column;
@@ -74,12 +75,26 @@ body {
   .form-row {
     flex-direction: row;
     flex-wrap: wrap;
+    align-items: center;
   }
   .form-row input[type="text"] {
-    flex: 2;
+    flex: 2 1 180px;
+    min-width: 160px;
   }
-  .form-row input[type="number"], .form-row select {
-    flex: 1;
+  .form-row input[type="number"] {
+    flex: 0 1 70px;
+    min-width: 60px;
+    text-align: center;
+  }
+  .form-row input[type="text"]:not([placeholder*="Buscar"]), 
+  .form-row select {
+    flex: 1 1 110px;
+    min-width: 100px;
+  }
+  .form-row button, .form-row .btn {
+    flex: 1 1 auto;
+    min-width: 130px;
+    white-space: nowrap;
   }
 }
 
