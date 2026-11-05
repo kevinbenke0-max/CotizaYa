@@ -404,7 +404,6 @@ td {
    SOLUCIÓN DEFINITIVA: TOTAL BLANCO Y BUSCADOR VISIBLE
    ========================================== */
 
-/* 1. Botón de Agregar Ítem con texto blanco */
 .form-row button, 
 .form-row .btn, 
 .form-row .btn-primary {
@@ -412,7 +411,6 @@ td {
   font-weight: 600;
 }
 
-/* 2. Texto blanco EXCLUSIVAMENTE para el bloque de Total a Cobrar */
 .day-totals, 
 .total-net,
 .card div[style*="background: #1e293b"],
@@ -427,7 +425,6 @@ td {
   color: #ffffff !important;
 }
 
-/* 3. AISLAR EL BUSCADOR: Asegurar que las sugerencias mantengan texto oscuro y legible */
 input[type="text"] + div, 
 datalist, 
 option,
@@ -437,20 +434,17 @@ option,
   background-color: #ffffff !important;
 }
 
-/* Forzar que el nombre del producto dentro del buscador sea oscuro */
 input[type="text"] + div *, 
 .autocomplete-suggestions *, 
 .suggestions-box * {
   color: #1e293b !important;
 }
 
-/* El Total a Cobrar (del carrito) se queda en blanco */
 .total-net,
 .card .total-net {
   color: #ffffff !important;
 }
 
-/* Los totales de Movimientos de Hoy (abajo) vuelven a ser oscuros y legibles */
 .day-totals,
 .day-totals * {
   color: #1e293b !important;
