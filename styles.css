@@ -401,10 +401,10 @@ td {
 }
 
 /* ==========================================
-   CORRECCIÓN DEFINITIVA DE TEXTOS EN SUGERENCIAS
+   CORRECCIÓN DEFINITIVA DE TEXTOS Y BUSCADOR
    ========================================== */
 
-/* 1. Botón de Agregar Ítem con texto verde claro */
+/* 1. Botón de Agregar Ítem con texto blanco */
 .form-row button, 
 .form-row .btn, 
 .form-row .btn-primary {
@@ -412,29 +412,31 @@ td {
   font-weight: 600;
 }
 
-/* 2. Total a Cobrar con texto verde claro */
+/* 2. Total a Cobrar con texto blanco */
 .total-net, 
 .card div[style*="background"] span,
 .card div[style*="background"] {
   color: #ffffff !important;
 }
 
-/* 3. Forzar que los nombres y textos dentro de las sugerencias del buscador sean oscuros y visibles */
+/* 3. SOLUCIÓN AL BUSCADOR: Forzar que cualquier elemento, texto, fuerte o span dentro de resultados o listas sea oscuro y legible */
+div[id*="autocomplete"] *, 
+ul[id*="autocomplete"] *, 
+.autocomplete-suggestions *, 
+.suggestions-box *,
+.autocomplete-result *,
 datalist, 
-option, 
-.autocomplete-suggestions, 
-.suggestions-box,
-div[id*="autocomplete"], 
-ul[id*="autocomplete"],
-div[id*="autocomplete"] div, 
-ul[id*="autocomplete"] li {
+option {
   color: #1e293b !important;
   background-color: #ffffff !important;
 }
 
-/* Específicamente para que el título o descripción del producto en el desplegable no sea blanco */
-div[id*="autocomplete"] strong, 
-div[id*="autocomplete"] span:not([style*="color"]),
+/* Asegurar visibilidad específica para los nombres de productos en listas de búsqueda */
+div[id*="autocomplete"] div, 
+ul[id*="autocomplete"] li, 
 .autocomplete-suggestions div {
   color: #1e293b !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
