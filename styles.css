@@ -419,9 +419,12 @@ td {
   color: #ffffff !important;
 }
 
-/* Asegurar color blanco en el texto del bloque negro del total */
-.card div[style*="background: rgb(34"], 
-.card div[style*="background: #1e"],
-.card div[style*="background: #0f"] {
+/* Forzar texto blanco únicamente en la etiqueta de Total a cobrar */
+.day-totals div span, 
+.card div[style*="background: rgb(15"] span,
+.card div[style*="background: #"] span,
+.card div[style*="background-color"] span,
+.total-net span,
+.card div[style*="background"] div {
   color: #ffffff !important;
 }
