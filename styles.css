@@ -401,7 +401,7 @@ td {
 }
 
 /* ==========================================
-   CORRECCIÓN LIMPIA Y SIN CONFLICTOS
+   SOLUCIÓN DEFINITIVA: TOTAL BLANCO Y BUSCADOR VISIBLE
    ========================================== */
 
 /* 1. Botón de Agregar Ítem con texto blanco */
@@ -412,19 +412,34 @@ td {
   font-weight: 600;
 }
 
-/* 2. Total a Cobrar con texto blanco (Apuntando directo a la clase del total, sin afectar tarjetas ni buscadores) */
+/* 2. Texto blanco EXCLUSIVAMENTE para el bloque de Total a Cobrar */
+.day-totals, 
 .total-net,
-.day-totals span,
-.card .total-net {
+.card div[style*="background: #1e293b"],
+.card div[style*="background:#1e293b"],
+.card div[style*="background: rgb(30"] {
   color: #ffffff !important;
 }
 
-/* Forzar texto blanco únicamente en la etiqueta de Total a cobrar */
-.day-totals div span, 
-.card div[style*="background: rgb(15"] span,
-.card div[style*="background: #"] span,
-.card div[style*="background-color"] span,
+.day-totals span, 
 .total-net span,
-.card div[style*="background"] div {
+.card div[style*="background"] span {
   color: #ffffff !important;
+}
+
+/* 3. AISLAR EL BUSCADOR: Asegurar que las sugerencias mantengan texto oscuro y legible */
+input[type="text"] + div, 
+datalist, 
+option,
+.autocomplete-suggestions, 
+.suggestions-box {
+  color: #1e293b !important;
+  background-color: #ffffff !important;
+}
+
+/* Forzar que el nombre del producto dentro del buscador sea oscuro */
+input[type="text"] + div *, 
+.autocomplete-suggestions *, 
+.suggestions-box * {
+  color: #1e293b !important;
 }
