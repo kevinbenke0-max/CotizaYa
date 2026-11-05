@@ -400,7 +400,7 @@ td {
   padding: 24px;
 }
 /* ==========================================
-   CORRECCIÓN FINAL DE SUGERENCIAS Y BOTONES
+   CORRECCIÓN DIRECTA PARA EL BUSCADOR Y BOTÓN
    ========================================== */
 
 /* 1. Botón de Agregar Ítem con texto blanco */
@@ -418,17 +418,13 @@ td {
   color: #ffffff !important;
 }
 
-/* 3. Forzar color oscuro en texto y opciones de autocompletado */
-input, select, datalist, option {
-  color: #1e293b;
-}
-
-/* Forzar que cualquier elemento de lista desplegable o sugerencia tenga texto visible */
-div[id*="autocomplete"], ul[id*="autocomplete"], .autocomplete-suggestions, .suggestions-box {
-  background-color: #ffffff !important;
+/* 3. Forzar que el campo de búsqueda y sus opciones muestren texto oscuro */
+input[type="text"], input[type="search"], datalist, option {
   color: #1e293b !important;
+  background-color: #ffffff !important;
 }
 
-div[id*="autocomplete"] *, ul[id*="autocomplete"] *, .autocomplete-suggestions *, .suggestions-box * {
+/* Forzar color oscuro en cualquier texto dentro de las cajas de autocompletado */
+.autocomplete-suggestions *, .suggestions-box *, div[id*="autocomplete"] *, ul[id*="autocomplete"] * {
   color: #1e293b !important;
 }
