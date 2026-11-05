@@ -160,7 +160,7 @@ function filtrarProductosSugeridos(texto) {
     item.innerHTML = `
       <div>
         <strong>${prod.name}</strong><br>
-        <small style="color: #666;">Stock: ${prod.stock} </small>
+        <small style="color: #666;">Stock: ${prod.stock}</small>
       </div>
       <div style="color: #0066cc; font-weight: bold; font-size: 1.05rem;">
         $${Number(prod.price).toLocaleString('es-AR')}
