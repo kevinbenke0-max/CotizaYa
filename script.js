@@ -14,48 +14,58 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 
 // ==========================================
-// MÓDULO DE PESTAÑAS Y CATÁLOGO (GLOBALES)
+// MÓDULO DE PESTAÑAS (3 VISTAS GLOBALES)
 // ==========================================
 
 function switchTab(tab) {
   const secCaja = document.getElementById('sectionCaja');
   const secCatalogo = document.getElementById('sectionCatalogo');
+  const secHistorial = document.getElementById('sectionHistorial');
+
   const btnCaja = document.getElementById('btnTabCaja');
   const btnCatalogo = document.getElementById('btnTabCatalogo');
+  const btnHistorial = document.getElementById('btnTabHistorial');
 
-  if (!secCaja || !secCatalogo) return;
+  if (!secCaja || !secCatalogo || !secHistorial) return;
 
+  // Resetear estilos de todos los botones
+  [btnCaja, btnCatalogo, btnHistorial].forEach(btn => {
+    if (btn) {
+      btn.className = 'btn btn-secondary';
+      btn.style.background = '#333';
+      btn.style.color = '#ccc';
+    }
+  });
+
+  // Ocultar todas las secciones
+  secCaja.style.display = 'none';
+  secCatalogo.style.display = 'none';
+  secHistorial.style.display = 'none';
+
+  // Mostrar la sección seleccionada
   if (tab === 'caja') {
     secCaja.style.display = 'block';
-    secCatalogo.style.display = 'none';
-
     if (btnCaja) {
       btnCaja.className = 'btn btn-primary';
       btnCaja.style.background = '';
       btnCaja.style.color = '#fff';
     }
-    if (btnCatalogo) {
-      btnCatalogo.className = 'btn btn-secondary';
-      btnCatalogo.style.background = '#333';
-      btnCatalogo.style.color = '#ccc';
-    }
     loadProductOptions();
   } else if (tab === 'catalogo') {
-    secCaja.style.display = 'none';
     secCatalogo.style.display = 'block';
-
     if (btnCatalogo) {
       btnCatalogo.className = 'btn btn-primary';
       btnCatalogo.style.background = '';
       btnCatalogo.style.color = '#fff';
     }
-    if (btnCaja) {
-      btnCaja.className = 'btn btn-secondary';
-      btnCaja.style.background = '#333';
-      btnCaja.style.color = '#ccc';
-    }
-    
     loadProducts();
+  } else if (tab === 'historial') {
+    secHistorial.style.display = 'block';
+    if (btnHistorial) {
+      btnHistorial.className = 'btn btn-primary';
+      btnHistorial.style.background = '';
+      btnHistorial.style.color = '#fff';
+    }
   }
 }
 
