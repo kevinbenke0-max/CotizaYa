@@ -400,10 +400,10 @@ td {
   padding: 24px;
 }
 /* ==========================================
-   CORRECCIÓN PRECISA DE TEXTOS (BOTONES Y TOTAL)
+   CORRECCIÓN DEFINITIVA DE SUGERENCIAS Y BOTONES
    ========================================== */
 
-/* 1. Texto blanco únicamente para el botón de Agregar Ítem */
+/* 1. Botón de Agregar Ítem con texto blanco */
 .form-row button, 
 .form-row .btn, 
 .form-row .btn-primary {
@@ -411,20 +411,24 @@ td {
   font-weight: 600;
 }
 
-/* 2. Texto blanco únicamente para el "Total a Cobrar" */
+/* 2. Total a Cobrar con texto blanco */
 .total-net, 
 .card div[style*="background"] span,
 .card div[style*="background"] {
   color: #ffffff !important;
 }
 
-/* 3. Asegurar que las sugerencias/autocompletado tengan letras oscuras y legibles */
+/* 3. Asegurar texto oscuro y visible en TODA la lista de sugerencias del buscador */
 datalist, 
 .autocomplete-suggestions,
 .suggestions-box,
 input::-webkit-calendar-picker-indicator,
+div[id*="autocomplete"], 
+ul[id*="autocomplete"],
 div[id*="autocomplete"] div, 
-ul[id*="autocomplete"] li {
+ul[id*="autocomplete"] li,
+.dropdown-item,
+datalist option {
   color: #1e293b !important;
   background-color: #ffffff !important;
 }
