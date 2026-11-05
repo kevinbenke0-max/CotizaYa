@@ -418,3 +418,10 @@ td {
 .card .total-net {
   color: #ffffff !important;
 }
+
+/* Asegurar color blanco en el texto del bloque negro del total */
+.card div[style*="background: rgb(34"], 
+.card div[style*="background: #1e"],
+.card div[style*="background: #0f"] {
+  color: #ffffff !important;
+}
