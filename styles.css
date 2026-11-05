@@ -455,3 +455,13 @@ input[type="text"] + div *,
 .day-totals * {
   color: #1e293b !important;
 }
+
+/* ==========================================
+   FORZAR TEXTO VISIBLE EN TOTALES DE HOY (ABAJO)
+   ========================================== */
+.day-totals,
+.day-totals *,
+.card .day-totals,
+.card .day-totals * {
+  color: #1e293b !important;
+}
