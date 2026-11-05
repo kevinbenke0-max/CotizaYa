@@ -419,11 +419,3 @@ td {
 .total-cobrar-label {
   color: #ffffff !important;
 }
-
-/* Regla directa general para textos oscuros sobre fondo oscuro dentro de las tarjetas */
-div[style*="background-color: rgb(34"], 
-div[style*="background: rgb(34"],
-div[style*="background-color: #"], 
-div[style*="background: #"] {
-  color: #ffffff !important;
-}
