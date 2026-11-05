@@ -16,8 +16,9 @@ body {
   padding: 16px;
 }
 
+/* Ampliamos el contenedor en PC para que no quede tan apretado */
 .container {
-  max-width: 680px;
+  max-width: 850px;
   margin: 0 auto;
 }
 
@@ -64,7 +65,7 @@ body {
   color: #0f172a;
 }
 
-/* FORMULARIO Y FILA DE MOVIMIENTOS OPTIMIZADA PARA PC Y MÓVIL */
+/* FORMULARIO Y FILA DE MOVIMIENTOS - DISTRIBUCIÓN AMPLIA */
 .form-row {
   display: flex;
   flex-direction: column;
@@ -76,30 +77,30 @@ body {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
   
   .form-row input[type="text"] {
-    flex: 2.5 1 200px;
+    flex: 3 1 220px;
   }
   
   .form-row input[type="number"] {
-    flex: 0 0 65px;
+    flex: 0 0 60px;
     text-align: center;
   }
 
   .form-row input[type="text"]:not([placeholder*="Buscar"]) {
-    flex: 1 1 110px;
+    flex: 1.2 1 110px;
   }
 
   .form-row select {
-    flex: 1.2 1 120px;
+    flex: 1.3 1 120px;
   }
 
   .form-row button, .form-row .btn {
     flex: 0 0 auto;
     white-space: nowrap;
-    padding: 12px 18px;
+    padding: 12px 16px;
   }
 }
 
@@ -356,7 +357,7 @@ td {
   padding: 12px;
   border-radius: 10px;
   margin: 15px 0;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
 .device-info strong {
