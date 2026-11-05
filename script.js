@@ -81,7 +81,7 @@ function loadProducts() {
           <tr>
             <td><strong>${p.name}</strong></td>
             <td>$${Number(p.price).toLocaleString('es-AR')}</td>
-            <td><span class="badge ${p.stock > 0 ? 'text-success' : 'text-danger'}">${p.stock} u.</span></td>
+            <td><span class="badge ${p.stock > 0 ? 'text-success' : 'text-danger'}">${p.stock}</span></td>
             <td style="text-align: right; display: flex; gap: 5px; justify-content: flex-end;">
               <button onclick="editProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}', ${p.price}, ${p.stock})" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.8rem;">✏️ Editar</button>
               <button onclick="deleteProduct('${p.id}')" class="btn btn-danger-soft" style="padding: 4px 8px; font-size: 0.8rem;">🗑️ Eliminar</button>
