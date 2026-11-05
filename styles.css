@@ -401,7 +401,7 @@ td {
 }
 
 /* ==========================================
-   CORRECCIÓN DEFINITIVA DE TEXTOS Y BUSCADOR
+   FORZAR TEXTO OSCURO EN CUALQUIER MENÚ DE BÚSQUEDA
    ========================================== */
 
 /* 1. Botón de Agregar Ítem con texto blanco */
@@ -419,24 +419,17 @@ td {
   color: #ffffff !important;
 }
 
-/* 3. SOLUCIÓN AL BUSCADOR: Forzar que cualquier elemento, texto, fuerte o span dentro de resultados o listas sea oscuro y legible */
-div[id*="autocomplete"] *, 
-ul[id*="autocomplete"] *, 
-.autocomplete-suggestions *, 
-.suggestions-box *,
-.autocomplete-result *,
-datalist, 
-option {
+/* 3. Capturar CUALQUIER lista desplegable, resultado o contenedor flotante de búsqueda */
+div[style*="position: absolute"], 
+div[style*="position:absolute"],
+input + div, 
+input + ul,
+[class*="sug"] *, 
+[class*="result"] *, 
+[class*="search"] *, 
+[class*="auto"] *, 
+[class*="drop"] *,
+[class*="list"] * {
   color: #1e293b !important;
   background-color: #ffffff !important;
-}
-
-/* Asegurar visibilidad específica para los nombres de productos en listas de búsqueda */
-div[id*="autocomplete"] div, 
-ul[id*="autocomplete"] li, 
-.autocomplete-suggestions div {
-  color: #1e293b !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
 }
