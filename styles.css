@@ -399,3 +399,42 @@ td {
   border-radius: 16px;
   padding: 24px;
 }
+
+/* ==========================================
+   CORRECCIÓN DEFINITIVA DE TEXTOS EN SUGERENCIAS
+   ========================================== */
+
+/* 1. Botón de Agregar Ítem con texto blanco */
+.form-row button, 
+.form-row .btn, 
+.form-row .btn-primary {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* 2. Total a Cobrar con texto blanco */
+.total-net, 
+.card div[style*="background"] span,
+.card div[style*="background"] {
+  color: #ffffff !important;
+}
+
+/* 3. Forzar que los nombres y textos dentro de las sugerencias del buscador sean oscuros y visibles */
+datalist, 
+option, 
+.autocomplete-suggestions, 
+.suggestions-box,
+div[id*="autocomplete"], 
+ul[id*="autocomplete"],
+div[id*="autocomplete"] div, 
+ul[id*="autocomplete"] li {
+  color: #1e293b !important;
+  background-color: #ffffff !important;
+}
+
+/* Específicamente para que el título o descripción del producto en el desplegable no sea blanco */
+div[id*="autocomplete"] strong, 
+div[id*="autocomplete"] span:not([style*="color"]),
+.autocomplete-suggestions div {
+  color: #1e293b !important;
+}
