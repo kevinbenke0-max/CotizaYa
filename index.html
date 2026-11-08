@@ -164,8 +164,14 @@
         </form>
       </section>
 
+      <!-- INVENTARIO CON BUSCADOR -->
       <section class="card">
-        <h3>📋 Inventario de Productos</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+          <h3 style="margin-bottom: 0;">📋 Inventario de Productos</h3>
+          <!-- BARRA DE BÚSQUEDA RÁPIDA -->
+          <input type="text" id="searchInventory" placeholder="🔍 Filtrar productos..." oninput="filtrarInventario(this.value)" autocomplete="off" style="max-width: 240px; padding: 8px 12px; font-size: 0.9rem;">
+        </div>
+
         <div class="table-responsive">
           <table>
             <thead>
