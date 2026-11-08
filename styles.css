@@ -465,7 +465,6 @@ input[type="text"] + div *,
   background-color: #ffffff;
 }
 
-/* Corrección definitiva para evitar desbordes en tarjetas móviles */
 .card input, .card select, .card button {
   max-width: 100% !important;
   box-sizing: border-box !important;
