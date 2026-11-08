@@ -140,11 +140,26 @@
         <form id="formProduct" onsubmit="saveProduct(event)">
           <input type="hidden" id="editProductId" value="">
           
-          <div class="form-row">
-            <input type="text" id="prodName" placeholder="Nombre del producto (ej: Gaseosa 2.25L)" required autocomplete="off">
-            <input type="number" step="any" id="prodPrice" placeholder="Precio ($)" min="0" required>
-            <input type="number" id="prodStock" placeholder="Stock" min="0" required>
-            <button type="submit" id="btnSaveProduct" class="btn btn-primary">💾 Guardar</button>
+          <div class="form-row" style="flex-direction: column; gap: 10px;">
+            <!-- Fila 1: Nombre y Costo -->
+            <div style="display: flex; gap: 8px; width: 100%;">
+              <input type="text" id="prodName" placeholder="Nombre del producto (ej: Gaseosa 2.25L)" required autocomplete="off" style="flex: 2;">
+              <input type="number" step="any" id="prodCost" placeholder="Precio Costo ($)" min="0" style="flex: 1;" oninput="calcularPrecioVentaAutomatico()">
+            </div>
+
+            <!-- Fila 2: % Ganancia, Precio Final Calculado, Stock y Botón -->
+            <div style="display: flex; gap: 8px; width: 100%; align-items: center; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 4px; flex: 1; min-width: 120px;">
+                <input type="number" step="any" id="prodMargin" placeholder="% Ganancia" min="0" value="30" style="width: 100%; text-align: center;" oninput="calcularPrecioVentaAutomatico()">
+                <span style="font-size: 0.9rem; font-weight: bold; color: #64748b;">%</span>
+              </div>
+
+              <input type="number" step="any" id="prodPrice" placeholder="Precio Venta ($)" min="0" required style="flex: 1; min-width: 120px; background-color: #f1f5f9; font-weight: bold; color: #16a34a;" title="Calculado automáticamente (puedes editarlo si deseas)">
+
+              <input type="number" id="prodStock" placeholder="Stock" min="0" required style="width: 80px; text-align: center;">
+              
+              <button type="submit" id="btnSaveProduct" class="btn btn-primary" style="flex: 1; min-width: 130px;">💾 Guardar</button>
+            </div>
           </div>
         </form>
       </section>
@@ -156,7 +171,8 @@
             <thead>
               <tr>
                 <th>Producto</th>
-                <th>Precio</th>
+                <th>Costo / Margen</th>
+                <th>Precio Venta</th>
                 <th>Stock</th>
                 <th style="text-align: right;">Acciones</th>
               </tr>
