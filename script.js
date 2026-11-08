@@ -99,7 +99,6 @@ function loadProducts() {
         window.inventarioProductosCache.push({ id: doc.id, ...doc.data() });
       });
 
-      // Obtener el valor actual del buscador para mantener el filtro activo si se está usando
       const searchInput = document.getElementById('searchInventory');
       const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
       
@@ -114,7 +113,7 @@ function loadProducts() {
     });
 }
 
-// Función para pintar la tabla de inventario (soporta filtro)
+// Función para pintar la tabla clásica de inventario con columnas
 function renderizarTablaInventario(productos) {
   const list = document.getElementById('productList');
   if (!list) return;
