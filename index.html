@@ -133,32 +133,37 @@
       </section>
     </div>
 
-    <!-- SECCIÓN 2: CATÁLOGO DE PRODUCTOS (Oculta por defecto) -->
+    <!-- SECCIÓN 2: CATÁLOGO DE PRODUCTOS -->
     <div id="sectionCatalogo" style="display: none;">
       <section class="card">
         <h3 id="formProductTitle">📦 Agregar Producto</h3>
         <form id="formProduct" onsubmit="saveProduct(event)">
           <input type="hidden" id="editProductId" value="">
           
-          <div class="form-row" style="flex-direction: column; gap: 10px;">
-            <!-- Fila 1: Nombre y Costo -->
-            <div style="display: flex; gap: 8px; width: 100%;">
-              <input type="text" id="prodName" placeholder="Nombre del producto (ej: Gaseosa 2.25L)" required autocomplete="off" style="flex: 2;">
-              <input type="number" step="any" id="prodCost" placeholder="Precio Costo ($)" min="0" style="flex: 1;" oninput="calcularPrecioVentaAutomatico()">
+          <div style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+            <!-- Fila 1: Nombre del producto -->
+            <div style="width: 100%;">
+              <input type="text" id="prodName" placeholder="Nombre del producto (ej: Gaseosa 2.25L)" required autocomplete="off" style="width: 100%; box-sizing: border-box;">
             </div>
 
-            <!-- Fila 2: % Ganancia, Precio Final Calculado, Stock y Botón -->
-            <div style="display: flex; gap: 8px; width: 100%; align-items: center; flex-wrap: wrap;">
-              <div style="display: flex; align-items: center; gap: 4px; flex: 1; min-width: 120px;">
-                <input type="number" step="any" id="prodMargin" placeholder="% Ganancia" min="0" value="30" style="width: 100%; text-align: center;" oninput="calcularPrecioVentaAutomatico()">
+            <!-- Fila 2: Costo y % de Ganancia -->
+            <div style="display: flex; gap: 8px; width: 100%;">
+              <input type="number" step="any" id="prodCost" placeholder="Precio Costo ($)" min="0" style="width: 50%; box-sizing: border-box;" oninput="calcularPrecioVentaAutomatico()">
+              <div style="display: flex; align-items: center; gap: 4px; width: 50%;">
+                <input type="number" step="any" id="prodMargin" placeholder="% Ganancia" min="0" value="30" style="width: 100%; text-align: center; box-sizing: border-box;" oninput="calcularPrecioVentaAutomatico()">
                 <span style="font-size: 0.9rem; font-weight: bold; color: #64748b;">%</span>
               </div>
+            </div>
 
-              <input type="number" step="any" id="prodPrice" placeholder="Precio Venta ($)" min="0" required style="flex: 1; min-width: 120px; background-color: #f1f5f9; font-weight: bold; color: #16a34a;" title="Calculado automáticamente (puedes editarlo si deseas)">
+            <!-- Fila 3: Precio Venta y Stock -->
+            <div style="display: flex; gap: 8px; width: 100%;">
+              <input type="number" step="any" id="prodPrice" placeholder="Precio Venta ($)" min="0" required style="width: 60%; box-sizing: border-box; background-color: #f1f5f9; font-weight: bold; color: #16a34a;" title="Calculado automáticamente">
+              <input type="number" id="prodStock" placeholder="Stock" min="0" required style="width: 40%; text-align: center; box-sizing: border-box;">
+            </div>
 
-              <input type="number" id="prodStock" placeholder="Stock" min="0" required style="width: 80px; text-align: center;">
-              
-              <button type="submit" id="btnSaveProduct" class="btn btn-primary" style="flex: 1; min-width: 130px;">💾 Guardar</button>
+            <!-- Botón Guardar -->
+            <div style="width: 100%;">
+              <button type="submit" id="btnSaveProduct" class="btn btn-primary" style="width: 100%; padding: 12px; box-sizing: border-box;">💾 Guardar Producto</button>
             </div>
           </div>
         </form>
@@ -166,20 +171,18 @@
 
       <!-- INVENTARIO CON BUSCADOR -->
       <section class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
           <h3 style="margin-bottom: 0;">📋 Inventario de Productos</h3>
           <!-- BARRA DE BÚSQUEDA RÁPIDA -->
-          <input type="text" id="searchInventory" placeholder="🔍 Filtrar productos..." oninput="filtrarInventario(this.value)" autocomplete="off" style="max-width: 240px; padding: 8px 12px; font-size: 0.9rem;">
+          <input type="text" id="searchInventory" placeholder="🔍 Filtrar productos..." oninput="filtrarInventario(this.value)" autocomplete="off" style="width: 100%; padding: 10px 12px; font-size: 0.9rem; box-sizing: border-box;">
         </div>
 
         <div class="table-responsive">
-          <table>
+          <table style="min-width: 300px; width: 100%;">
             <thead>
               <tr>
                 <th>Producto</th>
-                <th>Costo / Margen</th>
-                <th>Precio Venta</th>
-                <th>Stock</th>
+                <th>Detalles / Precio</th>
                 <th style="text-align: right;">Acciones</th>
               </tr>
             </thead>
@@ -190,7 +193,7 @@
         </div>
       </section>
     </div>
-
+    
     <!-- SECCIÓN 3: HISTORIAL Y RESUMEN MENSUAL (Oculta por defecto) -->
     <div id="sectionHistorial" style="display: none;">
       <!-- HISTORIAL DE CIERRES DIARIOS -->
