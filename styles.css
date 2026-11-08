@@ -459,3 +459,8 @@ input[type="text"] + div *,
 .card .day-totals * {
   color: #1e293b !important;
 }
+
+/* Estilos para los campos de costo y margen */
+#prodCost, #prodMargin {
+  background-color: #ffffff;
+}
