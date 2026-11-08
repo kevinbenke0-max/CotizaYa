@@ -464,3 +464,9 @@ input[type="text"] + div *,
 #prodCost, #prodMargin {
   background-color: #ffffff;
 }
+
+/* Corrección definitiva para evitar desbordes en tarjetas móviles */
+.card input, .card select, .card button {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
