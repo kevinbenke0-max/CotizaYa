@@ -1,11 +1,11 @@
 // --- CONFIGURACIÓN DE FIREBASE ---
 const firebaseConfig = {
-  apiKey: "AIzaSyB4eg-yFaE9FQe9dB3WNeOj9JJwI...",
+  apiKey: "AIzaSyB4eg-yFaE9FQe9dB3WNeOj9JJwI7898d", // Reemplazá con tu clave completa si falta algo
   authDomain: "control-caja-ultra.firebaseapp.com",
   projectId: "control-caja-ultra",
   storageBucket: "control-caja-ultra.appspot.com",
   messagingSenderId: "76362765432",
-  appId: "1:76362765432:web:1e44c161254bec0..."
+  appId: "1:76362765432:web:1e44c161254bec0de7898d"
 };
 
 if (!firebase.apps.length) {
@@ -52,6 +52,7 @@ async function handleAuth(e) {
     return;
   }
 
+  // Firebase Auth requiere un formato de email simulado internamente
   const emailSimulado = `${usernameInput}@controlcaja.com`;
 
   try {
