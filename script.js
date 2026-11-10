@@ -84,8 +84,6 @@ async function handleAuth(e) {
 
 function cerrarSesion() {
   auth.signOut().then(() => {
-    localStorage.removeItem('cashMovements');
-    localStorage.removeItem('closedDaysHistory');
     location.reload();
   });
 }
@@ -141,9 +139,9 @@ auth.onAuthStateChanged(async (user) => {
           }
         }
 
-        loadProductOptions();
         loadProducts();
-        cargarMovimientosYHistorialCloud();
+        sincronizarMovimientosCloud();
+        sincronizarCierresCloud();
       }
     }
   } else {
@@ -221,7 +219,6 @@ function switchTab(tab) {
       btnCaja.style.background = '';
       btnCaja.style.color = '#fff';
     }
-    loadProductOptions();
   } else if (tab === 'catalogo') {
     secCatalogo.style.display = 'block';
     if (btnCatalogo) {
@@ -241,7 +238,7 @@ function switchTab(tab) {
 }
 
 // ==========================================
-// CÁLCULO Y PRODUCTOS
+// CÁLCULO Y PRODUCTOS / STOCK
 // ==========================================
 function calcularPrecioVentaAutomatico() {
   const costInput = parseFloat(document.getElementById('prodCost').value) || 0;
@@ -317,45 +314,20 @@ function filtrarInventario(texto) {
   renderizarTablaInventario(filtrados);
 }
 
-window.listaProductosCache = [];
 window.precioUnitarioSeleccionado = 0;
-
-function loadProductOptions() {
-  if (!window.currentUID) return;
-
-  db.collection('licenses').doc(window.currentUID).collection('products').get().then((snapshot) => {
-    window.listaProductosCache = [];
-    snapshot.forEach((doc) => {
-      const p = doc.data();
-      window.listaProductosCache.push({
-        name: p.name,
-        price: p.price,
-        stock: p.stock
-      });
-    });
-  });
-}
-
-function actualizarMontoPorCantidad() {
-  const qty = parseInt(document.getElementById('movQty').value) || 1;
-  const movAmountInput = document.getElementById('movAmount');
-  if (window.precioUnitarioSeleccionado > 0) {
-    movAmountInput.value = window.precioUnitarioSeleccionado * qty;
-  }
-}
 
 function filtrarProductosSugeridos(texto) {
   const box = document.getElementById('sugerenciasBox');
   if (!box) return;
 
   const query = texto.trim().toLowerCase();
-  if (query === '' || window.listaProductosCache.length === 0) {
+  if (query === '' || window.inventarioProductosCache.length === 0) {
     box.style.display = 'none';
     box.innerHTML = '';
     return;
   }
 
-  const matches = window.listaProductosCache.filter(p => p.name.toLowerCase().includes(query));
+  const matches = window.inventarioProductosCache.filter(p => p.name.toLowerCase().includes(query));
   if (matches.length === 0) {
     box.style.display = 'none';
     box.innerHTML = '';
@@ -408,6 +380,14 @@ document.addEventListener('click', (e) => {
   }
 });
 
+function actualizarMontoPorCantidad() {
+  const qty = parseInt(document.getElementById('movQty').value) || 1;
+  const movAmountInput = document.getElementById('movAmount');
+  if (window.precioUnitarioSeleccionado > 0) {
+    movAmountInput.value = window.precioUnitarioSeleccionado * qty;
+  }
+}
+
 function editProduct(id, name, price, stock, cost = 0, margin = 30) {
   document.getElementById('editProductId').value = id;
   document.getElementById('prodName').value = name;
@@ -454,8 +434,6 @@ async function saveProduct(e) {
     document.getElementById('prodMargin').value = '30';
     document.getElementById('formProductTitle').textContent = '📦 Agregar Producto';
     document.getElementById('btnSaveProduct').textContent = '💾 Guardar Producto';
-
-    loadProductOptions();
   } catch (err) {
     console.error("Error al guardar producto:", err);
     alert("Hubo un error al guardar el producto.");
@@ -468,7 +446,6 @@ async function deleteProduct(id) {
 
   try {
     await db.collection('licenses').doc(window.currentUID).collection('products').doc(id).delete();
-    loadProductOptions();
   } catch (err) {
     console.error("Error al eliminar producto:", err);
   }
@@ -495,24 +472,40 @@ async function descontarStockCantidad(nombreProducto, cantidadVenta) {
 }
 
 // ==========================================
-// CARRITO Y MOVIMIENTOS
+// CARRITO Y MOVIMIENTOS EN TIEMPO REAL (NUBE)
 // ==========================================
 let carritoVenta = [];
 let movements = [];
 let closedDays = [];
 
-function cargarMovimientosYHistorialCloud() {
-  movements = JSON.parse(localStorage.getItem(`cashMovements_${window.currentUID}`)) || [];
-  closedDays = JSON.parse(localStorage.getItem(`closedDaysHistory_${window.currentUID}`)) || [];
-  initMonthSelector();
-  renderMovements();
-  renderClosedDays();
+function sincronizarMovimientosCloud() {
+  if (!window.currentUID) return;
+
+  db.collection('licenses').doc(window.currentUID).collection('movements')
+    .orderBy('timestamp', 'desc')
+    .onSnapshot((snapshot) => {
+      movements = [];
+      snapshot.forEach((doc) => {
+        movements.push({ id: doc.id, ...doc.data() });
+      });
+      renderMovements();
+      calculateMonthlySummary();
+    });
 }
 
-function guardarMovimientosYHistorialCloud() {
+function sincronizarCierresCloud() {
   if (!window.currentUID) return;
-  localStorage.setItem(`cashMovements_${window.currentUID}`, JSON.stringify(movements));
-  localStorage.setItem(`closedDaysHistory_${window.currentUID}`, JSON.stringify(closedDays));
+
+  db.collection('licenses').doc(window.currentUID).collection('closedDays')
+    .orderBy('timestamp', 'desc')
+    .onSnapshot((snapshot) => {
+      closedDays = [];
+      snapshot.forEach((doc) => {
+        closedDays.push({ id: doc.id, ...doc.data() });
+      });
+      renderClosedDays();
+      initMonthSelector();
+    });
 }
 
 function agregarItemAlCarrito() {
@@ -600,27 +593,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const movTypeSelect = document.getElementById('movType');
 
   if (btnAddMov) {
-    btnAddMov.addEventListener('click', () => {
+    btnAddMov.addEventListener('click', async () => {
+      if (!window.currentUID) return;
+
       if (carritoVenta.length > 0) {
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-        carritoVenta.forEach(item => {
+        for (const item of carritoVenta) {
           const detalleTexto = item.qty > 1 ? `${item.desc} (x${item.qty})` : item.desc;
-          movements.unshift({ 
-            desc: detalleTexto, 
-            amount: item.amount, 
-            type: item.type, 
-            time: timeStr 
+          
+          await db.collection('licenses').doc(window.currentUID).collection('movements').add({
+            desc: detalleTexto,
+            amount: item.amount,
+            type: item.type,
+            time: timeStr,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
           });
 
           if (item.type === 'income') {
             descontarStockCantidad(item.desc, item.qty);
           }
-        });
+        }
 
         carritoVenta = [];
         renderizarCarrito();
-        saveAndRender();
         return;
       }
 
@@ -635,11 +631,13 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const detalleTexto = qty > 1 ? `${desc} (x${qty})` : desc;
-      movements.unshift({ 
-        desc: detalleTexto, 
-        amount, 
-        type, 
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+      
+      await db.collection('licenses').doc(window.currentUID).collection('movements').add({
+        desc: detalleTexto,
+        amount: amount,
+        type: type,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
       
       if (type === 'income') {
@@ -650,17 +648,9 @@ document.addEventListener('DOMContentLoaded', () => {
       movQtyInput.value = '1';
       movAmountInput.value = '';
       window.precioUnitarioSeleccionado = 0;
-      
-      saveAndRender();
     });
   }
 });
-
-function saveAndRender() {
-  guardarMovimientosYHistorialCloud();
-  renderMovements();
-  calculateMonthlySummary();
-}
 
 function renderMovements() {
   const movList = document.getElementById('movList');
@@ -681,7 +671,7 @@ function renderMovements() {
     return;
   }
 
-  movements.forEach((mov, idx) => {
+  movements.forEach((mov) => {
     if (mov.type === 'income') totalIncome += mov.amount;
     else totalExpense += mov.amount;
 
@@ -690,10 +680,10 @@ function renderMovements() {
     const sign = mov.type === 'income' ? '+' : '-';
 
     tr.innerHTML = `
-      <td><strong>${mov.desc}</strong><br><small>${mov.time}</small></td>
+      <td><strong>${mov.desc}</strong><br><small>${mov.time || ''}</small></td>
       <td>${mov.type === 'income' ? 'Ingreso' : 'Gasto'}</td>
       <td style="text-align: right;" class="${amountClass}"><strong>${sign}$${Number(mov.amount).toLocaleString('es-AR')}</strong></td>
-      <td><button class="btn btn-danger" onclick="intentarBorrarMovimiento(${idx})" title="Requiere Contraseña de Administrador">🗑️ 🔒</button></td>
+      <td><button class="btn btn-danger" onclick="intentarBorrarMovimiento('${mov.id}')" title="Requiere Contraseña de Administrador">🗑️ 🔒</button></td>
     `;
     movList.appendChild(tr);
   });
@@ -705,15 +695,18 @@ function renderMovements() {
   lblNetBalance.className = net >= 0 ? 'text-success' : 'text-danger';
 }
 
-window.intentarBorrarMovimiento = (idx) => {
-  solicitarPasswordAdmin(() => {
-    movements.splice(idx, 1);
-    saveAndRender();
-    alert("✅ Venta eliminada correctamente.");
+window.intentarBorrarMovimiento = (id) => {
+  solicitarPasswordAdmin(async () => {
+    try {
+      await db.collection('licenses').doc(window.currentUID).collection('movements').doc(id).delete();
+      alert("✅ Venta eliminada correctamente.");
+    } catch (err) {
+      console.error("Error al borrar movimiento:", err);
+    }
   });
 };
 
-function ejecutarCierreCajaReal() {
+async function ejecutarCierreCajaReal() {
   if (movements.length === 0) {
     alert('No hay movimientos registrados hoy para cerrar.');
     return;
@@ -730,21 +723,31 @@ function ejecutarCierreCajaReal() {
   let net = totalIncome - totalExpense;
   let dateStr = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
-  closedDays.unshift({
-    date: dateStr,
-    income: totalIncome,
-    expense: totalExpense,
-    net: net,
-    items: [...movements]
-  });
+  try {
+    // 1. Guardar el cierre en la colección closedDays
+    await db.collection('licenses').doc(window.currentUID).collection('closedDays').add({
+      date: dateStr,
+      income: totalIncome,
+      expense: totalExpense,
+      net: net,
+      items: [...movements],
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
-  movements = [];
-  guardarMovimientosYHistorialCloud();
+    // 2. Borrar los movimientos actuales de la base de datos
+    const batch = db.batch();
+    const movsRef = db.collection('licenses').doc(window.currentUID).collection('movements');
+    const snapshot = await movsRef.get();
+    snapshot.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
 
-  renderMovements();
-  renderClosedDays();
-  initMonthSelector();
-  alert('¡Cierre de caja guardado con éxito!');
+    alert('¡Cierre de caja guardado con éxito!');
+  } catch (err) {
+    console.error("Error al ejecutar cierre de caja:", err);
+    alert("Hubo un error al realizar el cierre.");
+  }
 }
 
 function renderClosedDays() {
@@ -757,7 +760,7 @@ function renderClosedDays() {
     return;
   }
 
-  closedDays.forEach((day, idx) => {
+  closedDays.forEach((day) => {
     const tr = document.createElement('tr');
     const netClass = day.net >= 0 ? 'text-success' : 'text-danger';
     const sign = day.net >= 0 ? '+' : '';
@@ -766,7 +769,7 @@ function renderClosedDays() {
       <td><strong>📅 ${day.date}</strong> <br><small style="color:#0066cc;">Ver detalle 🔍</small></td>
       <td><small>➕ $${(day.income || 0).toLocaleString('es-AR')}</small><br><small>➖ $${(day.expense || 0).toLocaleString('es-AR')}</small></td>
       <td style="text-align: right;" class="${netClass}"><strong>${sign}$${(day.net || 0).toLocaleString('es-AR')}</strong></td>
-      <td><button class="btn btn-danger-soft" onclick="event.stopPropagation(); deleteClosedDay(${idx})">x</button></td>
+      <td><button class="btn btn-danger-soft" onclick="event.stopPropagation(); deleteClosedDay('${day.id}')">x</button></td>
     `;
 
     tr.addEventListener('click', () => {
@@ -928,21 +931,30 @@ document.addEventListener('click', (e) => {
   }
 });
 
-window.deleteClosedDay = (idx) => {
+window.deleteClosedDay = (id) => {
   if (confirm('¿Eliminar este cierre del historial?')) {
-    closedDays.splice(idx, 1);
-    guardarMovimientosYHistorialCloud();
-    renderClosedDays();
-    initMonthSelector();
+    solicitarPasswordAdmin(async () => {
+      try {
+        await db.collection('licenses').doc(window.currentUID).collection('closedDays').doc(id).delete();
+      } catch (err) {
+        console.error("Error al eliminar cierre:", err);
+      }
+    });
   }
 };
 
 function limpiarHistorialReal() {
   if (confirm('¿Deseas borrar todo el historial de cierres?')) {
-    closedDays = [];
-    guardarMovimientosYHistorialCloud();
-    renderClosedDays();
-    initMonthSelector();
-    alert("🗑️ Historial limpiado.");
+    solicitarPasswordAdmin(async () => {
+      try {
+        const snapshot = await db.collection('licenses').doc(window.currentUID).collection('closedDays').get();
+        const batch = db.batch();
+        snapshot.forEach(doc => batch.delete(doc.ref));
+        await batch.commit();
+        alert("🗑️ Historial limpiado.");
+      } catch (err) {
+        console.error("Error al limpiar historial:", err);
+      }
+    });
   }
 }
