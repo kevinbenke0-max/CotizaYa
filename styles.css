@@ -10,10 +10,12 @@
 }
 
 body {
-  background-color: #f8fafc;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+  background-attachment: fixed;
   color: #1e293b;
   line-height: 1.5;
   padding: 16px;
+  min-height: 100vh;
 }
 
 /* Ampliamos el contenedor en PC para que no quede tan apretado */
@@ -24,6 +26,12 @@ body {
 
 .app-header {
   margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 18px 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .header-title {
@@ -51,11 +59,11 @@ body {
 
 .card {
   background: #ffffff;
-  border-radius: 14px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 22px;
   margin-bottom: 16px;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
-  border: 1px solid #f1f5f9;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .card h3 {
@@ -118,7 +126,7 @@ input, select, button {
 input:focus, select:focus {
   border-color: #2563eb;
   background-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .btn {
@@ -137,9 +145,12 @@ input:focus, select:focus {
 .btn-primary { 
   background: #2563eb; 
   color: white; 
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
-.btn-primary:hover { background: #1d4ed8; }
+.btn-primary:hover { 
+  background: #1d4ed8; 
+  transform: translateY(-1px);
+}
 
 .btn-success { 
   background: #16a34a; 
@@ -147,9 +158,12 @@ input:focus, select:focus {
   width: 100%; 
   margin-top: 12px; 
   padding: 12px;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
 }
-.btn-success:hover { background: #15803d; }
+.btn-success:hover { 
+  background: #15803d; 
+  transform: translateY(-1px);
+}
 
 .btn-danger { 
   background: #fee2e2; 
@@ -178,8 +192,9 @@ input:focus, select:focus {
   font-size: 1.05rem;
   margin-bottom: 10px;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 158, 227, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 158, 227, 0.3);
 }
+.btn-mp:hover { filter: brightness(1.05); }
 
 .btn-wa {
   background: #25d366;
@@ -198,8 +213,9 @@ input:focus, select:focus {
   margin-top: 15px;
   font-size: 1rem;
   border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
 }
+.btn-wa-share:hover { filter: brightness(1.05); }
 
 /* BOTÓN FLOTANTE DE WHATSAPP */
 .float-wa {
@@ -328,8 +344,8 @@ td {
 .lock-screen, .modal {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(4px);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -339,17 +355,18 @@ td {
 
 .lock-card {
   background: white;
-  border-radius: 16px;
-  padding: 24px;
+  border-radius: 20px;
+  padding: 28px;
   max-width: 420px;
   width: 100%;
   text-align: center;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .lock-icon {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
+  font-size: 2.8rem;
+  margin-bottom: 12px;
 }
 
 .device-info {
@@ -396,7 +413,7 @@ td {
   width: 100%;
   max-height: 85vh;
   overflow-y: auto;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 24px;
 }
 
