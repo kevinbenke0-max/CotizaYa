@@ -40,6 +40,31 @@
     </div>
   </div>
 
+  <!-- PANTALLA DE SELECCIÓN DE ROL (SE MUESTRA TRAS LOGUEARSE) -->
+  <div id="roleScreen" class="lock-screen" style="display: none;">
+    <div class="lock-card" style="max-width: 420px; text-align: center;">
+      <div class="lock-icon">💼</div>
+      <h2>Seleccionar Modo de Ingreso</h2>
+      <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">¿Cómo deseas ingresar a la aplicación hoy?</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button onclick="seleccionarRolCajero()" class="btn btn-secondary" style="background: #374151; color: #fff; padding: 14px; font-weight: bold; font-size: 1rem; cursor: pointer;">
+          👤 Entrar como Cajero<br>
+          <small style="font-weight: normal; font-size: 0.8rem; color: #cbd5e1;">(Solo movimientos del día, sin contraseña)</small>
+        </button>
+
+        <button onclick="seleccionarRolAdmin()" class="btn btn-primary" style="padding: 14px; font-weight: bold; font-size: 1rem; cursor: pointer;">
+          🔑 Entrar como Administrador<br>
+          <small style="font-weight: normal; font-size: 0.8rem; color: #e0f2fe;">(Requiere contraseña - Acceso total)</small>
+        </button>
+      </div>
+
+      <div style="margin-top: 20px;">
+        <button onclick="cerrarSesion()" class="btn btn-danger-soft" style="width: 100%;">Cerrar Sesión</button>
+      </div>
+    </div>
+  </div>
+
   <!-- PANTALLA DE BLOQUEO POR SUSCRIPCIÓN VENCIDA -->
   <div id="lockScreen" class="lock-screen" style="display: none;">
     <div class="lock-card">
@@ -87,8 +112,8 @@
       <!-- BOTONES DE NAVEGACIÓN SUPERIOR (3 PESTAÑAS) -->
       <div class="nav-tabs" style="display: flex; gap: 10px; border-top: 1px solid #333; padding-top: 10px;">
         <button type="button" id="btnTabCaja" class="btn btn-primary" onclick="switchTab('caja')" style="flex: 1; font-weight: bold;">💵 Caja / Movimientos</button>
-        <button type="button" id="btnTabCatalogo" class="btn btn-secondary" onclick="verificarAccesoAdminYCambiarTab('catalogo')" style="flex: 1; font-weight: bold; background: #333; color: #ccc;">📦 Catálogo / Stock 🔒</button>
-        <button type="button" id="btnTabHistorial" class="btn btn-secondary" onclick="verificarAccesoAdminYCambiarTab('historial')" style="flex: 1; font-weight: bold; background: #333; color: #ccc;">📈 Historial / Mes 🔒</button>
+        <button type="button" id="btnTabCatalogo" class="btn btn-secondary" onclick="switchTab('catalogo')" style="flex: 1; font-weight: bold; background: #333; color: #ccc;">📦 Catálogo / Stock 🔒</button>
+        <button type="button" id="btnTabHistorial" class="btn btn-secondary" onclick="switchTab('historial')" style="flex: 1; font-weight: bold; background: #333; color: #ccc;">📈 Historial / Mes 🔒</button>
       </div>
     </header>
 
