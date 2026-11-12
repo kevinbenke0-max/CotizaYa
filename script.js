@@ -88,8 +88,10 @@ function cerrarSesion() {
   });
 }
 
+// Control de sesión y despliegue del selector de rol
 auth.onAuthStateChanged(async (user) => {
   const authScreen = document.getElementById('authScreen');
+  const roleScreen = document.getElementById('roleScreen');
   const mainApp = document.getElementById('mainApp');
   const lockScreen = document.getElementById('lockScreen');
 
@@ -119,12 +121,15 @@ auth.onAuthStateChanged(async (user) => {
 
       if (diffMs <= 0) {
         authScreen.style.display = 'none';
+        roleScreen.style.display = 'none';
         mainApp.style.display = 'none';
         lockScreen.style.display = 'flex';
       } else {
+        // En lugar de entrar directo, mostramos la pantalla para elegir perfil
         authScreen.style.display = 'none';
         lockScreen.style.display = 'none';
-        mainApp.style.display = 'block';
+        mainApp.style.display = 'none';
+        if (roleScreen) roleScreen.style.display = 'flex';
 
         const trialBadge = document.getElementById('trialBadge');
         if (trialBadge) {
@@ -139,21 +144,59 @@ auth.onAuthStateChanged(async (user) => {
           }
         }
 
-        loadProducts();
+        loadProductsForCashier();
         sincronizarMovimientosCloud();
         sincronizarCierresCloud();
       }
     }
   } else {
     window.currentUID = null;
-    authScreen.style.display = 'flex';
-    mainApp.style.display = 'none';
-    lockScreen.style.display = 'none';
+    if (authScreen) authScreen.style.display = 'flex';
+    if (roleScreen) roleScreen.style.display = 'none';
+    if (mainApp) mainApp.style.display = 'none';
+    if (lockScreen) lockScreen.style.display = 'none';
   }
 });
 
 // ==========================================
-// SEGURIDAD: CONTRASEÑA DE ADMINISTRADOR
+// SELECCIÓN DE PERFIL (CAJERO VS ADMIN)
+// ==========================================
+function seleccionarRolCajero() {
+  document.getElementById('roleScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+
+  // Ocultar la barra de pestañas de administración para que solo vea Caja
+  const navTabs = document.querySelector('.nav-tabs');
+  if (navTabs) navTabs.style.display = 'none';
+
+  switchTab('caja');
+}
+
+async function seleccionarRolAdmin() {
+  const passwordIngresada = prompt("🔒 Ingrese la Contraseña de Administrador (Dueño):");
+  if (!passwordIngresada) return;
+
+  try {
+    const emailSimulado = `${window.currentUsername}@controlcaja.com`;
+    // Revalida la contraseña maestra en Firebase
+    await auth.signInWithEmailAndPassword(emailSimulado, passwordIngresada);
+    
+    // Contraseña correcta: mostrar la app completa con acceso libre
+    document.getElementById('roleScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+
+    const navTabs = document.querySelector('.nav-tabs');
+    if (navTabs) navTabs.style.display = 'flex';
+
+    switchTab('caja');
+    loadProducts(); // Carga completa del catálogo para el admin
+  } catch (err) {
+    alert("❌ Contraseña de administrador incorrecta.");
+  }
+}
+
+// ==========================================
+// SEGURIDAD: CONTRASEÑA PARA BORRAR / ACCIONES
 // ==========================================
 async function solicitarPasswordAdmin(accionAutorizada) {
   const passwordIngresada = prompt("🔒 Ingrese la Contraseña de Administrador (Dueño):");
@@ -166,12 +209,6 @@ async function solicitarPasswordAdmin(accionAutorizada) {
   } catch (err) {
     alert("❌ Contraseña de administrador incorrecta.");
   }
-}
-
-function verificarAccesoAdminYCambiarTab(tab) {
-  solicitarPasswordAdmin(() => {
-    switchTab(tab);
-  });
 }
 
 function intentarCierreCaja() {
@@ -238,7 +275,7 @@ function switchTab(tab) {
 }
 
 // ==========================================
-// CÁLCULO Y PRODUCTOS / STOCK
+// PRODUCTOS Y STOCK
 // ==========================================
 function calcularPrecioVentaAutomatico() {
   const costInput = parseFloat(document.getElementById('prodCost').value) || 0;
@@ -272,6 +309,18 @@ function loadProducts() {
       } else {
         renderizarTablaInventario(window.inventarioProductosCache);
       }
+    });
+}
+
+function loadProductsForCashier() {
+  if (!window.currentUID) return;
+
+  db.collection('licenses').doc(window.currentUID).collection('products')
+    .onSnapshot((snapshot) => {
+      window.inventarioProductosCache = [];
+      snapshot.forEach((doc) => {
+        window.inventarioProductosCache.push({ id: doc.id, ...doc.data() });
+      });
     });
 }
 
@@ -724,7 +773,6 @@ async function ejecutarCierreCajaReal() {
   let dateStr = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
   try {
-    // 1. Guardar el cierre en la colección closedDays
     await db.collection('licenses').doc(window.currentUID).collection('closedDays').add({
       date: dateStr,
       income: totalIncome,
@@ -734,7 +782,6 @@ async function ejecutarCierreCajaReal() {
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
-    // 2. Borrar los movimientos actuales de la base de datos
     const batch = db.batch();
     const movsRef = db.collection('licenses').doc(window.currentUID).collection('movements');
     const snapshot = await movsRef.get();
