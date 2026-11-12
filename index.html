@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control De Caja Ultra</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="landing.css">
 </head>
 <body>
 
@@ -40,28 +41,69 @@
     </div>
   </div>
 
-  <!-- PANTALLA DE SELECCIÓN DE ROL (SE MUESTRA TRAS LOGUEARSE) -->
-  <div id="roleScreen" class="lock-screen" style="display: none;">
-    <div class="lock-card" style="max-width: 420px; text-align: center;">
-      <div class="lock-icon">💼</div>
-      <h2>Seleccionar Modo de Ingreso</h2>
-      <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;">¿Cómo deseas ingresar a la aplicación hoy?</p>
+  <!-- PANTALLA DE PRESENTACIÓN Y SELECCIÓN DE ROL (LANDING) -->
+  <div id="roleScreen" class="lock-screen landing-screen" style="display: none;">
+    <div class="landing-card">
       
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <button onclick="seleccionarRolCajero()" class="btn btn-secondary" style="background: #374151; color: #fff; padding: 14px; font-weight: bold; font-size: 1rem; cursor: pointer;">
-          👤 Entrar como Cajero<br>
-          <small style="font-weight: normal; font-size: 0.8rem; color: #cbd5e1;">(Solo movimientos del día, sin contraseña)</small>
-        </button>
-
-        <button onclick="seleccionarRolAdmin()" class="btn btn-primary" style="padding: 14px; font-weight: bold; font-size: 1rem; cursor: pointer;">
-          🔑 Entrar como Administrador<br>
-          <small style="font-weight: normal; font-size: 0.8rem; color: #e0f2fe;">(Requiere contraseña - Acceso total)</small>
-        </button>
+      <!-- IMAGEN ILUSTRATIVA MODERNA -->
+      <div class="landing-img-container">
+        <img src="https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=600&auto=format&fit=crop" alt="Control De Caja Ultra" class="landing-banner-img">
       </div>
 
-      <div style="margin-top: 20px;">
+      <!-- TÍTULO E INFORMACIÓN DE LA APP -->
+      <h2 class="landing-title">¡Tu Negocio, en Tiempo Real!</h2>
+      
+      <div class="landing-features">
+        <div class="feature-item">
+          <span class="feature-icon">🔒</span>
+          <div>
+            <strong>Control Instantáneo</strong>
+            <small>Caja diaria y balances al momento</small>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">📦</span>
+          <div>
+            <strong>Inventario Inteligente</strong>
+            <small>Sigue tu stock y márgenes de ganancia</small>
+          </div>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">👥</span>
+          <div>
+            <strong>Acceso Seguro y Flexible</strong>
+            <small>Roles para Cajero y Administrador</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTONES DE INGRESO AL SISTEMA -->
+      <div class="landing-actions">
+        <h3 class="landing-subtitle">INGRESO AL SISTEMA</h3>
+        
+        <div class="role-buttons-grid">
+          <button onclick="seleccionarRolCajero()" class="btn-role btn-cajero">
+            <span class="role-icon">👤</span>
+            <div class="role-text">
+              <strong>PERFIL CAJERO</strong>
+              <small>Ventas Rápidas, Solo Caja</small>
+            </div>
+          </button>
+
+          <button onclick="seleccionarRolAdmin()" class="btn-role btn-admin">
+            <span class="role-icon">🔑</span>
+            <div class="role-text">
+              <strong>PERFIL ADMINISTRADOR</strong>
+              <small>Acceso Total, Contraseña</small>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div style="margin-top: 15px;">
         <button onclick="cerrarSesion()" class="btn btn-danger-soft" style="width: 100%;">Cerrar Sesión</button>
       </div>
+
     </div>
   </div>
 
