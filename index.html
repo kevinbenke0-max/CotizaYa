@@ -53,7 +53,6 @@
 
       <!-- CONTENEDOR DE IMAGEN / GRÁFICO ANIMADO -->
       <div class="landing-hero-box">
-        <!-- Si subís "portada.jpg" a tu GitHub, se mostrará automáticamente -->
         <img 
           src="portada.jpg" 
           alt="Control De Caja Ultra" 
@@ -61,7 +60,6 @@
           onerror="this.style.display='none'; document.getElementById('neonFallbackGraphic').style.display='flex';"
         >
 
-        <!-- Gráfico animado integrado (se muestra si no está portada.jpg) -->
         <div id="neonFallbackGraphic" class="neon-graphic-wrapper" style="display: none;">
           <div class="neon-grid-bg"></div>
           <svg class="neon-chart-svg" viewBox="0 0 360 180" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -80,12 +78,10 @@
               </filter>
             </defs>
 
-            <!-- Líneas de guía -->
             <line x1="20" y1="35" x2="340" y2="35" stroke="rgba(56, 189, 248, 0.15)" stroke-dasharray="4 4"/>
             <line x1="20" y1="80" x2="340" y2="80" stroke="rgba(56, 189, 248, 0.15)" stroke-dasharray="4 4"/>
             <line x1="20" y1="125" x2="340" y2="125" stroke="rgba(56, 189, 248, 0.15)" stroke-dasharray="4 4"/>
 
-            <!-- Barras de fondo -->
             <rect x="35" y="120" width="16" height="45" rx="3" fill="url(#barGrad)" class="bar-anim b1"/>
             <rect x="75" y="100" width="16" height="65" rx="3" fill="url(#barGrad)" class="bar-anim b2"/>
             <rect x="115" y="110" width="16" height="55" rx="3" fill="url(#barGrad)" class="bar-anim b3"/>
@@ -95,29 +91,22 @@
             <rect x="275" y="70" width="16" height="95" rx="3" fill="url(#barGrad)" class="bar-anim b7"/>
             <rect x="315" y="30" width="16" height="135" rx="3" fill="url(#barGrad)" class="bar-anim b8"/>
 
-            <!-- Área bajo la curva -->
             <path d="M25 145 L75 115 L120 128 L165 75 L205 98 L250 42 L290 62 L330 22 L330 165 L25 165 Z" fill="url(#areaGrad)"/>
-
-            <!-- Línea de tendencia en neón -->
             <path class="chart-line-anim" d="M25 145 L75 115 L120 128 L165 75 L205 98 L250 42 L290 62 L330 22" stroke="#00f2fe" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
 
-            <!-- Puntos brillantes -->
             <circle cx="75" cy="115" r="4" fill="#ffffff" stroke="#00f2fe" stroke-width="2"/>
             <circle cx="165" cy="75" r="4" fill="#ffffff" stroke="#00f2fe" stroke-width="2"/>
             <circle cx="250" cy="42" r="4" fill="#ffffff" stroke="#00f2fe" stroke-width="2"/>
             <circle cx="330" cy="22" r="5" fill="#ffffff" stroke="#00f2fe" stroke-width="3" class="pulse-dot"/>
           </svg>
 
-          <!-- Indicadores flotantes -->
           <div class="floating-badge badge-top-left">📈 +100% Control</div>
           <div class="floating-badge badge-bottom-right">💼 Tiempo Real</div>
         </div>
       </div>
 
-      <!-- SLOGAN PRINCIPAL -->
       <h2 class="landing-title">¡Tu Negocio, en Tiempo Real!</h2>
       
-      <!-- BARRA HORIZONTAL DE 3 BENEFICIOS -->
       <div class="landing-features-bar">
         <div class="feature-col">
           <span class="feat-icon">💰</span>
@@ -142,7 +131,6 @@
         </div>
       </div>
 
-      <!-- SECCIÓN DE BOTONES DE ACCESO LADO A LADO -->
       <h3 class="landing-section-title">INGRESO AL SISTEMA</h3>
       
       <div class="role-cards-grid">
@@ -159,39 +147,38 @@
         </button>
       </div>
 
-      <!-- BOTÓN CERRAR SESIÓN -->
       <button onclick="cerrarSesion()" class="btn-logout-landing">Cerrar Sesión</button>
 
     </div>
   </div>
 
-  <!-- PANTALLA DE BLOQUEO POR SUSCRIPCIÓN VENCIDA (CON CAMPO DE TITULAR) -->
+  <!-- PANTALLA DE BLOQUEO POR SUSCRIPCIÓN VENCIDA (TEXTOS OSCUROS Y CLAROS) -->
   <div id="lockScreen" class="lock-screen" style="display: none;">
     <div class="lock-card" style="max-width: 440px; text-align: left;">
       <div style="text-align: center;">
         <div class="lock-icon">⏳</div>
-        <h2>Suscripción Vencida</h2>
-        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 15px;">Tu período de prueba gratuita o suscripción mensual ha finalizado.</p>
+        <h2 style="color: #0f172a; font-weight: 800;">Suscripción Vencida</h2>
+        <p style="font-size: 0.88rem; color: #334155; font-weight: 600; margin-bottom: 15px;">Tu período de prueba gratuita o suscripción mensual ha finalizado.</p>
       </div>
       
-      <div class="device-info" style="background: rgba(30, 41, 59, 0.6); padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(255, 255, 255, 0.08);">
-        <small style="color: #94a3b8; display: block;">Negocio registrado:</small>
-        <strong id="userAccountName" style="color: #f8fafc; font-size: 0.95rem;">Cargando...</strong>
+      <div class="device-info" style="background: rgba(30, 41, 59, 0.06); padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(0, 0, 0, 0.08);">
+        <small style="color: #475569; display: block; font-weight: 600;">Negocio registrado:</small>
+        <strong id="userAccountName" style="color: #0f172a; font-size: 0.95rem;">Cargando...</strong>
       </div>
 
-      <!-- SECCIÓN ELEGANTE PARA VALIDAR EL TITULAR DE LA TRANSFERENCIA -->
-      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 15px;">
-        <label for="inputTitularPago" style="font-size: 0.8rem; font-weight: 700; display: block; margin-bottom: 4px; color: #38bdf8;">
-          👤 Titular de la cuenta que transfiere: <span style="color: #f87171;">*</span>
+      <!-- SECCIÓN PARA VALIDAR EL TITULAR DE LA TRANSFERENCIA -->
+      <div style="background: rgba(15, 23, 42, 0.04); border: 1px solid rgba(37, 99, 235, 0.3); border-radius: 12px; padding: 12px; margin-bottom: 15px;">
+        <label for="inputTitularPago" style="font-size: 0.82rem; font-weight: 700; display: block; margin-bottom: 4px; color: #1d4ed8;">
+          👤 Titular de la cuenta que transfiere: <span style="color: #dc2626;">*</span>
         </label>
-        <p style="font-size: 0.72rem; color: #cbd5e1; margin-bottom: 8px; line-height: 1.3;">
+        <p style="font-size: 0.75rem; color: #334155; font-weight: 600; margin-bottom: 8px; line-height: 1.3;">
           Indica el nombre de la persona o cuenta bancaria/Mercado Pago desde la cual realizaste el pago para corroborar tus datos al instante.
         </p>
-        <input type="text" id="inputTitularPago" placeholder="Ej: Juan Pérez / Ana Gómez" required autocomplete="off" style="width: 100%; padding: 10px 12px; box-sizing: border-box; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #ffffff; font-size: 0.85rem; outline: none;">
+        <input type="text" id="inputTitularPago" placeholder="Ej: Juan Pérez / Ana Gómez" required autocomplete="off" style="width: 100%; padding: 10px 12px; box-sizing: border-box; border-radius: 8px; border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-size: 0.85rem; outline: none;">
       </div>
 
-      <p class="pay-instruction" style="font-size: 0.8rem; color: #cbd5e1; margin-bottom: 12px; text-align: center;">
-        Realiza el pago de la suscripción ($10.000) y envíanos el comprobante:
+      <p class="pay-instruction" style="font-size: 0.85rem; color: #1e293b; font-weight: 700; margin-bottom: 12px; text-align: center;">
+        Realiza el pago de la suscripción mensual ($10.000):
       </p>
 
       <!-- BOTÓN DE MERCADO PAGO -->
