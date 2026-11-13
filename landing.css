@@ -317,3 +317,78 @@
     padding-left: 10px;
   }
 }
+/* =========================================================
+   AJUSTES RESPONSIVOS PARA CELULARES
+   ========================================================= */
+@media screen and (max-width: 480px) {
+  #roleScreen.landing-screen {
+    padding: 10px 8px;
+    align-items: flex-start;
+  }
+
+  .landing-container {
+    max-width: 100%;
+    padding: 5px;
+  }
+
+  .landing-hero-box {
+    height: 160px; /* Altura más compacta para que entre bien en celulares */
+    border-radius: 14px;
+    margin-bottom: 12px;
+  }
+
+  .neon-chart-svg {
+    width: 95%;
+    height: 90%;
+  }
+
+  .floating-badge {
+    font-size: 0.62rem;
+    padding: 3px 7px;
+  }
+
+  .badge-top-left {
+    top: 8px;
+    left: 8px;
+  }
+
+  .badge-bottom-right {
+    bottom: 8px;
+    right: 8px;
+  }
+
+  .landing-title {
+    font-size: 1.15rem;
+    margin-bottom: 10px;
+  }
+
+  .landing-features-bar {
+    padding: 8px 4px;
+    margin-bottom: 14px;
+  }
+
+  .feat-text strong {
+    font-size: 0.66rem;
+  }
+
+  .feat-text small {
+    font-size: 0.6rem;
+  }
+
+  .role-cards-grid {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .role-card-btn {
+    padding: 12px 6px;
+  }
+
+  .role-name {
+    font-size: 0.75rem;
+  }
+
+  .role-desc {
+    font-size: 0.62rem;
+  }
+}
