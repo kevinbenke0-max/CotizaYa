@@ -43,66 +43,124 @@
 
   <!-- PANTALLA DE PRESENTACIÓN Y SELECCIÓN DE ROL (LANDING) -->
   <div id="roleScreen" class="lock-screen landing-screen" style="display: none;">
-    <div class="landing-card">
+    <div class="landing-container">
       
-      <!-- IMAGEN ILUSTRATIVA MODERNA -->
-      <div class="landing-img-container">
-        <img src="https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=600&auto=format&fit=crop" alt="Control De Caja Ultra" class="landing-banner-img">
+      <!-- TÍTULO SUPERIOR CON ESTILO ULTRA -->
+      <div class="landing-header-brand">
+        <span class="brand-main">CONTROL DE CAJA <span class="brand-crown">👑</span></span>
+        <span class="brand-sub">ULTRA</span>
       </div>
 
-      <!-- TÍTULO E INFORMACIÓN DE LA APP -->
+      <!-- CONTENEDOR DE IMAGEN / GRÁFICO ANIMADO -->
+      <div class="landing-hero-box">
+        <!-- Si subís "portada.jpg" a tu GitHub, se mostrará automáticamente -->
+        <img 
+          src="portada.jpg" 
+          alt="Control De Caja Ultra" 
+          class="landing-custom-img" 
+          onerror="this.style.display='none'; document.getElementById('neonFallbackGraphic').style.display='flex';"
+        >
+
+        <!-- Gráfico animado integrado (se muestra si no está portada.jpg) -->
+        <div id="neonFallbackGraphic" class="neon-graphic-wrapper" style="display: none;">
+          <div class="neon-grid-bg"></div>
+          <svg class="neon-chart-svg" viewBox="0 0 360 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#00f2fe" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#00f2fe" stop-opacity="0.0"/>
+              </linearGradient>
+              <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+                <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.2"/>
+              </linearGradient>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="4" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            <!-- Líneas de guía -->
+            <line x1="20" y1="35" x2="340" y2="35" stroke="rgba(56, 189, 248, 0.15)" stroke-dasharray="4 4"/>
+            <line x1="20" y1="80" x2="340" y2="80" stroke="rgba(56, 189, 248, 0.15)" stroke-dasharray="4 4"/>
+            <line x1="20" y1="125" x2="340" y2="125" stroke="rgba(56, 189, 248, 0.15)" stroke-dasharray="4 4"/>
+
+            <!-- Barras de fondo -->
+            <rect x="35" y="120" width="16" height="45" rx="3" fill="url(#barGrad)" class="bar-anim b1"/>
+            <rect x="75" y="100" width="16" height="65" rx="3" fill="url(#barGrad)" class="bar-anim b2"/>
+            <rect x="115" y="110" width="16" height="55" rx="3" fill="url(#barGrad)" class="bar-anim b3"/>
+            <rect x="155" y="80" width="16" height="85" rx="3" fill="url(#barGrad)" class="bar-anim b4"/>
+            <rect x="195" y="95" width="16" height="70" rx="3" fill="url(#barGrad)" class="bar-anim b5"/>
+            <rect x="235" y="55" width="16" height="110" rx="3" fill="url(#barGrad)" class="bar-anim b6"/>
+            <rect x="275" y="70" width="16" height="95" rx="3" fill="url(#barGrad)" class="bar-anim b7"/>
+            <rect x="315" y="30" width="16" height="135" rx="3" fill="url(#barGrad)" class="bar-anim b8"/>
+
+            <!-- Área bajo la curva -->
+            <path d="M25 145 L75 115 L120 128 L165 75 L205 98 L250 42 L290 62 L330 22 L330 165 L25 165 Z" fill="url(#areaGrad)"/>
+
+            <!-- Línea de tendencia en neón -->
+            <path class="chart-line-anim" d="M25 145 L75 115 L120 128 L165 75 L205 98 L250 42 L290 62 L330 22" stroke="#00f2fe" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+
+            <!-- Puntos brillantes -->
+            <circle cx="75" cy="115" r="4" fill="#ffffff" stroke="#00f2fe" stroke-width="2"/>
+            <circle cx="165" cy="75" r="4" fill="#ffffff" stroke="#00f2fe" stroke-width="2"/>
+            <circle cx="250" cy="42" r="4" fill="#ffffff" stroke="#00f2fe" stroke-width="2"/>
+            <circle cx="330" cy="22" r="5" fill="#ffffff" stroke="#00f2fe" stroke-width="3" class="pulse-dot"/>
+          </svg>
+
+          <!-- Indicadores flotantes -->
+          <div class="floating-badge badge-top-left">📈 +100% Control</div>
+          <div class="floating-badge badge-bottom-right">💼 Tiempo Real</div>
+        </div>
+      </div>
+
+      <!-- SLOGAN PRINCIPAL -->
       <h2 class="landing-title">¡Tu Negocio, en Tiempo Real!</h2>
       
-      <div class="landing-features">
-        <div class="feature-item">
-          <span class="feature-icon">🔒</span>
-          <div>
-            <strong>Control Instantáneo</strong>
-            <small>Caja diaria y balances al momento</small>
+      <!-- BARRA HORIZONTAL DE 3 BENEFICIOS -->
+      <div class="landing-features-bar">
+        <div class="feature-col">
+          <span class="feat-icon">💰</span>
+          <div class="feat-text">
+            <strong>Control</strong>
+            <small>Instantáneo</small>
           </div>
         </div>
-        <div class="feature-item">
-          <span class="feature-icon">📦</span>
-          <div>
-            <strong>Inventario Inteligente</strong>
-            <small>Sigue tu stock y márgenes de ganancia</small>
+        <div class="feature-col">
+          <span class="feat-icon">📊</span>
+          <div class="feat-text">
+            <strong>Inventario</strong>
+            <small>Inteligente</small>
           </div>
         </div>
-        <div class="feature-item">
-          <span class="feature-icon">👥</span>
-          <div>
-            <strong>Acceso Seguro y Flexible</strong>
-            <small>Roles para Cajero y Administrador</small>
+        <div class="feature-col">
+          <span class="feat-icon">🛡️</span>
+          <div class="feat-text">
+            <strong>Acceso Seguro</strong>
+            <small>y Flexible</small>
           </div>
         </div>
       </div>
 
-      <!-- BOTONES DE INGRESO AL SISTEMA -->
-      <div class="landing-actions">
-        <h3 class="landing-subtitle">INGRESO AL SISTEMA</h3>
-        
-        <div class="role-buttons-grid">
-          <button onclick="seleccionarRolCajero()" class="btn-role btn-cajero">
-            <span class="role-icon">👤</span>
-            <div class="role-text">
-              <strong>PERFIL CAJERO</strong>
-              <small>Ventas Rápidas, Solo Caja</small>
-            </div>
-          </button>
+      <!-- SECCIÓN DE BOTONES DE ACCESO LADO A LADO -->
+      <h3 class="landing-section-title">INGRESO AL SISTEMA</h3>
+      
+      <div class="role-cards-grid">
+        <button onclick="seleccionarRolCajero()" class="role-card-btn card-cajero">
+          <div class="role-avatar">🧑‍💼</div>
+          <strong class="role-name">PERFIL CAJERO</strong>
+          <small class="role-desc">(Ventas Rápidas, Solo Caja)</small>
+        </button>
 
-          <button onclick="seleccionarRolAdmin()" class="btn-role btn-admin">
-            <span class="role-icon">🔑</span>
-            <div class="role-text">
-              <strong>PERFIL ADMINISTRADOR</strong>
-              <small>Acceso Total, Contraseña</small>
-            </div>
-          </button>
-        </div>
+        <button onclick="seleccionarRolAdmin()" class="role-card-btn card-admin">
+          <div class="role-avatar">🔑</div>
+          <strong class="role-name">PERFIL ADMINISTRADOR</strong>
+          <small class="role-desc">(Acceso Total, Contraseña)</small>
+        </button>
       </div>
 
-      <div style="margin-top: 15px;">
-        <button onclick="cerrarSesion()" class="btn btn-danger-soft" style="width: 100%;">Cerrar Sesión</button>
-      </div>
+      <!-- BOTÓN CERRAR SESIÓN -->
+      <button onclick="cerrarSesion()" class="btn-logout-landing">Cerrar Sesión</button>
 
     </div>
   </div>
