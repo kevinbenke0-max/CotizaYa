@@ -226,11 +226,8 @@ async function solicitarPasswordAdmin(accionAutorizada) {
 }
 
 function intentarCierreCaja() {
-  solicitarPasswordAdmin(() => {
-    ejecutarCierreCajaReal();
-  });
+  ejecutarCierreCajaReal();
 }
-
 function intentarLimpiarHistorial() {
   solicitarPasswordAdmin(() => {
     limpiarHistorialReal();
