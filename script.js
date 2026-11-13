@@ -98,7 +98,7 @@ function actualizarEnlaceWhatsAppRenovacion() {
   const nombreNegocio = window.currentUsername || "Desconocido";
 
   const titularTexto = titular ? titular : "[Falta indicar titular]";
-  const text = `Hola! Ya realicé el pago de mi suscripción de Control De Caja Ultra.\n\nNegocio: *${nombreNegocio}*\nTitular de la cuenta que pagó: *${titularTexto}*\n\nAdjunto mi comprobante para la validación.`;
+  const text = `Hola! Ya realicé el pago de mi suscripción de Control De Caja Ultra.\n\nNegocio: *${nombreNegocio}*\nTitular de la cuenta que pagó: *${titularTexto}*`;
   
   btnRenovarWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=${encodeURIComponent(text)}`;
 }
