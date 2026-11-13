@@ -88,6 +88,27 @@ function cerrarSesion() {
   });
 }
 
+// Función para actualizar el enlace de WhatsApp con el titular de la transferencia
+function actualizarEnlaceWhatsAppRenovacion() {
+  const btnRenovarWA = document.getElementById('btnRenovarWA');
+  if (!btnRenovarWA) return;
+
+  const inputTitular = document.getElementById('inputTitularPago');
+  const titular = inputTitular ? inputTitular.value.trim() : "";
+  const nombreNegocio = window.currentUsername || "Desconocido";
+
+  const titularTexto = titular ? titular : "[Falta indicar titular]";
+  const text = `Hola! Ya realicé el pago de mi suscripción de Control De Caja Ultra.\n\nNegocio: *${nombreNegocio}*\nTitular de la cuenta que pagó: *${titularTexto}*\n\nAdjunto mi comprobante para la validación.`;
+  
+  btnRenovarWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=${encodeURIComponent(text)}`;
+}
+
+document.addEventListener('input', (e) => {
+  if (e.target && e.target.id === 'inputTitularPago') {
+    actualizarEnlaceWhatsAppRenovacion();
+  }
+});
+
 // Control de sesión y despliegue del selector de rol
 auth.onAuthStateChanged(async (user) => {
   const authScreen = document.getElementById('authScreen');
@@ -113,11 +134,8 @@ auth.onAuthStateChanged(async (user) => {
       const userAccountName = document.getElementById('userAccountName');
       if (userAccountName) userAccountName.textContent = window.currentUsername;
 
-      const btnRenovarWA = document.getElementById('btnRenovarWA');
-      if (btnRenovarWA) {
-        const text = `Hola, realicé el pago de mi suscripción de Control De Caja Ultra.\nMi usuario es: *${window.currentUsername}*`;
-        btnRenovarWA.href = `https://api.whatsapp.com/send?phone=5493755449964&text=${encodeURIComponent(text)}`;
-      }
+      // Actualizar enlace inicial de WhatsApp para renovación
+      actualizarEnlaceWhatsAppRenovacion();
 
       if (diffMs <= 0) {
         authScreen.style.display = 'none';
@@ -125,7 +143,6 @@ auth.onAuthStateChanged(async (user) => {
         mainApp.style.display = 'none';
         lockScreen.style.display = 'flex';
       } else {
-        // En lugar de entrar directo, mostramos la pantalla para elegir perfil
         authScreen.style.display = 'none';
         lockScreen.style.display = 'none';
         mainApp.style.display = 'none';
@@ -165,7 +182,6 @@ function seleccionarRolCajero() {
   document.getElementById('roleScreen').style.display = 'none';
   document.getElementById('mainApp').style.display = 'block';
 
-  // Ocultar la barra de pestañas de administración para que solo vea Caja
   const navTabs = document.querySelector('.nav-tabs');
   if (navTabs) navTabs.style.display = 'none';
 
@@ -178,10 +194,8 @@ async function seleccionarRolAdmin() {
 
   try {
     const emailSimulado = `${window.currentUsername}@controlcaja.com`;
-    // Revalida la contraseña maestra en Firebase
     await auth.signInWithEmailAndPassword(emailSimulado, passwordIngresada);
     
-    // Contraseña correcta: mostrar la app completa con acceso libre
     document.getElementById('roleScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
 
@@ -189,7 +203,7 @@ async function seleccionarRolAdmin() {
     if (navTabs) navTabs.style.display = 'flex';
 
     switchTab('caja');
-    loadProducts(); // Carga completa del catálogo para el admin
+    loadProducts();
   } catch (err) {
     alert("❌ Contraseña de administrador incorrecta.");
   }
